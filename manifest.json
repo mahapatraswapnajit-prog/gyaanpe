@@ -1,24 +1,18 @@
 {
-  "name": "Gyaanpe",
-  "short_name": "Gyaanpe",
-  "description": "Kids Learning Quiz App",
+  "name": "GyaanPe - Kids Learning Quiz",
+  "short_name": "GyaanPe",
+  "description": "Fun quiz app for kids with GK, Maths and Art",
   "start_url": "/gyaanpe/",
-  "scope": "/gyaanpe/",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#4f46e5",
+  "background_color": "#FFF9F0",
+  "theme_color": "#1A237E",
+  "orientation": "portrait",
+  "id": "/gyaanpe/",
   "icons": [
     {
-      "src": "GyaanPe_Logo_Final.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "GyaanPe_Logo_Final.png",
+      "src": "https://mahapatraswapnajit-prog.github.io/gyaanpe/icon.png",
       "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
+      "type": "image/png"
     }
   ]
 }

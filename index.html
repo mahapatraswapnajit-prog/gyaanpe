@@ -242,6 +242,10 @@ function replaySection(){document.getElementById('resultScreen').classList.remov
 function showFinalResult(){playLevelUp();document.getElementById('resultScreen').classList.add('show');var t=levelCorrect.reduce(function(a,b){return a+b;},0);document.getElementById('finalScore').textContent=t;document.getElementById('resultTrophy').textContent=['C','C','C','C','B','B','B','A','A','A','S'][Math.floor(t/10)]||'S';var g=document.getElementById('levelsGrid');g.innerHTML='';levelCorrect.forEach(function(c,i){var s=c>=9?'★★★':c>=7?'★★':c>=5?'★':'☆';g.innerHTML+='<div class="lg-item"><div class="lg-label">L'+(i+1)+'</div><div class="lg-val">'+c+'/10</div><div style="font-size:10px;color:#FF6F00;">'+s+'</div></div>';});var ti,ms;if(t>=90){ti='GENIUS!';ms='Outstanding! '+t+'/100!';}else if(t>=70){ti='CHAMPION!';ms='Amazing! '+t+'/100!';}else if(t>=50){ti='WELL DONE!';ms='Good effort! '+t+'/100!';}else{ti='KEEP TRYING!';ms='You completed all 10 levels!';}document.getElementById('resultTitle').textContent=ti;document.getElementById('resultMsg').textContent=ms;}
 history.pushState(null,null,location.href);
 window.addEventListener('popstate',function(){history.pushState(null,null,location.href);goHome();});
+</script><script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/gyaanpe/sw.js', {scope: '/gyaanpe/'});
+}
 </script>
 </body>
-</html></td></tr></tbody></table></body></html>
+</html>

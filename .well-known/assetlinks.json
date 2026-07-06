@@ -1,0 +1,8 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "com.gyaanpe.kidslearning",
+        "sha256_cert_fingerprints": ["12:91:9B:BA:17:93:B4:0D:89:82:23:44:CC:B5:2F:E8:61:BA:14:B8:A7:82:C5:EF:AA:3C:9E:E6:CA:6F:0C:88"]
+      }
+    }]

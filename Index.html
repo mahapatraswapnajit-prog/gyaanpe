@@ -153,7 +153,8 @@ body{font-family:'Nunito',sans-serif;background:#FFF9F0;min-height:100vh;overflo
 <div style="width:48px;height:48px;border-radius:50%;background:#1A237E;display:flex;align-items:center;justify-content:center;font-family:Anton,sans-serif;font-size:14px;color:white;animation:bounce2 2s infinite;">GK</div>
 <div style="width:48px;height:48px;border-radius:50%;background:#FF6F00;display:flex;align-items:center;justify-content:center;font-family:Anton,sans-serif;font-size:14px;color:white;animation:bounce2 2s infinite 0.3s;">123</div>
 <div style="width:48px;height:48px;border-radius:50%;background:#E91E63;display:flex;align-items:center;justify-content:center;font-family:Anton,sans-serif;font-size:12px;color:white;animation:bounce2 2s infinite 0.6s;">ART</div>
-</div>
+</div> 
+<div id="streakBox" style="display:inline-block;background:#FFF3E0;border:2px solid #FF6F00;border-radius:50px;padding:6px 16px;font-family:'Nunito',sans-serif;font-weight:800;color:#E65100;font-size:14px;margin-bottom:10px;"></div>
 <div class="home-title anim-title">Kids Learning App!</div>
 <div class="home-desc anim-desc">Choose your subject and start learning!<br>3 subjects - 10 levels each - 300 questions!</div>
 <div class="section-grid">
@@ -245,6 +246,8 @@ function retryLevel(){document.getElementById('gameoverScreen').classList.remove
 function replaySection(){document.getElementById('resultScreen').classList.remove('show');startSection(currentSection);}
 function showFinalResult(){playLevelUp();document.getElementById('resultScreen').classList.add('show');var t=levelCorrect.reduce(function(a,b){return a+b;},0);document.getElementById('finalScore').textContent=t;document.getElementById('resultTrophy').textContent=['C','C','C','C','B','B','B','A','A','A','S'][Math.floor(t/10)]||'S';var g=document.getElementById('levelsGrid');g.innerHTML='';levelCorrect.forEach(function(c,i){var s=c>=9?'★★★':c>=7?'★★':c>=5?'★':'☆';g.innerHTML+='<div class="lg-item"><div class="lg-label">L'+(i+1)+'</div><div class="lg-val">'+c+'/10</div><div style="font-size:10px;color:#FF6F00;">'+s+'</div></div>';});var ti,ms;if(t>=90){ti='GENIUS!';ms='Outstanding! '+t+'/100!';}else if(t>=70){ti='CHAMPION!';ms='Amazing! '+t+'/100!';}else if(t>=50){ti='WELL DONE!';ms='Good effort! '+t+'/100!';}else{ti='KEEP TRYING!';ms='You completed all 10 levels!';}document.getElementById('resultTitle').textContent=ti;document.getElementById('resultMsg').textContent=ms;}
 history.pushState(null,null,location.href);
+function updateStreak(){var today=new Date();var d=today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();var last=localStorage.getItem('gp_last')||'';var streak=parseInt(localStorage.getItem('gp_streak')||'0');if(last!==d){var y=new Date(today);y.setDate(y.getDate()-1);var ys=y.getFullYear()+'-'+(y.getMonth()+1)+'-'+y.getDate();if(last===ys){streak=streak+1;}else{streak=1;}localStorage.setItem('gp_last',d);localStorage.setItem('gp_streak',streak);}var el=document.getElementById('streakBox');if(el){el.innerHTML=emoImg('1f525',20)+' <b>'+streak+'</b> Day Streak!';}}
+updateStreak();
 window.addEventListener('popstate',function(){history.pushState(null,null,location.href);goHome();});
 </script><script>
 if ('serviceWorker' in navigator) {

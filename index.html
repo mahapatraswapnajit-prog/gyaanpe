@@ -155,6 +155,16 @@ body{font-family:'Nunito',sans-serif;background:#FFF9F0;min-height:100vh;overflo
 <div style="width:48px;height:48px;border-radius:50%;background:#E91E63;display:flex;align-items:center;justify-content:center;font-family:Anton,sans-serif;font-size:12px;color:white;animation:bounce2 2s infinite 0.6s;">ART</div>
 </div> 
 <div id="streakBox" style="display:inline-block;background:#FFF3E0;border:2px solid #FF6F00;border-radius:50px;padding:6px 16px;font-family:'Nunito',sans-serif;font-weight:800;color:#E65100;font-size:14px;margin-bottom:10px;"></div>
+	<div id="dailyQuizCard" style="display:none;background:linear-gradient(135deg,#FFD54F,#FF8F00);border-radius:16px;padding:14px;margin:10px 0;cursor:pointer;box-shadow:0 5px 15px rgba(255,143,0,0.3);" onclick="openDailyQuiz()">
+<div style="font-family:'Anton',sans-serif;font-size:17px;color:#4E2600;">&#11088; QUIZ OF THE DAY</div>
+<div id="dqStatus" style="font-size:11px;font-weight:700;color:#6D4C00;margin-top:2px;">Tap to play today's special question!</div>
+</div>
+<div id="dailyQuizBox" style="display:none;background:white;border:3px solid #FF8F00;border-radius:16px;padding:16px;margin:10px 0;text-align:center;">
+<div style="font-family:'Anton',sans-serif;font-size:13px;color:#FF8F00;margin-bottom:6px;">&#11088; QUIZ OF THE DAY</div>
+<div id="dqQuestion" style="font-family:'Anton',sans-serif;font-size:16px;color:#1A237E;margin-bottom:12px;"></div>
+<div id="dqOptions" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;"></div>
+<div id="dqResult" style="font-family:'Anton',sans-serif;font-size:15px;margin-top:10px;"></div>
+</div>
 <div class="home-title anim-title">Kids Learning App!</div>
 <div class="home-desc anim-desc">Choose your subject and start learning!<br>3 subjects - 10 levels each - 300 questions!</div>
 <div class="section-grid">
@@ -248,6 +258,12 @@ function showFinalResult(){playLevelUp();document.getElementById('resultScreen')
 history.pushState(null,null,location.href);
 function updateStreak(){var today=new Date();var d=today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();var last=localStorage.getItem('gp_last')||'';var streak=parseInt(localStorage.getItem('gp_streak')||'0');if(last!==d){var y=new Date(today);y.setDate(y.getDate()-1);var ys=y.getFullYear()+'-'+(y.getMonth()+1)+'-'+y.getDate();if(last===ys){streak=streak+1;}else{streak=1;}localStorage.setItem('gp_last',d);localStorage.setItem('gp_streak',streak);}var el=document.getElementById('streakBox');if(el){el.innerHTML=emoImg('1f525',20)+' <b>'+streak+'</b> Day Streak!';}}
 updateStreak();
+var DQ_URL='https://zapzone-98727-default-rtdb.firebaseio.com/gyaanpeQuiz.json';
+var dqData=null;
+function loadDailyQuiz(){fetch(DQ_URL).then(function(r){return r.json();}).then(function(d){if(!d||!d.q)return;dqData=d;var done=localStorage.getItem('gp_dq_done')===d.date;var card=document.getElementById('dailyQuizCard');card.style.display='block';if(done){document.getElementById('dqStatus').innerHTML='Done for today! Come back tomorrow '+emoImg('2705',14);}}).catch(function(e){});}
+function openDailyQuiz(){if(!dqData)return;if(localStorage.getItem('gp_dq_done')===dqData.date){return;}document.getElementById('dailyQuizCard').style.display='none';var box=document.getElementById('dailyQuizBox');box.style.display='block';document.getElementById('dqQuestion').textContent=dqData.q;var og=document.getElementById('dqOptions');og.innerHTML='';[dqData.o1,dqData.o2,dqData.o3,dqData.o4].forEach(function(op,i){var b=document.createElement('button');b.className='option-btn';b.textContent=op;b.onclick=function(){dqAnswer(i+1,b);};og.appendChild(b);});}
+function dqAnswer(n,btn){if(localStorage.getItem('gp_dq_done')===dqData.date)return;localStorage.setItem('gp_dq_done',dqData.date);var res=document.getElementById('dqResult');if(n===parseInt(dqData.ans)){btn.classList.add('correct');res.textContent='CORRECT! You are a star!';res.style.color='#2E7D32';playCorrect();}else{btn.classList.add('wrong');var ab=document.getElementById('dqOptions').children;ab[parseInt(dqData.ans)-1].classList.add('correct');res.textContent='Oops! Try again tomorrow!';res.style.color='#C62828';playWrong();}}
+loadDailyQuiz();
 window.addEventListener('popstate',function(){history.pushState(null,null,location.href);goHome();});
 </script><script>
 if ('serviceWorker' in navigator) {

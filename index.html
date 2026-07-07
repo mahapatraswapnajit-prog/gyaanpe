@@ -164,6 +164,11 @@ body{font-family:'Nunito',sans-serif;background:#FFF9F0;min-height:100vh;overflo
 <div id="dqQuestion" style="font-family:'Anton',sans-serif;font-size:16px;color:#1A237E;margin-bottom:12px;"></div>
 <div id="dqOptions" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;"></div>
 <div id="dqResult" style="font-family:'Anton',sans-serif;font-size:15px;margin-top:10px;"></div>
+</div> 
+<div id="chBanner" style="display:none;background:linear-gradient(135deg,#1A237E,#3949AB);border-radius:16px;padding:14px;margin:10px 0;color:white;">
+<div style="font-family:'Anton',sans-serif;font-size:16px;">&#127942; CHALLENGE!</div>
+<div id="chText" style="font-size:12px;font-weight:700;margin:4px 0 10px;"></div>
+<button onclick="acceptChallenge()" style="background:#FF6F00;color:white;border:none;border-radius:10px;padding:10px 20px;font-family:'Anton',sans-serif;font-size:14px;">ACCEPT CHALLENGE &#8594;</button>
 </div>
 <div class="home-title anim-title">Kids Learning App!</div>
 <div class="home-desc anim-desc">Choose your subject and start learning!<br>3 subjects - 10 levels each - 300 questions!</div>
@@ -207,7 +212,8 @@ body{font-family:'Nunito',sans-serif;background:#FFF9F0;min-height:100vh;overflo
 <div class="lc-score">Score: <span id="lcScore">0</span>/10</div>
 <div class="stars-display" id="lcStars">&#9733;&#9733;&#9733;</div>
 <div class="star-msg" id="lcMsg">Amazing!</div>
-<div class="next-level-card"><div class="nl-title" id="nlTitle">LEVEL 2 UNLOCKED!</div><div class="nl-desc" id="nlDesc">Ready?</div><button class="nl-btn" onclick="goNextLevel()">NEXT LEVEL &#8594;</button></div>
+<div class="next-level-card"><div class="nl-title" id="nlTitle">LEVEL 2 UNLOCKED!</div><div class="nl-desc" id="nlDesc">Ready?</div><button class="nl-btn" onclick="goNextLevel()">NEXT LEVEL &#8594;</button></div> 
+	<button onclick="sendChallenge()" style="width:100%;background:linear-gradient(135deg,#25D366,#128C7E);color:white;border:none;border-radius:14px;padding:13px;font-family:'Anton',sans-serif;font-size:15px;cursor:pointer;margin-top:8px;">&#127942; CHALLENGE A FRIEND</button>
 <button class="lc-home" onclick="goHome()">HOME</button>
 </div>
 <div class="result-screen" id="resultScreen">
@@ -264,6 +270,11 @@ function loadDailyQuiz(){fetch(DQ_URL).then(function(r){return r.json();}).then(
 function openDailyQuiz(){if(!dqData)return;if(localStorage.getItem('gp_dq_done')===dqData.date){return;}document.getElementById('dailyQuizCard').style.display='none';var box=document.getElementById('dailyQuizBox');box.style.display='block';document.getElementById('dqQuestion').textContent=dqData.q;var og=document.getElementById('dqOptions');og.innerHTML='';[dqData.o1,dqData.o2,dqData.o3,dqData.o4].forEach(function(op,i){var b=document.createElement('button');b.className='option-btn';b.textContent=op;b.onclick=function(){dqAnswer(i+1,b);};og.appendChild(b);});}
 function dqAnswer(n,btn){if(localStorage.getItem('gp_dq_done')===dqData.date)return;localStorage.setItem('gp_dq_done',dqData.date);var res=document.getElementById('dqResult');if(n===parseInt(dqData.ans)){btn.classList.add('correct');res.textContent='CORRECT! You are a star!';res.style.color='#2E7D32';playCorrect();}else{btn.classList.add('wrong');var ab=document.getElementById('dqOptions').children;ab[parseInt(dqData.ans)-1].classList.add('correct');res.textContent='Oops! Try again tomorrow!';res.style.color='#C62828';playWrong();}}
 loadDailyQuiz();
+var CH_URL='https://zapzone-98727-default-rtdb.firebaseio.com/gyaanpeChallenge';
+function sendChallenge(){var nm=prompt('Apna naam likho:')||'A friend';var sc=levelCorrect[currentLevel];fetch(CH_URL+'.json',{method:'POST',body:JSON.stringify({n:nm,s:sc,sec:currentSection,lvl:currentLevel})}).then(function(r){return r.json();}).then(function(d){var link='https://mahapatraswapnajit-prog.github.io/gyaanpe/?ch='+d.name;var msg='\uD83C\uDFC6 '+nm+' ne GyaanPe pe '+sc+'/10 score kiya! Kya aap hara sakte ho? Khelo: '+link;window.open('https://wa.me/?text='+encodeURIComponent(msg));}).catch(function(e){alert('Internet check karo!');});}
+function checkChallenge(){var m=location.search.match(/ch=([^&]+)/);if(!m)return;fetch(CH_URL+'/'+m[1]+'.json').then(function(r){return r.json();}).then(function(d){if(!d||!d.n)return;localStorage.setItem('gp_ch',JSON.stringify(d));var b=document.getElementById('chBanner');b.style.display='block';document.getElementById('chText').textContent=d.n+' ne '+d.s+'/10 score kiya hai! Hara ke dikhao!';}).catch(function(e){});}
+function acceptChallenge(){var d=JSON.parse(localStorage.getItem('gp_ch')||'null');if(!d)return;startSection(d.sec);loadLevel(d.lvl);}
+checkChallenge();
 window.addEventListener('popstate',function(){history.pushState(null,null,location.href);goHome();});
 </script><script>
 if ('serviceWorker' in navigator) {

@@ -1,8 +1,13 @@
-[{
-  "relation": ["delegate_permission/common.handle_all_urls"],
-  "target": {
-    "namespace": "android_app",
-    "package_name": "com.gyaanpe.kidslearning",
-    "sha256_cert_fingerprints": ["12:91:9B:BA:17:93:B4:0D:89:82:23:44:CC:B5:2F:E8:61:BA:14:B8:A7:82:C5:EF:AA:3C:9E:E6:CA:6F:0C:88", "D8:85:22:C0:D8:80:95:44:F1:7E:88:4C:50:09:49:76:6A:5A:F2:7B:FC:4E:FE:F3:3B:9B:19:09:2C:E0:56:05"]
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.gyaanpe.kidslearning",
+      "sha256_cert_fingerprints": [
+        "D8:85:22:C0:D8:80:95:44:F1:7E:88:4C:50:09:49:76:6A:5A:F2:7B:FC:4E:FE:F3:3B:9B:19:09:2C:E0:56:05",
+        "12:91:9B:BA:17:93:B4:0D:89:82:23:44:CC:B5:2F:E8:61:BA:14:B8:A7:82:C5:EF:AA:3C:9E:E6:CA:6F:0C:88"
+      ]
+    }
   }
-}]
+]

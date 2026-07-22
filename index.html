@@ -653,6 +653,25 @@ transform:scale(0.96);filter:brightness(0.97);
 .nutri-form-row{margin:8px 0;}
 .nutri-form-label{font-size:11.5px;font-weight:800;color:#333;margin-bottom:4px;display:block;}
 </style>
+ .nutri-disclaimer{background:#FFF3E0;border-left:4px solid #F57C00;border-radius:10px;padding:10px 12px;font-size:10.5px;color:#5D4037;margin:8px 0;line-height:1.5;}
+.nutri-meal-card{background:#FAFAFA;border-radius:14px;padding:12px 14px;margin:8px 0;}
+.nutri-meal-time{font-size:11px;font-weight:800;color:#F57C00;text-transform:uppercase;margin-bottom:4px;}
+.nutri-meal-text{font-size:12.5px;color:#333;line-height:1.5;}
+.nutri-day-tab{display:inline-block;padding:8px 12px;border-radius:12px;background:#EEE;font-size:11px;font-weight:800;color:#666;margin:3px;cursor:pointer;}
+.nutri-day-tab.active{background:#F57C00;color:#fff;}
+.nutri-nutrient-card{background:#E8F5E9;border-radius:12px;padding:10px 12px;margin:6px 0;}
+.nutri-nutrient-name{font-size:12px;font-weight:800;color:#2E7D32;}
+.nutri-nutrient-why{font-size:11px;color:#555;margin-top:2px;}
+.nutri-limit-card{background:#FFEBEE;border-radius:12px;padding:10px 12px;margin:6px 0;font-size:11.5px;color:#5D4037;}
+.nutri-habit-row{display:flex;align-items:center;justify-content:space-between;background:#FAFAFA;border-radius:12px;padding:10px 14px;margin:6px 0;}
+.nutri-habit-name{font-size:12px;font-weight:700;color:#333;}
+.nutri-habit-btns{display:flex;gap:5px;}
+.nutri-habit-btn{width:28px;height:28px;border-radius:50%;background:#EEE;border:none;font-size:14px;cursor:pointer;}
+.nutri-shop-group{margin:10px 0;}
+.nutri-shop-title{font-size:11px;font-weight:800;color:#666;margin-bottom:4px;}
+.nutri-shop-item{display:inline-block;background:#EDE7F6;color:#4527A0;font-size:11px;font-weight:700;padding:4px 10px;border-radius:10px;margin:3px;}
+.nutri-form-row{margin:8px 0;}
+.nutri-form-label{font-size:11.5px;font-weight:800;color:#333;margin-bottom:4px;display:block;}
 </head>
 <body>
 <div class="dot-bg">
@@ -1205,7 +1224,27 @@ transform:scale(0.96);filter:brightness(0.97);
 <div class="j-head"><button class="home-btn-back" onclick="openNutritionHome()">&#8592; BACK</button><span class="j-title" style="font-size:13px;">Habits &amp; Shopping</span><span style="width:60px;"></span></div>
 <div style="padding:6px 4px 20px 4px;" id="nutritionHabitsArea"></div>
 </div>
-<div class="jscreen" id="stageLearnScreen">
+<div class="jscreen" id="nutritionHomeScreen">
+<div class="j-head"><button class="home-btn-back" onclick="goHome()">&#8592; HOME</button><span class="j-title" style="font-size:13px;">&#127807; Nutrition Advisor</span><span style="width:60px;"></span></div>
+<div style="padding:6px 4px 20px 4px;" id="nutritionHomeArea"></div>
+</div>
+<div class="jscreen" id="nutritionProfileScreen">
+<div class="j-head"><button class="home-btn-back" onclick="openNutritionHome()">&#8592; BACK</button><span class="j-title" style="font-size:13px;">Child Profile</span><span style="width:60px;"></span></div>
+<div style="padding:6px 4px 20px 4px;" id="nutritionProfileArea"></div>
+</div>
+<div class="jscreen" id="nutritionMealScreen">
+<div class="j-head"><button class="home-btn-back" onclick="openNutritionHome()">&#8592; BACK</button><span class="j-title" style="font-size:13px;">Meal Plan</span><span style="width:60px;"></span></div>
+<div style="padding:6px 4px 20px 4px;" id="nutritionMealArea"></div>
+</div>
+<div class="jscreen" id="nutritionGuideScreen">
+<div class="j-head"><button class="home-btn-back" onclick="openNutritionHome()">&#8592; BACK</button><span class="j-title" style="font-size:13px;">Food Guide</span><span style="width:60px;"></span></div>
+<div style="padding:6px 4px 20px 4px;" id="nutritionGuideArea"></div>
+</div>
+<div class="jscreen" id="nutritionHabitsScreen">
+<div class="j-head"><button class="home-btn-back" onclick="openNutritionHome()">&#8592; BACK</button><span class="j-title" style="font-size:13px;">Habits &amp; Shopping</span><span style="width:60px;"></span></div>
+<div style="padding:6px 4px 20px 4px;" id="nutritionHabitsArea"></div>
+</div>
+ <div class="jscreen" id="stageLearnScreen">
 <div class="j-head"><button class="home-btn-back" onclick="openChapterHub('c6sst',0)">&#8592; BACK</button><span class="j-title" style="font-size:14px;">&#128218; Learn</span><span style="width:60px;"></span></div>
 <div id="stageLearnContainer" style="padding-bottom:20px;"></div>
 </div>
@@ -1453,6 +1492,7 @@ if(!isPremium()){
 html+='<div class="pdp-lock-banner"><h4>&#11088; Unlock Parent Dashboard Pro</h4><p style="font-size:12px;margin-bottom:10px;">AI Insights, Study Plans, Test Trends, Brain Gym Analytics, Wellness Score, PDF Reports &amp; more.</p><button class="pbc-btn" onclick="gpOpenPremium()">View Premium Plans &#8594;</button></div>';
 }else{
 html+='<div class="p-sec"><h4>&#128994; CHILD WELLNESS</h4>'+renderWellnessCard()+'</div>';
+ html+='<div class="p-sec"><h4>&#128994; CHILD WELLNESS</h4>'+renderWellnessCard()+'</div>';
 html+='<div class="p-sec"><h4>&#127807; AI NUTRITION &amp; GROWTH ADVISOR<span class="pdp-pro-badge">PRO</span></h4><div style="font-size:12px;color:#666;margin-bottom:8px;">Meal plans, growth tracking, healthy habits &amp; more.</div><button class="pbc-btn" onclick="openNutritionHome()">Open Nutrition Advisor &#8594;</button></div>';
 html+='<div class="p-sec"><h4>&#128172; AI DOUBT SOLVER</h4>'+renderParentDoubtStats()+'</div>';
 html+='<div class="p-sec"><h4>&#128221; AI WORKSHEETS</h4>'+renderParentWorksheetStats()+'</div>';
@@ -7035,7 +7075,8 @@ function gpSetGoalPro(type, val) {
 }
 
 
-var NUTRI_DISCLAIMER = "This guidance is educational only and is not a substitute for advice from a pediatrician or registered dietitian. Parents should consult a healthcare professional for medical concerns.";
+var _gpOrigHideAll = gpHideAllScreens; gpHideAllScreens = function(){ _gpOrigHideAll(); ['nutritionHomeScreen','nutritionProfileScreen','nutritionMealScreen','nutritionGuideScreen','nutritionHabitsScreen'].forEach(function(id){ var el = document.getElementById(id); if(el) el.style.display='none'; }); };
+ var NUTRI_DISCLAIMER = "This guidance is educational only and is not a substitute for advice from a pediatrician or registered dietitian. Parents should consult a healthcare professional for medical concerns.";
 
 var NUTRIENT_BANK = [
   { name: "Protein", why: "Builds and repairs muscles, supports growth.", foods: "Dal, paneer, eggs, milk, chicken, fish, beans" },
@@ -10797,7 +10838,7 @@ if ('serviceWorker' in navigator) {
   function applyPremium(active, plan, token, silent) {
     state.premium = !!active; state.plan = plan; state.token = token || null;
     try {
-      localStorage.setItem('gp_premium', JSON.stringify({ active: state.premium, plan: plan, token: token, ts: Date.now() }));
+    if (state.premium) { localStorage.setItem('gp_premium', JSON.stringify({ active: true, plan: plan, token: token, ts: Date.now() })); } else { localStorage.removeItem('gp_premium'); }
     } catch (e) {}
     document.documentElement.classList.toggle('gp-premium', state.premium);
     refreshUI();

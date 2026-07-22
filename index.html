@@ -10597,8 +10597,9 @@ html+='<div style="display:flex;padding:9px 12px;font-size:11.5px;font-weight:70
 el.innerHTML=html;
 }
 function gpBuy(p){
-if(p==='restore'){showToast('No previous purchase found on this device.');return;}
-showToast('\ud83d\ude80 Premium billing launches soon on Google Play! Thanks for your interest.');
+if(p==='restore'){GyaanPePremium.restore();return;}
+if(p==='yearly'||p==='annual'){GyaanPePremium.buy('yearly');return;}
+GyaanPePremium.buy('monthly');
 }
 function gpCloseModal(id){document.getElementById(id).classList.remove('show');}
 
@@ -10614,6 +10615,394 @@ gpInit();
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/gyaanpe/sw.js', {scope: '/gyaanpe/'});
 }
+</script>
+ <script>
+/* ============================================================
+   GyaanPe Premium — Google Play Billing (TWA) + Firebase sync
+   ------------------------------------------------------------
+   How to use (see INTEGRATION-GUIDE.md for full steps):
+   1. Paste this file's contents in a <script> tag near the end
+      of index.html (AFTER Firebase is initialised), or host it
+      as gyaanpe-premium.js and include with <script src=...>.
+   2. Anywhere in the app, check access with:
+        GyaanPePremium.isPremium()
+        GyaanPePremium.classAllowed(6)
+        GyaanPePremium.useLimited('aiTutor')   // counts + limits
+        gpAds.canShowBanner() / canShowInterstitial('session-complete')
+   3. Open the upgrade screen with:  GyaanPePremium.showPaywall()
+   ============================================================ */
+(function () {
+  'use strict';
+
+  var PLAY_BILLING = 'https://play.google.com/billing';
+
+  /* Product IDs in Play Console.
+     NOTE: TWA purchases use the "backwards compatible" base plan
+     of each subscription, so monthly and yearly must be TWO
+     separate subscription products (see integration guide). */
+  var PRODUCTS = {
+    monthly: 'gyaanpe_premium',          // BC base plan = monthly (Rs 199)
+    yearly:  'gyaanpe_premium_yearly'    // BC base plan = yearly  (Rs 1499)
+  };
+
+  /* ---------------- FREE PLAN LIMITS ---------------- */
+  var FREE = {
+    maxClass: 4,            // Nursery to Class 4 free
+    aiTutor: 5,             // questions / day
+    aiDoubt: 3,             // doubts / day
+    aiWorksheet: 2,         // worksheets / day
+    brainGymGames: 5,       // first 5 of 20 games
+    brainGymPlays: 3        // plays / day
+  };
+
+  /* Premium-only feature flags (no free quota at all) */
+  var PREMIUM_ONLY = [
+    'mixedPractice', 'weeklyExam', 'tables20', 'studyPlan',
+    'sundayChallenge', 'megaChallenge', 'dashboardPro',
+    'aiInsights', 'nutritionAdvisor', 'pdfReports', 'goalTracker',
+    'premiumBadges', 'premiumCertificates', 'premiumFrame'
+  ];
+
+  var state = {
+    supported: false,   // Digital Goods API present (i.e. running in TWA)
+    service: null,
+    premium: false,
+    plan: null,
+    token: null,
+    prices: {}          // { monthly:{price,title}, yearly:{...} }
+  };
+
+  function log() { try { console.log.apply(console, ['[GP-Premium]'].concat([].slice.call(arguments))); } catch (e) {} }
+
+  /* ---------------- User id (Firebase auth if present, else stable local id) */
+  function getUid() {
+    try {
+      if (window.firebase && firebase.auth && firebase.auth().currentUser) {
+        return firebase.auth().currentUser.uid;
+      }
+    } catch (e) {}
+    var id = localStorage.getItem('gp_uid');
+    if (!id) {
+      id = 'gp_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
+      localStorage.setItem('gp_uid', id);
+    }
+    return id;
+  }
+
+  /* ---------------- INIT (runs on every app start) ---------------- */
+  async function init() {
+    // Cached state first so UI is right even before Play responds
+    try {
+      var cached = JSON.parse(localStorage.getItem('gp_premium') || 'null');
+      if (cached && cached.active) applyPremium(true, cached.plan, cached.token, true);
+    } catch (e) {}
+
+    if (!('getDigitalGoodsService' in window)) {
+      log('Digital Goods API not available (browser / not TWA). Purchases disabled.');
+      refreshUI();
+      return;
+    }
+    try {
+      state.service = await window.getDigitalGoodsService(PLAY_BILLING);
+      state.supported = true;
+    } catch (e) {
+      log('Play Billing service unavailable:', e);
+      refreshUI();
+      return;
+    }
+    await loadPrices();
+    await restore(true);   // silent restore on every launch
+    refreshUI();
+  }
+
+  /* ---------------- PRICES ---------------- */
+  async function loadPrices() {
+    try {
+      var ids = [PRODUCTS.monthly, PRODUCTS.yearly];
+      var details = await state.service.getDetails(ids);
+      details.forEach(function (d) {
+        var key = (d.itemId === PRODUCTS.monthly) ? 'monthly' : 'yearly';
+        state.prices[key] = { title: d.title, price: fmtPrice(d.price), raw: d };
+      });
+      log('Prices loaded', state.prices);
+    } catch (e) { log('getDetails failed', e); }
+  }
+
+  function fmtPrice(p) {
+    if (!p) return '';
+    try {
+      return new Intl.NumberFormat('en-IN', { style: 'currency', currency: p.currency, maximumFractionDigits: 0 }).format(p.value);
+    } catch (e) { return p.currency + ' ' + p.value; }
+  }
+
+  /* ---------------- BUY ---------------- */
+  async function buy(planKey) {
+    var sku = PRODUCTS[planKey];
+    if (!sku) { log('unknown plan', planKey); return false; }
+    if (!state.supported) {
+      alert('Premium purchase sirf GyaanPe ki Play Store app me available hai.');
+      return false;
+    }
+    try {
+      var request = new PaymentRequest([{ supportedMethods: PLAY_BILLING, data: { sku: sku } }]);
+      var response = await request.show();               // Google Play payment sheet
+      var purchaseToken = response.details.purchaseToken;
+      await response.complete('success');                // acknowledges the purchase
+      await onPurchased(planKey, sku, purchaseToken, false);
+      return true;
+    } catch (e) {
+      var msg = String(e && e.message || e);
+      if (/cancel/i.test(msg)) log('User cancelled purchase');
+      else { log('Purchase failed:', e); alert('Purchase fail ho gaya. Dobara try karo.'); }
+      return false;
+    }
+  }
+
+  /* ---------------- RESTORE (reinstall / new device / renewal / expiry) ----------------
+     listPurchases() returns only CURRENTLY ACTIVE subscriptions.
+     Expired / cancelled-and-lapsed / refunded subs disappear from it,
+     so calling this on every launch handles expiry + renewal correctly. */
+  async function restore(silent) {
+    if (!state.supported) return false;
+    try {
+      var purchases = await state.service.listPurchases();
+      var owned = null;
+      (purchases || []).forEach(function (p) {
+        if (p.itemId === PRODUCTS.monthly || p.itemId === PRODUCTS.yearly) owned = p;
+      });
+      if (owned) {
+        var planKey = (owned.itemId === PRODUCTS.monthly) ? 'monthly' : 'yearly';
+        await onPurchased(planKey, owned.itemId, owned.purchaseToken, true);
+        if (!silent) toast('Premium restore ho gaya ✅');
+        return true;
+      }
+      // No active sub on this Google account -> downgrade if we thought premium
+      if (state.premium) log('Subscription expired/cancelled — downgrading to Free');
+      applyPremium(false, null, null, silent);
+      if (!silent) toast('Koi active Premium subscription nahi mili');
+      return false;
+    } catch (e) { log('listPurchases failed', e); return false; }
+  }
+
+  async function onPurchased(planKey, sku, token, silent) {
+    applyPremium(true, planKey, token, silent);
+    syncFirebase(planKey, sku, token);
+    if (!silent) {
+      toast('🎉 GyaanPe Premium active! Sab kuch unlock ho gaya.');
+      closePaywall();
+    }
+  }
+
+  /* ---------------- STATE + UI ---------------- */
+  function applyPremium(active, plan, token, silent) {
+    state.premium = !!active; state.plan = plan; state.token = token || null;
+    try {
+      localStorage.setItem('gp_premium', JSON.stringify({ active: state.premium, plan: plan, token: token, ts: Date.now() }));
+    } catch (e) {}
+    document.documentElement.classList.toggle('gp-premium', state.premium);
+    refreshUI();
+  }
+
+  function refreshUI() {
+    // Elements only for premium users: <div data-premium-only>
+    document.querySelectorAll('[data-premium-only]').forEach(function (el) {
+      el.style.display = state.premium ? '' : 'none';
+    });
+    // Elements only for free users (e.g. Upgrade buttons): <div data-free-only>
+    document.querySelectorAll('[data-free-only]').forEach(function (el) {
+      el.style.display = state.premium ? 'none' : '';
+    });
+    // Lock badges: <span data-premium-lock> shown when NOT premium
+    document.querySelectorAll('[data-premium-lock]').forEach(function (el) {
+      el.style.display = state.premium ? 'none' : '';
+    });
+    // Live price labels: <span data-gp-price="monthly"></span>
+    document.querySelectorAll('[data-gp-price]').forEach(function (el) {
+      var k = el.getAttribute('data-gp-price');
+      if (state.prices[k]) el.textContent = state.prices[k].price;
+    });
+    gpAds.applyPremiumState();
+  }
+
+  /* ---------------- FIREBASE SYNC ---------------- */
+  function syncFirebase(planKey, sku, token) {
+    try {
+      if (!(window.firebase && firebase.database)) { log('firebase.database not found — skipping sync'); return; }
+      firebase.database().ref('premiumUsers/' + getUid()).set({
+        active: true,
+        plan: planKey,
+        product: sku,
+        purchaseToken: token,
+        device: navigator.userAgent.slice(0, 80),
+        updatedAt: firebase.database.ServerValue ? firebase.database.ServerValue.TIMESTAMP : Date.now()
+      });
+    } catch (e) { log('firebase sync failed', e); }
+  }
+
+  /* ---------------- ACCESS CHECKS ---------------- */
+  function isPremium() { return state.premium; }
+
+  function classAllowed(classNum) {
+    // Nursery/LKG/UKG => pass 0; Class 1-7 => number
+    var n = parseInt(classNum, 10); if (isNaN(n)) n = 0;
+    return state.premium || n <= FREE.maxClass;
+  }
+
+  function featureAllowed(name) {
+    if (state.premium) return true;
+    return PREMIUM_ONLY.indexOf(name) === -1; // premium-only list blocked for free
+  }
+
+  /* Daily-limited features for free users.
+     Usage: var r = GyaanPePremium.useLimited('aiTutor');
+            if (!r.allowed) { GyaanPePremium.showPaywall('aiTutor'); return; }   */
+  function useLimited(name) {
+    if (state.premium) return { allowed: true, remaining: Infinity, limit: Infinity };
+    var limit = FREE[name];
+    if (limit === undefined) return { allowed: featureAllowed(name), remaining: 0, limit: 0 };
+    var today = new Date().toISOString().slice(0, 10);
+    var key = 'gp_use_' + name;
+    var rec = {};
+    try { rec = JSON.parse(localStorage.getItem(key) || '{}'); } catch (e) {}
+    if (rec.d !== today) rec = { d: today, n: 0 };
+    if (rec.n >= limit) return { allowed: false, remaining: 0, limit: limit };
+    rec.n += 1;
+    try { localStorage.setItem(key, JSON.stringify(rec)); } catch (e) {}
+    return { allowed: true, remaining: limit - rec.n, limit: limit };
+  }
+
+  /* Peek without consuming a use */
+  function remainingToday(name) {
+    if (state.premium) return Infinity;
+    var limit = FREE[name]; if (limit === undefined) return 0;
+    var today = new Date().toISOString().slice(0, 10);
+    var rec = {};
+    try { rec = JSON.parse(localStorage.getItem('gp_use_' + name) || '{}'); } catch (e) {}
+    return (rec.d === today) ? Math.max(0, limit - rec.n) : limit;
+  }
+
+  /* Rewarded-ad bonus: +N temporary uses of a limited feature (free users only) */
+  function grantBonus(name, extra) {
+    if (state.premium) return;
+    var today = new Date().toISOString().slice(0, 10);
+    var key = 'gp_use_' + name;
+    var rec = {};
+    try { rec = JSON.parse(localStorage.getItem(key) || '{}'); } catch (e) {}
+    if (rec.d !== today) rec = { d: today, n: 0 };
+    rec.n = Math.max(0, rec.n - (extra || 1));
+    try { localStorage.setItem(key, JSON.stringify(rec)); } catch (e) {}
+  }
+
+  /* ---------------- ADS POLICY ---------------- */
+  var interstitialCounter = 0;
+  window.gpAds = {
+    canShowBanner: function () { return !state.premium; },
+    /* Call gpAds.sessionCompleted() after a chapter/flow completes.
+       Interstitial allowed only every 3rd completed session. */
+    sessionCompleted: function () {
+      if (state.premium) return false;
+      interstitialCounter += 1;
+      return interstitialCounter % 3 === 0;
+    },
+    canShowInterstitial: function (context) {
+      if (state.premium) return false;
+      // Never during learning/quiz/AI — only at explicit safe checkpoints
+      return context === 'session-complete';
+    },
+    canShowRewarded: function () { return !state.premium; },
+    applyPremiumState: function () {
+      if (!state.premium) return;
+      // Hide any ad containers. Add class="gp-ad" on your ad divs.
+      document.querySelectorAll('.gp-ad, [data-ad], #ad-banner, #adBanner, .adsbygoogle')
+        .forEach(function (el) { el.style.display = 'none'; });
+    }
+  };
+
+  /* ---------------- PAYWALL (minimal, uses app theme color) ---------------- */
+  var BENEFITS = [
+    'Saari Classes (Nursery–7) & Subjects',
+    'Unlimited AI Tutor, Doubt Solver & Worksheets',
+    'Unlimited Chapter Tests, Mixed Practice & Weekly Exams',
+    'All 20 Brain Gym games — unlimited play',
+    'Parent Dashboard Pro + AI Insights + PDF Reports',
+    '100% Ad-Free experience'
+  ];
+
+  function showPaywall(fromFeature) {
+    closePaywall();
+    var m = state.prices.monthly ? state.prices.monthly.price : '₹199';
+    var y = state.prices.yearly ? state.prices.yearly.price : '₹1,499';
+    var wrap = document.createElement('div');
+    wrap.id = 'gp-paywall';
+    wrap.setAttribute('style',
+      'position:fixed;inset:0;background:rgba(13,17,45,.72);z-index:99999;' +
+      'display:flex;align-items:flex-end;justify-content:center;');
+    wrap.innerHTML =
+      '<div style="background:#fff;border-radius:20px 20px 0 0;max-width:520px;width:100%;' +
+      'max-height:88vh;overflow:auto;padding:22px 20px 26px;font-family:inherit;">' +
+      '<div style="text-align:right"><button id="gp-close" style="border:0;background:none;font-size:22px;">✕</button></div>' +
+      '<h2 style="margin:0 0 4px;color:#1A237E;">GyaanPe Premium 👑</h2>' +
+      '<p style="margin:0 0 14px;color:#555;">Loved by Kids ❤️ Trusted by Parents</p>' +
+      '<ul style="margin:0 0 18px;padding-left:20px;color:#333;line-height:1.7;">' +
+      BENEFITS.map(function (b) { return '<li>' + b + '</li>'; }).join('') +
+      '</ul>' +
+      '<button id="gp-buy-yearly" style="width:100%;padding:14px;border:0;border-radius:12px;' +
+      'background:#1A237E;color:#fff;font-size:16px;font-weight:700;margin-bottom:10px;">' +
+      'Yearly — ' + y + ' <span style="font-weight:400;opacity:.85;">(2 mahine FREE 🎁)</span></button>' +
+      '<button id="gp-buy-monthly" style="width:100%;padding:13px;border:2px solid #1A237E;border-radius:12px;' +
+      'background:#fff;color:#1A237E;font-size:15px;font-weight:700;">Monthly — ' + m + '</button>' +
+      '<p style="text-align:center;margin:14px 0 0;">' +
+      '<a href="#" id="gp-restore" style="color:#1A237E;">Pehle kharida tha? Restore Purchase</a></p>' +
+      '<p style="text-align:center;color:#999;font-size:11px;margin:10px 0 0;">' +
+      'Subscription Google Play se manage hoti hai. Kabhi bhi cancel karo.</p>' +
+      '</div>';
+    document.body.appendChild(wrap);
+    document.getElementById('gp-close').onclick = closePaywall;
+    wrap.addEventListener('click', function (e) { if (e.target === wrap) closePaywall(); });
+    document.getElementById('gp-buy-monthly').onclick = function () { buy('monthly'); };
+    document.getElementById('gp-buy-yearly').onclick = function () { buy('yearly'); };
+    document.getElementById('gp-restore').onclick = function (e) { e.preventDefault(); restore(false); };
+  }
+
+  function closePaywall() {
+    var el = document.getElementById('gp-paywall');
+    if (el) el.remove();
+  }
+
+  function toast(msg) {
+    var t = document.createElement('div');
+    t.textContent = msg;
+    t.setAttribute('style',
+      'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1A237E;color:#fff;' +
+      'padding:12px 18px;border-radius:24px;z-index:100000;font-size:14px;box-shadow:0 4px 14px rgba(0,0,0,.3);');
+    document.body.appendChild(t);
+    setTimeout(function () { t.remove(); }, 3200);
+  }
+
+  /* ---------------- PUBLIC API ---------------- */
+  window.GyaanPePremium = {
+    init: init,
+    buy: buy,
+    restore: function () { return restore(false); },
+    isPremium: isPremium,
+    classAllowed: classAllowed,
+    featureAllowed: featureAllowed,
+    useLimited: useLimited,
+    remainingToday: remainingToday,
+    grantBonus: grantBonus,
+    showPaywall: showPaywall,
+    prices: function () { return state.prices; },
+    uid: getUid,
+    _state: state // debugging only
+  };
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
+
 </script>
 </body>
 </html>

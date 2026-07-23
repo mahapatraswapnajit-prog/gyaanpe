@@ -6163,7 +6163,7 @@ function gpDevSetPremium(on) {
 }
 
 function isPremium() {
-  return localStorage.getItem("gp_dev_premium") === "1";
+  try { if (typeof GyaanPePremium !== 'undefined' && GyaanPePremium.isPremium && GyaanPePremium.isPremium()) return true; } catch(e){} try { var _gp = JSON.parse(localStorage.getItem('gp_premium')||'null'); if (_gp && _gp.active) return true; } catch(e){} return localStorage.getItem("gp_dev_premium") === "1";
 }
 
 var PREMIUM_COMPARE_ROWS = [

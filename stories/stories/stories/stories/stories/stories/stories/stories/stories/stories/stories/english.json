@@ -1,0 +1,27 @@
+{
+  "category": "english",
+  "stories": [
+    {
+      "id": "en001",
+      "title": "The Clever Fox and the Grapes",
+      "emoji": "\uD83E\uDD8A",
+      "image": "",
+      "time": "3 min",
+      "difficulty": "medium",
+      "body": [
+        "On a hot summer afternoon, a hungry fox was walking through a farmer's garden. His tummy rumbled loudly. \"I must find something to eat,\" he thought, licking his lips.",
+        "Suddenly, he spotted a bunch of juicy, purple grapes hanging high on a vine. They looked so fresh and sweet that his mouth began to water. \"Those grapes will make a perfect meal!\" he said happily.",
+        "The fox jumped up to reach them. But the grapes were too high. He jumped again, and again, and again, stretching as far as he could. No matter how hard he tried, he simply could not reach the grapes.",
+        "At last, tired and out of breath, the fox gave up. As he walked away with his nose in the air, he grumbled, \"Those grapes are probably sour anyway. I did not want them at all!\"",
+        "But of course, the grapes were perfectly sweet. The fox only said they were sour because he could not have them. This is where we get the saying: it is easy to hate what you cannot have."
+      ],
+      "quiz": [
+        {"q": "What did the fox find in the garden?", "opts": ["Apples", "Grapes", "Bananas", "Berries"], "a": 1},
+        {"q": "Why couldn't the fox reach them?", "opts": ["They were too high", "They were locked", "A dog guarded them", "They were fake"], "a": 0},
+        {"q": "How many times did he try?", "opts": ["Once", "Twice", "Many times", "He never tried"], "a": 2},
+        {"q": "What did the fox say when he gave up?", "opts": ["The grapes are sour", "I will come back", "I am happy", "The grapes are sweet"], "a": 0},
+        {"q": "What is the meaning of the story?", "opts": ["Grapes are sour", "It is easy to hate what you cannot have", "Foxes can jump high", "Never eat grapes"], "a": 1}
+      ]
+    }
+  ]
+}

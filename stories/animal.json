@@ -1,0 +1,93 @@
+{
+  "category": "animal",
+  "stories": [
+    {
+      "id": "an001",
+      "title": "Chintu the Curious Squirrel",
+      "emoji": "\uD83D\uDC3F\uFE0F",
+      "image": "",
+      "time": "3 min",
+      "difficulty": "easy",
+      "body": [
+        "In a big banyan tree lived a little squirrel named Chintu. Chintu loved to ask questions. \"Why is the sky blue? Why do birds sing? Why is honey sweet?\" he asked all day long.",
+        "One morning, Chintu saw a line of tiny ants carrying crumbs much bigger than themselves. \"How can such small ants carry such big food?\" he wondered. So he decided to follow them.",
+        "The ants marched over stones, under leaves, and across a little stream on a floating twig. Chintu watched carefully. Every ant helped the other. When one ant was tired, two ants took its load.",
+        "\"Now I understand!\" said Chintu happily. \"They are not strong because they are big. They are strong because they help each other!\" From that day, Chintu helped his squirrel friends collect nuts together, and their work became easy and fun.",
+        "Chintu learned that curiosity is a gift, and teamwork makes even the hardest work light."
+      ],
+      "quiz": [
+        {"q": "What did Chintu love to do?", "opts": ["Sleep all day", "Ask questions", "Eat only honey", "Fight with birds"], "a": 1},
+        {"q": "What did Chintu decide to follow?", "opts": ["A line of ants", "A flying bird", "A running rabbit", "The wind"], "a": 0},
+        {"q": "How did the ants cross the stream?", "opts": ["They flew", "On a floating twig", "They swam", "They jumped"], "a": 1},
+        {"q": "Why were the ants strong?", "opts": ["They were big", "They helped each other", "They were angry", "They ate a lot"], "a": 1},
+        {"q": "What did Chintu do after learning the lesson?", "opts": ["Slept more", "Helped his friends collect nuts", "Stopped asking questions", "Ran away"], "a": 1}
+      ]
+    },
+    {
+      "id": "an002",
+      "title": "The Elephant Who Was Afraid of Mice",
+      "emoji": "\uD83D\uDC18",
+      "image": "",
+      "time": "3 min",
+      "difficulty": "easy",
+      "body": [
+        "Gajraj was the biggest elephant in the whole forest. He had huge legs, long tusks, and a trumpet so loud it could be heard for miles. Every animal respected him \u2014 except for one tiny problem. Gajraj was terribly afraid of mice!",
+        "One day, a little mouse named Munni got stuck under a fallen branch. \"Help! Help!\" she squeaked. All the animals heard, but the branch was too heavy for them to lift.",
+        "Gajraj came near. His heart was pounding. \"A mouse! I am so scared,\" he whispered. But Munni's cries were so sad that Gajraj forgot his fear for a moment. He gently lifted the heavy branch with his strong trunk.",
+        "\"Thank you, big friend!\" said Munni, hugging his foot. \"You are not just strong, you are brave and kind.\" Gajraj smiled. He realized that being scared is normal, but helping someone in need makes us braver than our fears.",
+        "After that day, Gajraj and Munni became the best of friends, and Gajraj was never afraid of mice again."
+      ],
+      "quiz": [
+        {"q": "What was Gajraj afraid of?", "opts": ["Lions", "Mice", "Water", "Thunder"], "a": 1},
+        {"q": "What happened to Munni the mouse?", "opts": ["She got lost", "She got stuck under a branch", "She fell in water", "She flew away"], "a": 1},
+        {"q": "How did Gajraj help?", "opts": ["He called a lion", "He lifted the branch with his trunk", "He ran away", "He cried"], "a": 1},
+        {"q": "What did Gajraj learn?", "opts": ["To be angry", "Helping others makes us brave", "To hide", "To be selfish"], "a": 1},
+        {"q": "What did Gajraj and Munni become?", "opts": ["Enemies", "Best friends", "Strangers", "Neighbours only"], "a": 1}
+      ]
+    },
+    {
+      "id": "an003",
+      "title": "Raju the Honest Rabbit",
+      "emoji": "\uD83D\uDC30",
+      "image": "",
+      "time": "2 min",
+      "difficulty": "easy",
+      "body": [
+        "Raju the rabbit was hopping through the meadow when he found a shiny golden carrot lying on the path. It was the most beautiful carrot he had ever seen!",
+        "\"Whose carrot is this?\" Raju wondered. He could have eaten it quickly, but he knew it belonged to someone. So he picked it up and hopped from door to door, asking, \"Did you lose a golden carrot?\"",
+        "Finally, he reached the home of old Grandma Tortoise, who was crying. \"I lost my special golden carrot! My grandchild gave it to me,\" she sobbed. Raju happily returned it.",
+        "Grandma Tortoise was so pleased that she gave Raju a whole basket of fresh carrots. \"Honesty is the sweetest treasure of all,\" she said with a smile.",
+        "Raju hopped home with his basket, feeling happier than he had ever felt \u2014 not because of the carrots, but because he had done the right thing."
+      ],
+      "quiz": [
+        {"q": "What did Raju find?", "opts": ["A golden carrot", "A silver coin", "A red apple", "A blue flower"], "a": 0},
+        {"q": "What did Raju do with it?", "opts": ["Ate it", "Hid it", "Looked for the owner", "Threw it away"], "a": 2},
+        {"q": "Who had lost the carrot?", "opts": ["A fox", "Grandma Tortoise", "A bird", "A deer"], "a": 1},
+        {"q": "What did Raju get as a reward?", "opts": ["A basket of carrots", "Gold coins", "Nothing", "A new house"], "a": 0},
+        {"q": "What is the sweetest treasure?", "opts": ["Gold", "Honesty", "Carrots", "Speed"], "a": 1}
+      ]
+    },
+    {
+      "id": "an004",
+      "title": "The Peacock and the Rain",
+      "emoji": "\uD83E\uDD9A",
+      "image": "",
+      "time": "3 min",
+      "difficulty": "medium",
+      "body": [
+        "Moti the peacock had the most beautiful feathers in the jungle \u2014 blue, green, and gold, shining like jewels. But Moti was very proud. He laughed at the plain brown sparrow and the little grey mouse.",
+        "\"Look at me! I am the most beautiful,\" he would say, spreading his feathers. The other animals felt sad, but Moti did not care.",
+        "One summer, there was no rain for many days. The rivers dried up and everyone was thirsty. The wise old owl said, \"Only the one who dances with a pure heart can call the rain clouds.\"",
+        "Moti danced beautifully, but no rain came. Then the plain brown sparrow began to sing a gentle song, thinking not of herself but of her thirsty friends. Slowly, dark clouds gathered, and the rain poured down!",
+        "Moti understood at last. \"Beauty on the outside means nothing without kindness inside,\" he said. He apologized to everyone, and from that day, Moti used his lovely dance to make his friends happy, not to boast."
+      ],
+      "quiz": [
+        {"q": "What was special about Moti?", "opts": ["His voice", "His beautiful feathers", "His speed", "His size"], "a": 1},
+        {"q": "What was Moti's fault?", "opts": ["He was lazy", "He was proud", "He was greedy", "He was scared"], "a": 1},
+        {"q": "What problem came to the jungle?", "opts": ["A flood", "No rain", "A fire", "A storm"], "a": 1},
+        {"q": "Who finally brought the rain?", "opts": ["Moti", "The owl", "The sparrow", "The mouse"], "a": 2},
+        {"q": "What did Moti learn?", "opts": ["Beauty needs kindness inside", "To dance faster", "To fly higher", "To eat less"], "a": 0}
+      ]
+    }
+  ]
+}

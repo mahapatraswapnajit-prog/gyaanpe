@@ -7520,7 +7520,441 @@ function nutriParsePlan(raw) {
   return null;
 }
 
-function gpStageAction(sec,idx,stage){if(window._gpStageActions&&window._gpStageActions[stage])window._gpStageActions[stage]();}
+/* ============================================================
+   GyaanPe — KIDS STORIES MODULE  (self-contained)
+   Integrates with existing: addXP, addCoins, awardBadge,
+   gpProfile, gpConfetti, updateStreak, gpN, showToast, isPremium
+   ------------------------------------------------------------
+   SCALABLE DATA: story CONTENT lives in external JSON files
+   (stories/<category>.json) fetched on demand + cached, so you
+   can add thousands of stories WITHOUT touching this app code.
+   Only the light CATEGORY INDEX below lives in-app.
+   ============================================================ */
+(function(){
+'use strict';
+
+/* ---- WHERE STORY JSON FILES LIVE (same repo, /stories/ folder) ---- */
+var ST_BASE = 'stories/';   // e.g. stories/animal.json
+
+/* ---- CATEGORY INDEX (light; content is in JSON files) ----
+   free:true  -> whole category open to everyone
+   free:false -> premium only
+   Add a new category here + drop its JSON file = done.       */
+var ST_CATS = [
+  {id:'animal',   name:'Animal Stories',        emoji:'\uD83D\uDC3E', grad:'#FF8A65,#FF7043', free:true},
+  {id:'moral',    name:'Moral Stories',         emoji:'\uD83C\uDF1F', grad:'#4FC3F7,#29B6F6', free:true},
+  {id:'bedtime',  name:'Bedtime Stories',       emoji:'\uD83C\uDF19', grad:'#7986CB,#5C6BC0', free:true},
+  {id:'habits',   name:'Good Habits Stories',   emoji:'\u2728',       grad:'#4DB6AC,#26A69A', free:true},
+  {id:'panch',    name:'Panchatantra Stories',  emoji:'\uD83D\uDC22', grad:'#AED581,#9CCC65', free:false},
+  {id:'akbar',    name:'Akbar Birbal Stories',  emoji:'\uD83D\uDC51', grad:'#FFD54F,#FFCA28', free:false},
+  {id:'folk',     name:'Indian Folk Tales',     emoji:'\uD83C\uDFED', grad:'#F06292,#EC407A', free:false},
+  {id:'science',  name:'Science Stories',       emoji:'\uD83D\uDD2C', grad:'#4DD0E1,#26C6DA', free:false},
+  {id:'nature',   name:'Nature Stories',        emoji:'\uD83C\uDF3F', grad:'#81C784,#66BB6A', free:false},
+  {id:'space',    name:'Space & Adventure',     emoji:'\uD83D\uDE80', grad:'#9575CD,#7E57C2', free:false},
+  {id:'english',  name:'English Reading',       emoji:'\uD83D\uDCD6', grad:'#64B5F6,#42A5F5', free:false}
+];
+
+/* ---- Story-of-the-Day weekly schedule (category per weekday) ---- */
+var ST_SOTD_SCHEDULE = ['bedtime','moral','animal','science','panch','akbar','space'];
+/* JS getDay(): 0=Sun,1=Mon... -> Sun:bedtime, Mon:moral, Tue:animal,
+   Wed:science, Thu:panch, Fri:akbar, Sat:space  (matches brief) */
+
+var stCache = {};       // category -> [stories]  (session cache)
+var stCurrentCat = null;
+var stCurrentStory = null;
+var stCurrentList = [];
+var stCurrentIdx = -1;
+
+/* ---------- storage helpers ---------- */
+function stGet(k,d){try{var v=localStorage.getItem(k);return v==null?d:v;}catch(e){return d;}}
+function stJSON(k,d){try{return JSON.parse(localStorage.getItem(k))||d;}catch(e){return d;}}
+function stSet(k,v){try{localStorage.setItem(k,v);}catch(e){}}
+function stToday(){var t=new Date();return t.getFullYear()+'-'+(t.getMonth()+1)+'-'+t.getDate();}
+
+function stDone(){return stJSON('gp_st_done',{});}          // {storyId:true}
+function stFavs(){return stJSON('gp_st_fav',{});}
+function stMarks(){return stJSON('gp_st_mark',{});}
+function stIsPremium(){try{return typeof isPremium==='function'?isPremium():(typeof GyaanPePremium!=='undefined'&&GyaanPePremium.isPremium());}catch(e){return false;}}
+
+/* ---------- data loading (fetch + offline cache) ---------- */
+function stLoadCategory(catId, cb){
+  if(stCache[catId]){cb(stCache[catId]);return;}
+  // offline cache first (survives reloads / no network)
+  var cached=null;
+  try{cached=JSON.parse(localStorage.getItem('gp_st_cache_'+catId));}catch(e){}
+  fetch(ST_BASE+catId+'.json?v='+stToday()).then(function(r){return r.json();}).then(function(d){
+    var arr=(d&&d.stories)?d.stories:(Array.isArray(d)?d:[]);
+    stCache[catId]=arr;
+    try{localStorage.setItem('gp_st_cache_'+catId,JSON.stringify(arr));}catch(e){}
+    cb(arr);
+  }).catch(function(){
+    if(cached){stCache[catId]=cached;cb(cached);}       // offline fallback
+    else cb(null);                                       // truly unavailable
+  });
+}
+
+/* ---------- SCREEN SWITCH (uses app's gpHideAllScreens if present) ---------- */
+function stShowScreen(id){
+  if(typeof gpHideAllScreens==='function'){gpHideAllScreens();}
+  else{document.querySelectorAll('.jscreen').forEach(function(s){s.style.display='none';});}
+  var el=document.getElementById(id);
+  if(el)el.style.display='block';
+  window.scrollTo(0,0);
+}
+
+/* ---------- HOME: category grid + Story of the Day ---------- */
+function openStoriesHome(){
+  stShowScreen('storiesHome');
+  stRenderSotd();
+  var grid=document.getElementById('stCatGrid');
+  var done=stDone();
+  grid.innerHTML=ST_CATS.map(function(c){
+    var locked=!c.free && !stIsPremium();
+    var lockHtml=locked?'<span class="st-lock">\uD83D\uDD12 PRO</span>':'';
+    return '<div class="st-cat-card" style="background:linear-gradient(135deg,'+c.grad+')" onclick="stOpenCategory(\''+c.id+'\')">'+
+      lockHtml+'<div class="st-cat-emoji">'+c.emoji+'</div>'+
+      '<div><div class="st-cat-name">'+c.name+'</div>'+
+      '<div class="st-cat-count">'+(locked?'Premium':'Tap to read')+'</div></div></div>';
+  }).join('');
+}
+
+/* ---------- STORY OF THE DAY ---------- */
+function stRenderSotd(){
+  var slot=document.getElementById('stSotdSlot');
+  if(!slot)return;
+  var catId=ST_SOTD_SCHEDULE[new Date().getDay()];
+  var cat=ST_CATS.filter(function(c){return c.id===catId;})[0]||ST_CATS[0];
+  var doneToday=stGet('gp_st_sotd_day','')===stToday();
+  stLoadCategory(catId,function(arr){
+    if(!arr||!arr.length){slot.innerHTML='';return;}
+    // deterministic pick: same story all day
+    var seed=parseInt(stToday().replace(/-/g,''))||0;
+    var story=arr[seed%arr.length];
+    slot.innerHTML='<div class="st-sotd" onclick="stOpenSotd(\''+catId+'\',\''+story.id+'\')">'+
+      '<span class="st-sotd-tag">\u2B50 STORY OF THE DAY</span>'+
+      '<h3>'+stEsc(story.title)+'</h3>'+
+      '<p>'+cat.emoji+' '+cat.name+' &bull; '+(story.time||'3 min')+(doneToday?' &bull; \u2705 Read':'')+'</p>'+
+      '<button class="st-sotd-btn">'+(doneToday?'Read Again':'Read Now \u2192')+'</button></div>';
+  });
+}
+function stOpenSotd(catId,storyId){
+  stLoadCategory(catId,function(arr){
+    if(!arr)return;
+    var idx=arr.map(function(s){return s.id;}).indexOf(storyId);
+    stCurrentList=arr;stCurrentCat=catId;
+    stOpenStory(idx,true);
+  });
+}
+
+/* ---------- CATEGORY LIST ---------- */
+function stOpenCategory(catId){
+  var cat=ST_CATS.filter(function(c){return c.id===catId;})[0];
+  if(!cat)return;
+  if(!cat.free && !stIsPremium()){stCatPaywall(cat);return;}
+  stCurrentCat=catId;
+  stShowScreen('storiesList');
+  document.getElementById('stListTitle').textContent=cat.emoji+' '+cat.name;
+  var area=document.getElementById('stListArea');
+  area.innerHTML='<div class="st-empty">Loading stories\u2026</div>';
+  stLoadCategory(catId,function(arr){
+    if(!arr||!arr.length){area.innerHTML='<div class="st-empty">Stories coming soon! \uD83D\uDCDA</div>';return;}
+    stCurrentList=arr;
+    var done=stDone();var favs=stFavs();
+    area.innerHTML=arr.map(function(s,i){
+      var d=s.difficulty||'easy';var dl=d==='hard'?'hard':(d==='medium'?'med':'easy');
+      var dt=d==='hard'?'Hard':(d==='medium'?'Medium':'Easy');
+      var thumb=s.image?'<img src="'+s.image+'" alt="">':(s.emoji||cat.emoji);
+      var isDone=done[s.id]?'\u2705':'';var isFav=favs[s.id]?'\u2764\uFE0F':'';
+      return '<div class="st-story-card" onclick="stOpenStory('+i+')">'+
+        '<div class="st-story-thumb">'+thumb+'</div>'+
+        '<div class="st-story-info"><h4>'+stEsc(s.title)+' '+isFav+'</h4>'+
+        '<div class="st-meta"><span>\u23F1 '+(s.time||'3 min')+'</span>'+
+        '<span class="st-diff '+dl+'">'+dt+'</span></div></div>'+
+        '<div class="st-story-badge">'+(isDone||'\u25B6')+'</div></div>';
+    }).join('');
+  });
+}
+function stCatPaywall(cat){
+  stShowScreen('storiesList');
+  document.getElementById('stListTitle').textContent=cat.emoji+' '+cat.name;
+  document.getElementById('stListArea').innerHTML=
+    '<div class="st-premium-lock"><h3>\uD83D\uDD12 Premium Stories</h3>'+
+    '<p>'+cat.name+' aur poori story library premium me unlock hoti hai. 200+ original stories, ad-free reading!</p>'+
+    '<button onclick="stGoPremium()">\uD83D\uDC51 Go Premium</button></div>';
+}
+function stGoPremium(){
+  if(typeof GyaanPePremium!=='undefined'&&GyaanPePremium.showPaywall){GyaanPePremium.showPaywall();}
+  else if(typeof gpBuy==='function'){try{document.getElementById('gpPremModal').classList.add('show');}catch(e){}}
+  else if(typeof openPremium==='function'){openPremium();}
+}
+
+/* ---------- STORY READER ---------- */
+function stOpenStory(idx,fromSotd){
+  if(idx<0||idx>=stCurrentList.length)return;
+  stCurrentIdx=idx;
+  var s=stCurrentList[idx];stCurrentStory=s;
+  stShowScreen('storiesReader');
+  var favs=stFavs();var marks=stMarks();
+  var cat=ST_CATS.filter(function(c){return c.id===stCurrentCat;})[0]||{emoji:'\uD83D\uDCDA',name:''};
+  var d=s.difficulty||'easy';var dt=d==='hard'?'Hard':(d==='medium'?'Medium':'Easy');
+  var favOn=favs[s.id]?'on':'';var markOn=marks[s.id]?'on':'';
+  var heroImg=s.image?'<img src="'+s.image+'" alt="">':(s.emoji||cat.emoji);
+
+  // build body paragraphs (+ optional inline illustration slots)
+  var paras=(s.body||[]);
+  var bodyHtml=paras.map(function(p,i){
+    var block='<p>'+stEsc(p)+'</p>';
+    // illustration slot after 1st and middle paragraph
+    if(s.paraImages&&s.paraImages[i]){
+      block+='<div class="st-para-illus"><img src="'+s.paraImages[i]+'" alt=""></div>';
+    }else if((i===0||i===Math.floor(paras.length/2))&&s.emoji){
+      block+='<div class="st-para-illus">'+s.emoji+'</div>';
+    }
+    return block;
+  }).join('');
+
+  var showAd = !stIsPremium();  // reading itself is ad-free; ad shown AFTER at reward
+  document.getElementById('stReaderArea').innerHTML=
+    '<div class="st-reader-top">'+
+      '<button class="st-back" onclick="stBackToList()">&#8592;</button>'+
+      '<button class="st-tool '+favOn+'" id="stFavBtn" onclick="stToggleFav()" title="Favorite">\u2764\uFE0F</button>'+
+      '<button class="st-tool '+markOn+'" id="stMarkBtn" onclick="stToggleMark()" title="Bookmark">\uD83D\uDD16</button>'+
+      '<button class="st-tool" onclick="stShare()" title="Share">\uD83D\uDD17</button>'+
+    '</div>'+
+    '<div class="st-progress-wrap"><div class="st-progress-bar" id="stProgBar"></div></div>'+
+    '<div class="st-illus">'+heroImg+'</div>'+
+    '<div class="st-title">'+stEsc(s.title)+'</div>'+
+    '<div class="st-submeta"><span>'+cat.emoji+' '+cat.name+'</span><span>\u23F1 '+(s.time||'3 min')+'</span><span>\uD83D\uDCCA '+dt+'</span></div>'+
+    '<div class="st-body" id="stBody">'+bodyHtml+'</div>'+
+    '<div class="st-nav-row">'+
+      '<button class="st-nav-btn" id="stPrevBtn" onclick="stPrevStory()">\u2190 Previous</button>'+
+      '<button class="st-nav-btn" id="stNextBtn" onclick="stNextStory()">Next \u2192</button>'+
+    '</div>'+
+    '<div id="stQuizSlot"></div>';
+
+  document.getElementById('stPrevBtn').disabled=(idx<=0);
+  document.getElementById('stNextBtn').disabled=(idx>=stCurrentList.length-1);
+  stSetupProgress();
+  stRenderQuiz(s);
+  window.scrollTo(0,0);
+}
+function stBackToList(){ if(stCurrentCat)stOpenCategory(stCurrentCat); else openStoriesHome(); }
+function stPrevStory(){ if(stCurrentIdx>0)stOpenStory(stCurrentIdx-1); }
+function stNextStory(){ if(stCurrentIdx<stCurrentList.length-1)stOpenStory(stCurrentIdx+1); }
+
+/* reading progress bar tracks scroll */
+function stSetupProgress(){
+  var bar=document.getElementById('stProgBar');
+  function upd(){
+    var h=document.documentElement.scrollHeight-window.innerHeight;
+    var p=h>0?Math.min(100,Math.round(window.scrollY/h*100)):100;
+    if(bar)bar.style.width=p+'%';
+  }
+  window.onscroll=upd;upd();
+}
+
+/* ---------- favorite / bookmark / share ---------- */
+function stToggleFav(){
+  if(!stCurrentStory)return;var f=stFavs();
+  if(f[stCurrentStory.id])delete f[stCurrentStory.id];else f[stCurrentStory.id]=true;
+  stSet('gp_st_fav',JSON.stringify(f));
+  document.getElementById('stFavBtn').classList.toggle('on');
+}
+function stToggleMark(){
+  if(!stCurrentStory)return;var m=stMarks();
+  if(m[stCurrentStory.id])delete m[stCurrentStory.id];else m[stCurrentStory.id]={cat:stCurrentCat,t:Date.now()};
+  stSet('gp_st_mark',JSON.stringify(m));
+  document.getElementById('stMarkBtn').classList.toggle('on');
+  if(typeof showToast==='function')showToast(m[stCurrentStory.id]?'Bookmarked! \uD83D\uDD16':'Bookmark removed');
+}
+function stShare(){
+  if(!stCurrentStory)return;
+  var txt='Read "'+stCurrentStory.title+'" on GyaanPe! \uD83D\uDCDA Loved by Kids \u2764 Trusted by Parents';
+  if(navigator.share){navigator.share({title:'GyaanPe Stories',text:txt}).catch(function(){});}
+  else{try{navigator.clipboard.writeText(txt);if(typeof showToast==='function')showToast('Link copied! \uD83D\uDD17');}catch(e){}}
+}
+
+/* ---------- QUIZ + REWARDS ---------- */
+var stQuizState=null;
+function stRenderQuiz(s){
+  var slot=document.getElementById('stQuizSlot');
+  if(!s.quiz||!s.quiz.length){slot.innerHTML='';return;}
+  stQuizState={q:0,correct:0,total:s.quiz.length,story:s};
+  stShowQuizQ();
+}
+function stShowQuizQ(){
+  var st=stQuizState;var slot=document.getElementById('stQuizSlot');
+  if(st.q>=st.total){stStoryComplete();return;}
+  var q=st.story.quiz[st.q];
+  slot.innerHTML='<div class="st-quiz-box"><div class="st-quiz-progress">QUIZ &bull; Question '+(st.q+1)+' of '+st.total+'</div>'+
+    '<h3>\uD83E\uDDE9 Story Quiz</h3><div class="st-quiz-q">'+stEsc(q.q)+'</div>'+
+    q.opts.map(function(o,i){return '<button class="st-quiz-opt" onclick="stQuizAns('+i+',this)">'+stEsc(o)+'</button>';}).join('')+
+    '</div>';
+}
+var stQuizBusy=false;
+function stQuizAns(i,btn){
+  if(stQuizBusy)return;stQuizBusy=true;
+  var st=stQuizState;var q=st.story.quiz[st.q];
+  if(i===q.a){btn.classList.add('correct');st.correct++;if(typeof playCorrect==='function')playCorrect();}
+  else{btn.classList.add('wrong');var opts=btn.parentNode.querySelectorAll('.st-quiz-opt');if(opts[q.a])opts[q.a].classList.add('correct');if(typeof playWrong==='function')playWrong();}
+  setTimeout(function(){st.q++;stQuizBusy=false;stShowQuizQ();},850);
+}
+
+function stStoryComplete(){
+  var st=stQuizState;var s=st.story;
+  var already=stDone()[s.id];
+  // rewards (once per story for XP/coins; quiz replay gives small bonus)
+  var baseXP=already?5:20;
+  var baseCoins=already?2:10;
+  var quizXP=st.correct*3;
+  var totalXP=baseXP+quizXP;var totalCoins=baseCoins+st.correct;
+  if(typeof addXP==='function')addXP(totalXP);
+  if(typeof addCoins==='function')addCoins(totalCoins);
+
+  // mark complete + reading stats
+  if(!already){
+    var d=stDone();d[s.id]=stToday();stSet('gp_st_done',JSON.stringify(d));
+    stBumpStat('gp_st_count',1);
+    stLogHistory(s);
+  }
+  stBumpStat('gp_st_minutes',parseInt(s.time)||3);
+  stLogQuizScore(st.correct,st.total);
+  stBumpReadingStreak();
+
+  // badges
+  var cnt=parseInt(stGet('gp_st_count','0'))||0;
+  if(typeof awardBadge==='function'){
+    if(cnt>=1)awardBadge('st_reader1');
+    if(cnt>=10)awardBadge('st_reader10');
+    if(cnt>=25)awardBadge('st_reader25');
+    if(cnt>=50)awardBadge('st_reader50');
+    if(st.correct===st.total&&st.total>=5)awardBadge('st_quizace');
+  }
+
+  // Story-of-the-Day bonus + daily streak
+  var sotdCat=ST_SOTD_SCHEDULE[new Date().getDay()];
+  var isSotd=(stCurrentCat===sotdCat);
+  var sotdMsg='';
+  if(isSotd && stGet('gp_st_sotd_day','')!==stToday()){
+    stSet('gp_st_sotd_day',stToday());
+    if(typeof addXP==='function')addXP(15);
+    if(typeof addCoins==='function')addCoins(8);
+    if(typeof awardBadge==='function')awardBadge('st_dailyreader');
+    if(typeof updateStreak==='function')updateStreak();   // counts toward daily streak
+    sotdMsg='<div class="st-reward-badge">\u2B50 Story of the Day Bonus: +15 XP, +8 Coins!</div>';
+    totalXP+=15;totalCoins+=8;
+  }
+
+  if(typeof gpConfetti==='function')gpConfetti();
+  if(typeof playLevelUp==='function')playLevelUp();
+
+  document.getElementById('stQuizSlot').innerHTML=
+    '<div class="st-reward-card"><div class="st-reward-emoji">\uD83C\uDF89</div>'+
+    '<h2>Story Complete!</h2>'+
+    '<div>You got '+st.correct+' / '+st.total+' correct!</div>'+
+    '<div class="st-reward-stats"><div>+'+totalXP+'<span>XP</span></div><div>+'+totalCoins+'<span>Coins</span></div></div>'+
+    sotdMsg+
+    '<div class="st-reward-badge">\uD83D\uDCDA Reading Badge Earned!</div>'+
+    '<button class="st-reward-btn" onclick="stAfterComplete()">Continue \u2192</button></div>';
+  document.getElementById('stQuizSlot').scrollIntoView({behavior:'smooth'});
+}
+
+/* interstitial ad AFTER every 4-5 completed stories (free only, never during reading/quiz) */
+function stAfterComplete(){
+  if(!stIsPremium()){
+    var n=(parseInt(stGet('gp_st_ad_ctr','0'))||0)+1;
+    if(n>=5){ stSet('gp_st_ad_ctr','0'); stMaybeInterstitial(); }
+    else stSet('gp_st_ad_ctr',String(n));
+  }
+  if(stCurrentIdx<stCurrentList.length-1)stNextStory();
+  else stBackToList();
+}
+function stMaybeInterstitial(){
+  // Hook to existing ad system if present; otherwise no-op (never blocks UX)
+  try{ if(typeof gpAds!=='undefined'&&gpAds.sessionCompleted){ if(gpAds.sessionCompleted()&&typeof showInterstitialAd==='function')showInterstitialAd(); } }catch(e){}
+}
+
+/* ---------- reading stats for Parent Dashboard ---------- */
+function stBumpStat(key,by){stSet(key,String((parseInt(stGet(key,'0'))||0)+by));}
+function stLogHistory(s){
+  var h=stJSON('gp_st_history',[]);
+  h.unshift({id:s.id,title:s.title,cat:stCurrentCat,t:Date.now()});
+  if(h.length>50)h=h.slice(0,50);
+  stSet('gp_st_history',JSON.stringify(h));
+}
+function stLogQuizScore(c,t){
+  var q=stJSON('gp_st_quiz',{c:0,t:0});q.c+=c;q.t+=t;stSet('gp_st_quiz',JSON.stringify(q));
+}
+function stBumpReadingStreak(){
+  var last=stGet('gp_st_rstreak_day','');var today=stToday();
+  if(last===today)return;
+  var streak=parseInt(stGet('gp_st_rstreak','0'))||0;
+  var y=new Date();y.setDate(y.getDate()-1);var ys=y.getFullYear()+'-'+(y.getMonth()+1)+'-'+y.getDate();
+  streak=(last===ys)?streak+1:1;
+  stSet('gp_st_rstreak_day',today);stSet('gp_st_rstreak',String(streak));
+}
+
+/* Public: returns reading stats block for Parent Dashboard */
+function stDashboardStats(){
+  var cnt=parseInt(stGet('gp_st_count','0'))||0;
+  var mins=parseInt(stGet('gp_st_minutes','0'))||0;
+  var q=stJSON('gp_st_quiz',{c:0,t:0});
+  var acc=q.t>0?Math.round(q.c/q.t*100):0;
+  var rstreak=parseInt(stGet('gp_st_rstreak','0'))||0;
+  var hist=stJSON('gp_st_history',[]);
+  return {count:cnt,minutes:mins,quizAcc:acc,readingStreak:rstreak,history:hist};
+}
+/* renders a ready HTML card for Parent Dashboard (call from your dashboard render) */
+function stDashboardCardHTML(){
+  var st=stDashboardStats();
+  var recent=st.history.slice(0,3).map(function(h){return '<div style="font-size:11.5px;color:#555;margin-top:3px;">\uD83D\uDCD6 '+stEsc(h.title)+'</div>';}).join('')||'<div style="font-size:11.5px;color:#999;margin-top:3px;">No stories read yet</div>';
+  return '<div class="p-sec"><h4>\uD83D\uDCDA READING (KIDS STORIES)</h4>'+
+    '<div style="display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:#333;margin-bottom:6px;">'+
+    '<span><b>'+st.count+'</b> stories</span>'+
+    '<span><b>'+st.minutes+'</b> min read</span>'+
+    '<span><b>'+st.quizAcc+'%</b> quiz</span>'+
+    '<span>\uD83D\uDD25 <b>'+st.readingStreak+'</b> day streak</span></div>'+
+    recent+'</div>';
+}
+
+function stEsc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+/* ---------- expose ---------- */
+window.openStoriesHome=openStoriesHome;
+window.stOpenCategory=stOpenCategory;
+window.stOpenStory=stOpenStory;
+window.stShowScreen=stShowScreen;
+window.stBackToList=stBackToList;
+window.stPrevStory=stPrevStory;
+window.stNextStory=stNextStory;
+window.stToggleFav=stToggleFav;
+window.stToggleMark=stToggleMark;
+window.stShare=stShare;
+window.stQuizAns=stQuizAns;
+window.stAfterComplete=stAfterComplete;
+window.stOpenSotd=stOpenSotd;
+window.stGoPremium=stGoPremium;
+window.stDashboardStats=stDashboardStats;
+window.stDashboardCardHTML=stDashboardCardHTML;
+window.stRenderHomeSotd=function(targetId){
+  // optional: render a Story-of-the-Day card into the MAIN home screen
+  var host=document.getElementById(targetId||'stMainSotd');if(!host)return;
+  var catId=ST_SOTD_SCHEDULE[new Date().getDay()];
+  var cat=ST_CATS.filter(function(c){return c.id===catId;})[0]||ST_CATS[0];
+  var doneToday=stGet('gp_st_sotd_day','')===stToday();
+  stLoadCategory(catId,function(arr){
+    if(!arr||!arr.length){host.innerHTML='';return;}
+    var seed=parseInt(stToday().replace(/-/g,''))||0;var story=arr[seed%arr.length];
+    host.innerHTML='<div class="st-sotd" onclick="stOpenSotd(\''+catId+'\',\''+story.id+'\')">'+
+      '<span class="st-sotd-tag">\u2B50 STORY OF THE DAY</span>'+
+      '<h3>'+stEsc(story.title)+'</h3>'+
+      '<p>'+cat.emoji+' '+cat.name+' &bull; '+(story.time||'3 min')+(doneToday?' &bull; \u2705 Read':'')+'</p>'+
+      '<button class="st-sotd-btn">'+(doneToday?'Read Again':'Read Now \u2192')+'</button></div>';
+  });
+};
+
+})();
+ function gpStageAction(sec,idx,stage){if(window._gpStageActions&&window._gpStageActions[stage])window._gpStageActions[stage]();}
 
 
 

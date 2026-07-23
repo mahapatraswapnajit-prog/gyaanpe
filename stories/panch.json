@@ -1,0 +1,50 @@
+{
+  "category": "panch",
+  "stories": [
+    {
+      "id": "pa001",
+      "title": "The Monkey and the Crocodile",
+      "emoji": "\uD83D\uDC12",
+      "image": "",
+      "time": "4 min",
+      "difficulty": "medium",
+      "body": [
+        "On the bank of a wide river grew a tall jamun tree full of sweet purple fruits. In it lived a clever monkey named Raktamukha. Every day he ate the juicy jamuns and enjoyed the cool breeze.",
+        "One day a crocodile named Karala came swimming by. The kind monkey offered him some sweet jamuns. Karala loved them! He came every day, and soon the two became good friends, sharing fruits and stories.",
+        "Karala took some jamuns home for his wife. She ate them and said greedily, \"If the fruits are this sweet, the heart of the monkey who eats them must be even sweeter! I want to eat his heart!\"",
+        "Karala felt sad, but he loved his wife, so he tricked the monkey. \"Friend, come to my home for dinner. Sit on my back and I'll carry you across the river.\" Halfway across, Karala confessed the real plan.",
+        "The clever monkey did not panic. \"Oh dear! Why didn't you tell me earlier? I left my heart hanging on the tree! Take me back to fetch it.\" The foolish crocodile turned around at once. As soon as they reached the bank, the monkey leaped up the tree to safety and laughed, \"A heart stays inside the body, silly friend! Your greed has cost you our friendship.\"",
+        "The moral is clear: presence of mind can save you from the greatest danger, and greed destroys even the best of friendships."
+      ],
+      "quiz": [
+        {"q": "What tree did the monkey live in?", "opts": ["Mango", "Jamun", "Banana", "Neem"], "a": 1},
+        {"q": "What did the monkey give the crocodile?", "opts": ["Sweet jamuns", "Gold", "Water", "Leaves"], "a": 0},
+        {"q": "What did the crocodile's wife want?", "opts": ["More fruits", "The monkey's heart", "A new home", "To swim"], "a": 1},
+        {"q": "How did the monkey trick the crocodile?", "opts": ["He said his heart was on the tree", "He swam away", "He called for help", "He fought"], "a": 0},
+        {"q": "What is the moral of the story?", "opts": ["Greed and cleverness", "Presence of mind saves you; greed destroys friendship", "Always swim", "Never eat fruits"], "a": 1}
+      ]
+    },
+    {
+      "id": "pa002",
+      "title": "The Foolish Crows and the Snake",
+      "emoji": "\uD83D\uDC26\u200D\u2B1B",
+      "image": "",
+      "time": "3 min",
+      "difficulty": "medium",
+      "body": [
+        "A pair of crows built their nest in a big banyan tree and were very happy. But in a hollow at the bottom of the same tree lived a wicked black snake.",
+        "Every time the mother crow laid eggs, the greedy snake would crawl up and eat them. The poor crows were heartbroken. \"We must do something, or we will never have baby crows,\" they said.",
+        "They flew to their wise friend, the jackal. The jackal thought for a moment and said, \"Do not fight the strong with strength. Use your wits. Near the pond, the princess bathes and leaves her golden necklace on the steps. Snatch it and drop it near the snake's hole.\"",
+        "The crows did exactly that. When the palace guards chased the golden necklace, they found it near the snake's hole. They saw the snake, and with their strong sticks, they drove it away for good!",
+        "The clever crows lived happily ever after with their baby chicks. The moral: what cannot be achieved by force can often be achieved by clever thinking."
+      ],
+      "quiz": [
+        {"q": "Where did the crows build their nest?", "opts": ["A banyan tree", "A rock", "A house", "A bush"], "a": 0},
+        {"q": "Who ate the crow's eggs?", "opts": ["A cat", "A black snake", "An eagle", "A rat"], "a": 1},
+        {"q": "Whom did the crows ask for help?", "opts": ["A lion", "A jackal", "An owl", "A bear"], "a": 1},
+        {"q": "What did the crows steal?", "opts": ["A golden necklace", "Food", "A crown", "A ring"], "a": 0},
+        {"q": "What is the moral?", "opts": ["Use strength only", "Clever thinking beats force", "Never build nests", "Steal things"], "a": 1}
+      ]
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "category": "space",
+  "stories": [
+    {
+      "id": "sp001",
+      "title": "Kabir's Journey to the Moon",
+      "emoji": "\uD83D\uDE80",
+      "image": "",
+      "time": "4 min",
+      "difficulty": "medium",
+      "body": [
+        "Kabir loved space more than anything. His room was full of star charts, and every night he gazed at the Moon through his little telescope, dreaming of visiting it one day.",
+        "One magical night, a small silver rocket landed softly in his garden! A friendly robot named Zip popped out. \"Kabir! We need a brave young explorer for a Moon mission. Will you come?\" Kabir could not believe his luck!",
+        "Up, up they zoomed, past the fluffy clouds, past the blue edge of Earth, into the dark, twinkling space. \"Look!\" said Zip. \"There is our Earth \u2014 a beautiful blue and green marble floating in space. It is the only home we have.\"",
+        "They landed on the Moon with a gentle bounce. Everything felt so light that Kabir could jump very high! He saw grey dust, deep craters, and no air at all. \"The Moon has no water or air to breathe,\" Zip explained, \"which is why we must take care of our precious Earth.\"",
+        "Kabir planted a little flag, collected a Moon rock, and bounced with joy. When he returned home, he promised to study hard and protect the Earth. \"One day,\" he said, looking at the stars, \"I will be a real astronaut!\" And with dreams that big, who knows \u2014 maybe he will."
+      ],
+      "quiz": [
+        {"q": "What did Kabir love most?", "opts": ["Cars", "Space", "Cricket", "Food"], "a": 1},
+        {"q": "Who took Kabir on the mission?", "opts": ["A robot named Zip", "His father", "A pilot", "An alien"], "a": 0},
+        {"q": "How did Earth look from space?", "opts": ["A blue and green marble", "A red ball", "A flat plate", "A star"], "a": 0},
+        {"q": "What does the Moon NOT have?", "opts": ["Dust", "Craters", "Air and water", "Rocks"], "a": 2},
+        {"q": "What did Kabir promise?", "opts": ["To sleep more", "To study hard and protect Earth", "To never return", "To eat Moon rocks"], "a": 1}
+      ]
+    }
+  ]
+}

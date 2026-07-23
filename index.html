@@ -777,6 +777,8 @@ transform:scale(0.96);filter:brightness(0.97);
 <div class="goal-bar-track"><div class="goal-bar-fill" id="goalBarFill" style="width:0%;"></div></div></div>
 <div class="dq-reminder" id="dqReminder" onclick="openDailyQuiz()">&#128293; Aaj ka Quiz of the Day baaki hai! Streak banao!</div>
 <div id="dailyQuizCard" style="display:none;background:linear-gradient(135deg,#FFD54F,#FF8F00);border-radius:16px;padding:14px;margin:10px 0;cursor:pointer;box-shadow:0 5px 15px rgba(255,143,0,0.3);" onclick="openDailyQuiz()">
+ <div id="stMainSotd"></div>
+ <div onclick="openStoriesHome()" style="background:linear-gradient(135deg,#7C4DFF,#448AFF);border-radius:16px;padding:16px;color:#fff;text-align:center;cursor:pointer;margin:10px 0;box-shadow:0 4px 12px rgba(124,77,255,.3);"><div style="font-size:32px;">&#128218;</div><div style="font-family:'Anton',sans-serif;font-size:16px;margin-top:4px;">KIDS STORIES</div><div style="font-size:11px;opacity:.9;">Read &amp; earn XP, coins, badges!</div></div>
 <div style="font-family:'Anton',sans-serif;font-size:17px;color:#4E2600;">&#11088; QUIZ OF THE DAY</div>
 <div id="dqStatus" style="font-size:11px;font-weight:700;color:#6D4C00;margin-top:2px;">Tap to play today's special question!</div>
 </div>
@@ -1556,6 +1558,7 @@ html+='<div class="pdp-lock-banner"><h4>&#11088; Unlock Parent Dashboard Pro</h4
 html+='<div class="p-sec"><h4>&#128994; CHILD WELLNESS</h4>'+renderWellnessCard()+'</div>';
  html+='<div class="p-sec"><h4>&#128994; CHILD WELLNESS</h4>'+renderWellnessCard()+'</div>';
 html+='<div class="p-sec"><h4>&#127807; AI NUTRITION &amp; GROWTH ADVISOR<span class="pdp-pro-badge">PRO</span></h4><div style="font-size:12px;color:#666;margin-bottom:8px;">Meal plans, growth tracking, healthy habits &amp; more.</div><button class="pbc-btn" onclick="openNutritionHome()">Open Nutrition Advisor &#8594;</button></div>';
+ if(typeof stDashboardCardHTML==='function'){html+=stDashboardCardHTML();}
 html+='<div class="p-sec"><h4>&#128172; AI DOUBT SOLVER</h4>'+renderParentDoubtStats()+'</div>';
 html+='<div class="p-sec"><h4>&#128221; AI WORKSHEETS</h4>'+renderParentWorksheetStats()+'</div>';
 html+='<div class="p-sec"><h4>&#127942; OLYMPIAD MODE</h4>'+renderParentOlympiadStats()+'</div>';
@@ -7954,6 +7957,7 @@ window.stRenderHomeSotd=function(targetId){
 };
 
 })();
+ (function(){var _o=window.gpHideAllScreens;window.gpHideAllScreens=function(){if(_o)_o();['storiesHome','storiesList','storiesReader'].forEach(function(id){var e=document.getElementById(id);if(e)e.style.display='none';});};})();
  function gpStageAction(sec,idx,stage){if(window._gpStageActions&&window._gpStageActions[stage])window._gpStageActions[stage]();}
 
 
@@ -11143,7 +11147,7 @@ function gpCloseModal(id){document.getElementById(id).classList.remove('show');}
 function gpDailyReward(){var t=new Date();var d=t.getFullYear()+'-'+(t.getMonth()+1)+'-'+t.getDate();if(gpN('gp_reward_last','')===d)return;localStorage.setItem('gp_reward_last',d);var streak=parseInt(gpN('gp_streak','1'))||1;var day=((streak-1)%7)+1;var coins=day*10;addCoins(coins);addXP(20);var txt='Day '+day+' login! You got \uD83E\uDDE9 '+coins+' coins + 20 XP!';if(day===7){addCoins(50);txt='\uD83D\uDC51 Day 7 SPECIAL! '+(coins+50)+' coins + 20 XP + bonus!';}document.getElementById('gpRewardText').textContent=txt;document.getElementById('gpRewardModal').classList.add('show');}
 
 var SUBLABEL={c6sst:'Social Science (C6)',c7sst:'Social Science (C7)',c7maths:'Maths (C7)',c7eng:'English (C7)',c7hin:'हिंदी (C7)',c7evs:'Science (C7)',c7gk:'GK (C7)',c7art:'Art (C7)',c7comp:'Computer (C7)',c6maths:'Maths (C6)',c6eng:'English (C6)',c6hin:'हिंदी (C6)',c6evs:'Science (C6)',c6gk:'GK (C6)',c6art:'Art (C6)',c6comp:'Computer (C6)',c5maths:'Maths (C5)',c5eng:'English (C5)',c5hin:'हिंदी (C5)',c5evs:'EVS (C5)',c5gk:'GK (C5)',c5art:'Art (C5)',c5comp:'Computer (C5)',c4maths:'Maths (C4)',c4eng:'English (C4)',c4hin:'हिंदी (C4)',c4evs:'EVS (C4)',c4gk:'GK (C4)',c4art:'Art (C4)',c4comp:'Computer (C4)',c3maths:'Maths (C3)',c3eng:'English (C3)',c3hin:'हिंदी (C3)',c3evs:'EVS (C3)',c3gk:'GK (C3)',c3art:'Art (C3)',c3comp:'Computer (C3)',c2maths:'Maths (C2)',c2eng:'English (C2)',c2hin:'हिंदी (C2)',c2evs:'EVS (C2)',c2gk:'GK (C2)',c2art:'Art (C2)',c2comp:'Computer (C2)',english:'English',maths:'Maths',evs:'EVS',hindi:'Hindi',poetry:'Poetry',gk:'GK',art:'Art'};
-function gpRenderHome(){var p=gpProfile();var av=document.getElementById('gpAvatar');if(av)av.textContent=p.avatar;var nm=document.getElementById('gpName');if(nm)nm.textContent=p.name;gpPills();var f=document.getElementById('gpFact');if(f){var doy=Math.floor((Date.now()-new Date(new Date().getFullYear(),0,0))/86400000);f.textContent=FACTS[doy%FACTS.length];}var r=gpJSON('gp_recent');var cc=document.getElementById('gpContinue');if(cc&&r&&allData[r.sec]){var lvl=(r.lvl>=maxLvOf(r.sec))?maxLvOf(r.sec):(r.lvl+1);cc.style.display='block';document.getElementById('gpContinueSub').textContent=(SUBLABEL[r.sec]||r.sec)+' \u2022 Level '+lvl;}else if(cc){cc.style.display='none';}renderBadges();var wn=document.getElementById('gpWelcomeName');if(wn)wn.textContent=p.name;gpRenderQuote();gpDailyGoal();gpRenderAchievement();}
+function gpRenderHome(){var p=gpProfile();var av=document.getElementById('gpAvatar');if(av)av.textContent=p.avatar;var nm=document.getElementById('gpName');if(nm)nm.textContent=p.name;gpPills();var f=document.getElementById('gpFact');if(f){var doy=Math.floor((Date.now()-new Date(new Date().getFullYear(),0,0))/86400000);f.textContent=FACTS[doy%FACTS.length];}var r=gpJSON('gp_recent');var cc=document.getElementById('gpContinue');if(cc&&r&&allData[r.sec]){var lvl=(r.lvl>=maxLvOf(r.sec))?maxLvOf(r.sec):(r.lvl+1);cc.style.display='block';document.getElementById('gpContinueSub').textContent=(SUBLABEL[r.sec]||r.sec)+' \u2022 Level '+lvl;}else if(cc){cc.style.display='none';}renderBadges();var wn=document.getElementById('gpWelcomeName');if(wn)wn.textContent=p.name;gpRenderQuote();gpDailyGoal();gpRenderAchievement();if(typeof stRenderHomeSotd==='function')stRenderHomeSotd('stMainSotd');}
 
 function gpInit(){gpDailyReward();gpRenderHome();if(!localStorage.getItem('gp_seen_hero')){var hw=document.getElementById('heroImageWrap');if(hw)hw.style.display='block';localStorage.setItem('gp_seen_hero','1');}}
 gpInit();

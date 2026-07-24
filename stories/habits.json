@@ -1,0 +1,49 @@
+{
+  "category": "habits",
+  "stories": [
+    {
+      "id": "hb001",
+      "title": "Golu and the Magic Toothbrush",
+      "emoji": "\uD83E\uDDB7",
+      "image": "",
+      "time": "3 min",
+      "difficulty": "easy",
+      "body": [
+        "Golu was a happy little boy, but he hated brushing his teeth. \"Brushing is so boring!\" he would say, and run away every morning and night.",
+        "One night, Golu had a dream. His toothbrush began to glow and speak! \"Hello Golu, I am your Magic Toothbrush. Come, let me show you something.\" Suddenly, Golu shrank tiny and could see inside his own mouth!",
+        "Oh no! Tiny sugar monsters were dancing on his teeth, digging little holes and shouting, \"We love it when Golu doesn't brush! More cavities for us!\" Golu was shocked.",
+        "The Magic Toothbrush swept the sugar monsters away with a foamy, minty wave. \"See? When you brush morning and night, you wash all the monsters away and keep your teeth strong and shiny!\"",
+        "Golu woke up and ran straight to brush his teeth. From that day, he never missed brushing again. His smile grew bright and healthy, and the sugar monsters never came back!"
+      ],
+      "quiz": [
+        {"q": "What did Golu hate doing?", "opts": ["Sleeping", "Brushing his teeth", "Eating", "Playing"], "a": 1},
+        {"q": "What spoke to Golu in his dream?", "opts": ["His pillow", "His toothbrush", "His shoe", "His toy"], "a": 1},
+        {"q": "What was dancing on his teeth?", "opts": ["Fairies", "Sugar monsters", "Ants", "Stars"], "a": 1},
+        {"q": "How often should we brush?", "opts": ["Once a week", "Never", "Morning and night", "Only when dirty"], "a": 2},
+        {"q": "What happened to Golu's smile?", "opts": ["It became bright and healthy", "It disappeared", "It stayed the same", "It got worse"], "a": 0}
+      ]
+    },
+    {
+      "id": "hb002",
+      "title": "Meera Learns to Share",
+      "emoji": "\uD83E\uDD1D",
+      "image": "",
+      "time": "3 min",
+      "difficulty": "easy",
+      "body": [
+        "Meera had a brand new box of colourful crayons \u2014 twenty-four shining colours! She loved them so much that she would not let anyone touch them, not even her best friend Anaya.",
+        "One day in class, the teacher asked everyone to draw a garden. Anaya had forgotten her crayons at home. \"Meera, may I please share yours?\" she asked. But Meera hugged her box tightly and said, \"No! They are mine!\"",
+        "Anaya's eyes filled with tears, and she drew her garden in plain grey pencil. Meera drew a beautiful colourful garden, but somehow she did not feel happy at all.",
+        "That evening, Meera felt bad. The next day, she walked up to Anaya and said, \"I'm sorry. Let's share my crayons and draw together!\" Anaya's face lit up with a big smile.",
+        "Together they drew the most beautiful garden the class had ever seen. Meera learned that sharing does not make you have less \u2014 it makes your happiness grow bigger!"
+      ],
+      "quiz": [
+        {"q": "What did Meera get that was new?", "opts": ["A box of crayons", "A doll", "A book", "Shoes"], "a": 0},
+        {"q": "What did the teacher ask them to draw?", "opts": ["A house", "A garden", "An animal", "A car"], "a": 1},
+        {"q": "Why couldn't Anaya draw in colour?", "opts": ["She was sleepy", "She forgot her crayons", "She didn't want to", "She was absent"], "a": 1},
+        {"q": "What did Meera do the next day?", "opts": ["Ignored Anaya", "Shared her crayons", "Hid them", "Cried"], "a": 1},
+        {"q": "What did Meera learn about sharing?", "opts": ["It makes you sad", "It makes happiness grow bigger", "It is useless", "It wastes things"], "a": 1}
+      ]
+    }
+  ]
+}

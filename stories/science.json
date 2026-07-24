@@ -1,0 +1,27 @@
+{
+  "category": "science",
+  "stories": [
+    {
+      "id": "sc001",
+      "title": "Why the Sky Wears Blue",
+      "emoji": "\uD83D\uDD2C",
+      "image": "",
+      "time": "4 min",
+      "difficulty": "medium",
+      "body": [
+        "Little Anaya loved looking at the sky. One evening she asked her grandmother, \"Dadi, why is the sky blue in the day but orange at sunset?\" Dadi smiled and said, \"Let the Sunbeam tell you himself.\"",
+        "That night, a friendly Sunbeam appeared in Anaya's dream. \"Hello Anaya! I travel all the way from the Sun. My white light is actually made of seven colours hidden together \u2014 red, orange, yellow, green, blue, indigo, and violet!\"",
+        "\"When I enter the sky,\" the Sunbeam continued, \"I bump into tiny bits of air. The blue part of me bounces and scatters all around the sky much more than the other colours. That is why you see the sky filled with blue!\"",
+        "\"But at sunset,\" said the Sunbeam, \"I have to travel through much more air to reach you. By then, most of the blue has scattered away, and the red and orange colours reach your eyes. That is why sunsets glow orange and pink!\"",
+        "Anaya woke up amazed. Now every time she looked at the sky, she remembered that its colours were made of dancing light and tiny bits of air. Science, she realized, was the most wonderful magic of all \u2014 and it was real!"
+      ],
+      "quiz": [
+        {"q": "How many colours are hidden in white light?", "opts": ["Three", "Five", "Seven", "Ten"], "a": 2},
+        {"q": "Which colour scatters most in the sky?", "opts": ["Red", "Blue", "Green", "Yellow"], "a": 1},
+        {"q": "Why is the sky blue in the day?", "opts": ["Blue light scatters the most", "The sea reflects", "Paint", "Magic"], "a": 0},
+        {"q": "Why are sunsets orange?", "opts": ["Blue scatters away, red reaches us", "The sun is orange", "Clouds are orange", "It gets cold"], "a": 0},
+        {"q": "What did Anaya think science was?", "opts": ["Boring", "Real and wonderful magic", "Too hard", "Useless"], "a": 1}
+      ]
+    }
+  ]
+}

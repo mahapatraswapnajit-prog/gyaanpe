@@ -1,0 +1,27 @@
+{
+  "category": "nature",
+  "stories": [
+    {
+      "id": "na001",
+      "title": "The Little Seed's Big Dream",
+      "emoji": "\uD83C\uDF3F",
+      "image": "",
+      "time": "3 min",
+      "difficulty": "easy",
+      "body": [
+        "Deep in the dark, cool soil lay a tiny seed named Beeja. All around her were other seeds, sleeping quietly. But Beeja had a big dream. \"I want to grow into the tallest, greenest tree and touch the sky!\" she said.",
+        "\"That is impossible,\" laughed a pebble nearby. \"You are so small and the sky is so far.\" But Beeja did not lose hope. When the first rains came, she drank the water and began to push \u2014 up, up, up!",
+        "It was hard work. She had to break through the heavy soil. But slowly, a tiny green shoot poked out into the sunlight. The warm sun kissed her leaves, and the rain fed her roots. Beeja grew a little taller every day.",
+        "Seasons passed. Beeja grew into a strong sapling, then a young tree, and finally a tall, mighty tree with a thousand green leaves. Birds built nests in her branches, and tired travellers rested in her cool shade.",
+        "\"I did it!\" whispered Beeja happily, her top branches swaying near the clouds. She had learned that with patience, hope, and hard work, even the smallest seed can achieve the biggest dream."
+      ],
+      "quiz": [
+        {"q": "What was the little seed's name?", "opts": ["Beeja", "Pushpa", "Lata", "Kali"], "a": 0},
+        {"q": "What was Beeja's dream?", "opts": ["To stay small", "To grow into a tall tree", "To roll away", "To sleep"], "a": 1},
+        {"q": "What helped Beeja grow?", "opts": ["Rain and sun", "Only wind", "Nothing", "The pebble"], "a": 0},
+        {"q": "Who rested in her shade?", "opts": ["Only birds", "Tired travellers", "Nobody", "Fish"], "a": 1},
+        {"q": "What is the lesson?", "opts": ["Dreams are useless", "Patience and hard work achieve big dreams", "Stay small", "Give up"], "a": 1}
+      ]
+    }
+  ]
+}

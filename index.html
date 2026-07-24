@@ -8243,8 +8243,9 @@ window.stkFreezesLeft=stkFreezesLeft;
 })();
 
 (function(){
+  (function(){
   function gpApplyClassLocks(){
-  function gpApplyClassLocks(){
+    try{
     try{
       var premium = typeof isPremium==='function' ? isPremium() : false;
       ['c5','c6','c7'].forEach(function(cls){

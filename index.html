@@ -6210,7 +6210,8 @@ var PREMIUM_CONFIG = {
   premiumClasses: ["c5", "c6", "c7"],
 };
 
-function gpDevSetPremium(on) {
+function gpDevSetPremium(on, secret) {
+  if (secret !== "gyaanpe2026dev") { console.warn("Not authorized."); return; }
   localStorage.setItem("gp_dev_premium", on ? "1" : "0");
   alert(on ? "Developer preview: Premium ON (not a real purchase)" : "Developer preview: Premium OFF");
 }

@@ -8241,9 +8241,9 @@ window.stkDashboardCardHTML=stkDashboardCardHTML;
 window.stkFreezesLeft=stkFreezesLeft;
 
 })();
- }catch(e){}
-  }
-  window.gpApplyClassLocks = gpApplyClassLocks;gpStageAction ---- */
+})();
+
+(function(){
 (function(){
   function gpApplyClassLocks(){
     try{
@@ -8258,7 +8258,10 @@ window.stkFreezesLeft=stkFreezesLeft;
           chip.innerHTML = '\uD83D\uDD12 PRO';
           chip.classList.add('gp-locked');
         }
-      });
+ });
+      }catch(e){}
+    }
+    window.gpApplyClassLocks = gpApplyClassLocks;
 })();
 
  function gpStageAction(sec,idx,stage){if(window._gpStageActions&&window._gpStageActions[stage])window._gpStageActions[stage]();}

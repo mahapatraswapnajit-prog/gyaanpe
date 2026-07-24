@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>GyaanPe – Loved by Kids, Trusted by Parents</title><link rel="manifest" href="/gyaanpe/manifest.json">
  <link rel="icon" href="/gyaanpe/GyaanPe_Logo_Final.png">
 <style>
@@ -764,13 +764,111 @@ transform:scale(0.96);filter:brightness(0.97);
 .stk-reminder button{background:none;border:none;font-size:16px;cursor:pointer;color:#999;}
 .stk-freeze-toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#42A5F5;color:#fff;padding:12px 18px;border-radius:24px;z-index:100000;font-size:13px;box-shadow:0 4px 14px rgba(0,0,0,.3);}
 .cc-tag.gp-locked{background:linear-gradient(135deg,#5E35B1,#3949AB)!important;color:#fff!important;}
-
-
-</style>
+/* ---------------- GyaanPe First-Time Experience styles ---------------- */
+  #gpFTE{position:fixed;inset:0;background:#FFF9F0;z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;font-family:'Nunito',sans-serif;}
+  #gpFTE.gp-hidden{display:none;}
+  .gp-fte-logo{font-size:38px;font-family:'Anton',sans-serif;color:#1A237E;letter-spacing:1px;margin-bottom:6px;}
+  .gp-fte-logo span{color:#FF6F00;}
+  .gp-fte-tagline{font-size:14px;color:#555;margin-bottom:34px;text-align:center;}
+  .gp-fte-btn{width:100%;max-width:340px;padding:16px 20px;border:none;border-radius:18px;font-family:'Nunito',sans-serif;font-weight:800;font-size:16px;cursor:pointer;margin-bottom:14px;box-shadow:0 6px 16px rgba(0,0,0,0.08);transition:transform .15s ease;}
+  .gp-fte-btn:active{transform:scale(0.97);}
+  .gp-fte-btn-primary{background:linear-gradient(135deg,#FF6F00,#FF8F00);color:#fff;}
+  .gp-fte-btn-secondary{background:#fff;color:#1A237E;border:2px solid #1A237E;}
+  #gpDemoBar{position:fixed;top:0;left:0;right:0;background:#5E35B1;color:#fff;text-align:center;font-size:12.5px;font-weight:800;padding:8px 10px;z-index:100000;display:none;}
+  #gpDemoBar.gp-show{display:block;}
+  #gpDemoExitBtn{background:#fff;color:#5E35B1;border:none;border-radius:10px;padding:4px 10px;font-weight:800;font-size:12px;margin-left:10px;cursor:pointer;}
+  #gpDemoScreen{position:fixed;inset:0;top:38px;background:#FFF9F0;z-index:99998;overflow-y:auto;display:none;padding:16px;}
+  #gpDemoScreen.gp-show{display:block;}
+  .gp-demo-card{background:#fff;border-radius:18px;padding:16px;margin-bottom:14px;box-shadow:0 4px 14px rgba(0,0,0,0.06);border-left:5px solid #FF6F00;}
+  .gp-demo-card h3{font-size:15px;color:#1A237E;margin-bottom:6px;}
+  .gp-demo-card p{font-size:13px;color:#555;line-height:1.5;}
+  .gp-demo-tag{display:inline-block;background:#FFF3E0;color:#E65100;font-size:10.5px;font-weight:800;padding:3px 8px;border-radius:8px;margin-bottom:8px;}
+  .gp-demo-stats{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;}
+  .gp-demo-stat{background:#F3F0FF;color:#5E35B1;font-size:12px;font-weight:800;padding:6px 12px;border-radius:12px;}
+  #gpWelcomeScreen{position:fixed;inset:0;background:linear-gradient(135deg,#1A237E,#3949AB);z-index:99999;display:none;flex-direction:column;align-items:center;justify-content:center;padding:24px;color:#fff;text-align:center;}
+  #gpWelcomeScreen.gp-show{display:flex;}
+  .gp-welcome-emoji{font-size:56px;margin-bottom:10px;animation:gpBounce 1s ease infinite alternate;}
+  @keyframes gpBounce{from{transform:translateY(0);}to{transform:translateY(-12px);}}
+  #gpWelcomeScreen h2{font-size:24px;font-family:'Anton',sans-serif;margin-bottom:6px;}
+  #gpWelcomeScreen p{font-size:14px;opacity:0.9;margin-bottom:22px;}
+  .gp-reward-row{display:flex;gap:14px;margin-bottom:26px;flex-wrap:wrap;justify-content:center;}
+  .gp-reward-chip{background:rgba(255,255,255,0.15);border-radius:16px;padding:12px 18px;font-weight:800;font-size:14px;}
+  #gpFirstDayWidget{background:#fff;border-radius:18px;padding:14px 16px;margin:10px 14px;box-shadow:0 4px 14px rgba(0,0,0,0.06);border-top:4px solid #5E35B1;}
+  #gpFirstDayWidget h4{font-size:13px;color:#1A237E;margin-bottom:8px;}
+  .gp-fd-step{display:flex;align-items:center;gap:8px;padding:6px 0;font-size:13px;color:#333;}
+  .gp-fd-step.gp-done{color:#999;text-decoration:line-through;}
+  .gp-fd-dot{width:18px;height:18px;border-radius:50%;border:2px solid #5E35B1;flex-shrink:0;}
+  .gp-fd-step.gp-done .gp-fd-dot{background:#5E35B1;}
 
 </style>
 </head>
 <body>
+<div id="gpFTE">
+  <div class="gp-fte-logo">Gyaan<span>Pe</span></div>
+  <div class="gp-fte-tagline">Loved by Kids &middot; Trusted by Parents</div>
+  <button class="gp-fte-btn gp-fte-btn-secondary" onclick="gpOpenDemo()">&#128064; Explore Demo (Optional)</button>
+  <button class="gp-fte-btn gp-fte-btn-primary" onclick="gpGoToRealSetup()">&#128640; Start My Learning Journey</button>
+</div>
+
+<div id="gpDemoBar">
+  You're viewing Demo Data — nothing is saved
+  <button id="gpDemoExitBtn" onclick="gpCloseDemo()">Exit Demo</button>
+</div>
+
+<div id="gpDemoScreen">
+  <div class="gp-demo-card">
+    <span class="gp-demo-tag">SAMPLE LESSON</span>
+    <h3>Class 3 &middot; Maths &middot; Fractions</h3>
+    <p>Learn &rarr; Practice &rarr; Quiz &rarr; Revision &rarr; Summary &rarr; Chapter Test. This is a sample of the 6-step Learning Flow every topic follows.</p>
+  </div>
+  <div class="gp-demo-card">
+    <span class="gp-demo-tag">SAMPLE</span>
+    <h3>&#129504; Brain Gym</h3>
+    <p>Quick daily puzzles and logic games to keep the brain sharp between lessons.</p>
+  </div>
+  <div class="gp-demo-card">
+    <span class="gp-demo-tag">SAMPLE</span>
+    <h3>&#128218; Story of the Day</h3>
+    <p>"The Clever Rabbit" &mdash; a sample Panchatantra story with a comprehension quiz at the end.</p>
+  </div>
+  <div class="gp-demo-card">
+    <span class="gp-demo-tag">SAMPLE</span>
+    <h3>&#128101; Parent Dashboard</h3>
+    <p>Streaks, consistency, and quiz history — this is what a parent would see for a real child profile.</p>
+    <div class="gp-demo-stats">
+      <div class="gp-demo-stat">&#11088; 460 XP</div>
+      <div class="gp-demo-stat">&#128293; 5 Day Streak</div>
+      <div class="gp-demo-stat">&#127942; 3 Badges</div>
+    </div>
+  </div>
+  <div class="gp-demo-card">
+    <span class="gp-demo-tag">PREMIUM PREVIEW</span>
+    <h3>&#11088; GyaanPe Premium</h3>
+    <p>All classes unlocked, exclusive story categories (Akbar-Birbal, Science, Space), and an ad-free experience.</p>
+  </div>
+  <p style="text-align:center;font-size:12px;color:#888;margin-top:6px;">Demo data &mdash; your real progress will begin when you start learning.</p>
+</div>
+
+<div id="gpWelcomeScreen">
+  <div class="gp-welcome-emoji">&#127881;</div>
+  <h2 id="gpWelcomeName">Welcome, Champ!</h2>
+  <p>Your learning adventure starts today!</p>
+  <div class="gp-reward-row">
+    <div class="gp-reward-chip">&#11088; +100 XP</div>
+    <div class="gp-reward-chip">&#129689; +100 Coins</div>
+    <div class="gp-reward-chip">&#127941; First Step Badge</div>
+  </div>
+  <button class="gp-fte-btn gp-fte-btn-primary" style="max-width:280px;" onclick="gpCloseWelcome()">Let's Start Learning!</button>
+</div>
+
+<div id="gpFirstDayWidget" style="display:none;">
+  <h4>&#127942; Your First Day</h4>
+  <div class="gp-fd-step" data-task="lesson"><div class="gp-fd-dot"></div> First Lesson</div>
+  <div class="gp-fd-step" data-task="practice"><div class="gp-fd-dot"></div> First Practice</div>
+  <div class="gp-fd-step" data-task="quiz"><div class="gp-fd-dot"></div> First Quiz</div>
+  <div class="gp-fd-step" data-task="braingym"><div class="gp-fd-dot"></div> First Brain Gym Game</div>
+  <div class="gp-fd-step" data-task="story"><div class="gp-fd-dot"></div> Story of the Day</div>
+</div> 
 <div class="dot-bg">
 <div class="dot" style="width:70px;height:70px;background:#FF6F00;left:5%;top:10%;"></div>
 <div class="dot" style="width:50px;height:50px;background:#1A237E;left:85%;top:20%;animation-delay:1s"></div>
@@ -11852,6 +11950,87 @@ if ('serviceWorker' in navigator) {
   }
 })();
 
+</script>
+ <script>
+(function(){
+  try{
+    function g(k,d){ try{ return localStorage.getItem(k) ?? d; }catch(e){ return d; } }
+    function s(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
+
+    function gpInitFTE(){
+      var onboarded = g('gp_onboarded','0');
+      var fte = document.getElementById('gpFTE');
+      if(!fte) return;
+      if(onboarded==='1'){ fte.classList.add('gp-hidden'); } else { fte.classList.remove('gp-hidden'); }
+    }
+    gpInitFTE();
+
+    window.gpOpenDemo = function(){
+      document.getElementById('gpFTE').classList.add('gp-hidden');
+      document.getElementById('gpDemoBar').classList.add('gp-show');
+      document.getElementById('gpDemoScreen').classList.add('gp-show');
+    };
+    window.gpCloseDemo = function(){
+      document.getElementById('gpDemoBar').classList.remove('gp-show');
+      document.getElementById('gpDemoScreen').classList.remove('gp-show');
+      document.getElementById('gpFTE').classList.remove('gp-hidden');
+    };
+
+    window.gpGoToRealSetup = function(){
+      document.getElementById('gpFTE').classList.add('gp-hidden');
+      s('gp_onboarded','1');
+      // === INTEGRATION POINT #1 ===
+      // Replace next line with your real setup screen's show logic.
+      console.log('[GyaanPe FTE] TODO: show your real name/class setup screen here');
+    };
+
+    window.gpAwardReward = function(xp, coins, badgeName){
+      s('gp_xp', (parseInt(g('gp_xp','0'))||0) + xp);
+      s('gp_coins', (parseInt(g('gp_coins','0'))||0) + coins);
+      var badges = JSON.parse(g('gp_badges','[]')||'[]');
+      if(badgeName && badges.indexOf(badgeName)===-1){ badges.push(badgeName); }
+      s('gp_badges', JSON.stringify(badges));
+    };
+
+    window.gpFirstLoginWelcome = function(childName, childClass){
+      document.getElementById('gpWelcomeName').textContent = 'Welcome, ' + (childName||'Champ') + '!';
+      document.getElementById('gpWelcomeScreen').classList.add('gp-show');
+      gpAwardReward(100, 100, 'First Step');
+      s('gp_child_class', childClass||'');
+      s('gp_first_day_active','1');
+    };
+
+    window.gpCloseWelcome = function(){
+      document.getElementById('gpWelcomeScreen').classList.remove('gp-show');
+      document.getElementById('gpFirstDayWidget').style.display='block';
+      gpRenderFirstDay();
+    };
+
+    window.gpMarkDayTaskDone = function(task){
+      var done = JSON.parse(g('gp_fd_done','[]')||'[]');
+      if(done.indexOf(task)===-1){ done.push(task); s('gp_fd_done', JSON.stringify(done)); }
+      gpRenderFirstDay();
+      if(done.length>=5){
+        s('gp_first_day_active','0');
+        setTimeout(function(){ var w=document.getElementById('gpFirstDayWidget'); if(w) w.style.display='none'; }, 1500);
+      }
+    };
+
+    function gpRenderFirstDay(){
+      var done = JSON.parse(g('gp_fd_done','[]')||'[]');
+      document.querySelectorAll('#gpFirstDayWidget .gp-fd-step').forEach(function(el){
+        var task = el.getAttribute('data-task');
+        if(done.indexOf(task)>-1){ el.classList.add('gp-done'); } else { el.classList.remove('gp-done'); }
+      });
+    }
+
+    if(g('gp_first_day_active','0')==='1'){
+      var w=document.getElementById('gpFirstDayWidget');
+      if(w){ w.style.display='block'; gpRenderFirstDay(); }
+    }
+
+  }catch(e){ console.error('[GyaanPe FTE] init error', e); }
+})();
 </script>
 </body>
 </html>

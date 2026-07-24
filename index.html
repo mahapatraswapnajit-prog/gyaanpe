@@ -723,6 +723,47 @@ transform:scale(0.96);filter:brightness(0.97);
 .st-premium-lock p{font-size:12.5px;opacity:.9;margin-bottom:12px;}
 .st-premium-lock button{background:#FFD54F;color:#4A148C;border:none;border-radius:12px;padding:11px 22px;font-size:14px;font-weight:800;cursor:pointer;}
 .st-empty{text-align:center;color:#999;padding:30px;font-size:13px;}
+.stk-card{background:linear-gradient(135deg,#FF7043,#F4511E);border-radius:20px;padding:18px;color:#fff;margin:10px 0;box-shadow:0 6px 18px rgba(244,81,53,.3);}
+.stk-card-top{display:flex;align-items:center;gap:12px;}
+.stk-flame{font-size:42px;line-height:1;}
+.stk-num{font-family:'Anton',sans-serif;font-size:32px;line-height:1;}
+.stk-label{font-size:11px;opacity:.9;font-weight:700;}
+.stk-stats-row{display:flex;gap:16px;margin-top:10px;font-size:11.5px;}
+.stk-stats-row b{font-size:14px;display:block;}
+.stk-progress-wrap{height:8px;background:rgba(255,255,255,.25);border-radius:8px;margin-top:12px;overflow:hidden;}
+.stk-progress-bar{height:100%;background:#FFD54F;border-radius:8px;transition:width .3s;}
+.stk-next{font-size:11px;margin-top:6px;opacity:.95;}
+.stk-cal-btn{background:rgba(255,255,255,.2);border:none;border-radius:10px;color:#fff;font-size:11px;font-weight:800;padding:7px 12px;margin-top:10px;cursor:pointer;}
+.stk-cal-modal{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9998;display:none;align-items:flex-end;justify-content:center;}
+.stk-cal-modal.show{display:flex;}
+.stk-cal-box{background:#fff;border-radius:20px 20px 0 0;max-width:480px;width:100%;max-height:85vh;overflow:auto;padding:18px;}
+.stk-cal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
+.stk-cal-head h3{font-family:'Anton',sans-serif;font-size:18px;color:#1A237E;}
+.stk-cal-close{background:#EEE;border:none;border-radius:10px;padding:6px 12px;font-weight:800;cursor:pointer;}
+.stk-cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;}
+.stk-cal-dow{text-align:center;font-size:10px;font-weight:800;color:#999;padding:4px 0;}
+.stk-cal-day{aspect-ratio:1;display:flex;align-items:center;justify-content:center;border-radius:8px;font-size:11px;font-weight:700;position:relative;}
+.stk-cal-day.done{background:#4CAF50;color:#fff;}
+.stk-cal-day.freeze{background:#42A5F5;color:#fff;}
+.stk-cal-day.missed{background:#FFEBEE;color:#C62828;}
+.stk-cal-day.future{background:#F5F5F5;color:#BBB;}
+.stk-cal-day.today{outline:2px solid #FF6F00;}
+.stk-cal-day.milestone::after{content:'\2B50';position:absolute;top:-4px;right:-4px;font-size:9px;}
+.stk-cal-legend{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;font-size:10.5px;color:#666;}
+.stk-cal-legend span{display:flex;align-items:center;gap:4px;}
+.stk-cal-dot{width:9px;height:9px;border-radius:50%;display:inline-block;}
+.stk-celeb{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:9999;display:none;align-items:center;justify-content:center;}
+.stk-celeb.show{display:flex;}
+.stk-celeb-box{background:linear-gradient(135deg,#FFD54F,#FF7043);border-radius:24px;padding:32px 24px;text-align:center;color:#fff;max-width:340px;animation:stkPop .4s ease;}
+@keyframes stkPop{0%{transform:scale(.7);opacity:0;}100%{transform:scale(1);opacity:1;}}
+.stk-celeb-emoji{font-size:70px;margin-bottom:10px;}
+.stk-celeb-box h2{font-family:'Anton',sans-serif;font-size:26px;margin-bottom:6px;}
+.stk-celeb-box p{font-size:13px;opacity:.95;margin-bottom:14px;}
+.stk-celeb-btn{background:#fff;color:#E65100;border:none;border-radius:12px;padding:11px 26px;font-size:14px;font-weight:800;cursor:pointer;}
+.stk-reminder{background:#FFF3E0;border-left:4px solid #FF9800;border-radius:12px;padding:10px 14px;font-size:12px;color:#5D4037;margin:8px 0;display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.stk-reminder button{background:none;border:none;font-size:16px;cursor:pointer;color:#999;}
+.stk-freeze-toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#42A5F5;color:#fff;padding:12px 18px;border-radius:24px;z-index:100000;font-size:13px;box-shadow:0 4px 14px rgba(0,0,0,.3);}
+
 </style>
 </head>
 <body>
@@ -778,6 +819,8 @@ transform:scale(0.96);filter:brightness(0.97);
 <div class="goal-bar-track"><div class="goal-bar-fill" id="goalBarFill" style="width:0%;"></div></div></div>
 <div class="dq-reminder" id="dqReminder" onclick="openDailyQuiz()">&#128293; Aaj ka Quiz of the Day baaki hai! Streak banao!</div>
 <div id="dailyQuizCard" style="display:none;background:linear-gradient(135deg,#FFD54F,#FF8F00);border-radius:16px;padding:14px;margin:10px 0;cursor:pointer;box-shadow:0 5px 15px rgba(255,143,0,0.3);" onclick="openDailyQuiz()">
+ <div id="stkHomeCard"></div>
+<div id="stkReminderSlot"></div>
  <div id="stMainSotd"></div>
  <div onclick="openStoriesHome()" style="background:linear-gradient(135deg,#7C4DFF,#448AFF);border-radius:16px;padding:16px;color:#fff;text-align:center;cursor:pointer;margin:10px 0;box-shadow:0 4px 12px rgba(124,77,255,.3);"><div style="font-size:32px;">&#128218;</div><div style="font-family:'Anton',sans-serif;font-size:16px;margin-top:4px;">KIDS STORIES</div><div style="font-size:11px;opacity:.9;">Read &amp; earn XP, coins, badges!</div></div>
 <div style="font-family:'Anton',sans-serif;font-size:17px;color:#4E2600;">&#11088; QUIZ OF THE DAY</div>
@@ -1309,6 +1352,12 @@ transform:scale(0.96);filter:brightness(0.97);
 <div id="stListArea"></div>
 </div></div>
 <div class="jscreen" id="storiesReader"><div class="st-wrap"><div class="st-reader" id="stReaderArea"></div></div></div>
+<div class="stk-cal-modal" id="stkCalModal"><div class="stk-cal-box">
+<div class="stk-cal-head"><h3>&#128197; Streak Calendar</h3><button class="stk-cal-close" onclick="stkCloseCalendar()">Close</button></div>
+<div id="stkCalGrid"></div>
+</div></div>
+<div class="stk-celeb" id="stkCelebModal"><div class="stk-celeb-box" id="stkCelebBox"></div></div>
+
  <div class="jscreen" id="stageLearnScreen">
 <div class="j-head"><button class="home-btn-back" onclick="openChapterHub('c6sst',0)">&#8592; BACK</button><span class="j-title" style="font-size:14px;">&#128218; Learn</span><span style="width:60px;"></span></div>
 <div id="stageLearnContainer" style="padding-bottom:20px;"></div>
@@ -1558,6 +1607,7 @@ html+='<div class="pdp-lock-banner"><h4>&#11088; Unlock Parent Dashboard Pro</h4
 }else{
 html+='<div class="p-sec"><h4>&#128994; CHILD WELLNESS</h4>'+renderWellnessCard()+'</div>';
  html+='<div class="p-sec"><h4>&#128994; CHILD WELLNESS</h4>'+renderWellnessCard()+'</div>';
+ if(typeof stkDashboardCardHTML==='function'){html+=stkDashboardCardHTML();}
 html+='<div class="p-sec"><h4>&#127807; AI NUTRITION &amp; GROWTH ADVISOR<span class="pdp-pro-badge">PRO</span></h4><div style="font-size:12px;color:#666;margin-bottom:8px;">Meal plans, growth tracking, healthy habits &amp; more.</div><button class="pbc-btn" onclick="openNutritionHome()">Open Nutrition Advisor &#8594;</button></div>';
  if(typeof stDashboardCardHTML==='function'){html+=stDashboardCardHTML();}
 html+='<div class="p-sec"><h4>&#128172; AI DOUBT SOLVER</h4>'+renderParentDoubtStats()+'</div>';
@@ -7845,6 +7895,7 @@ function stStoryComplete(){
     if(typeof addCoins==='function')addCoins(8);
     if(typeof awardBadge==='function')awardBadge('st_dailyreader');
     if(typeof updateStreak==='function')updateStreak();   // counts toward daily streak
+   if(typeof stkRecordActivity==='function')stkRecordActivity();
     sotdMsg='<div class="st-reward-badge">\u2B50 Story of the Day Bonus: +15 XP, +8 Coins!</div>';
     totalXP+=15;totalCoins+=8;
   }
@@ -7959,6 +8010,235 @@ window.stRenderHomeSotd=function(targetId){
 
 })();
  (function(){var _o=window.gpHideAllScreens;window.gpHideAllScreens=function(){if(_o)_o();['storiesHome','storiesList','storiesReader'].forEach(function(id){var e=document.getElementById(id);if(e)e.style.display='none';});};})();
+/* ============================================================
+   GyaanPe — ADVANCED STREAK SYSTEM (additive layer)
+   ------------------------------------------------------------
+   Reuses EXISTING gp_streak / gp_longest_streak / updateStreak()
+   / awardBadge() — does not duplicate or reset them.
+   Adds: milestones, calendar log, premium freeze, celebration
+   screens, home streak card, parent dashboard stats.
+   ============================================================ */
+(function(){
+'use strict';
+
+var MILESTONES = [5,7,15,30,50,100,180,365];
+var MS_BADGE = {5:'stk5',7:'streak7',15:'stk15',30:'stk30',50:'stk50',100:'stk100',180:'stk180',365:'stk365'};
+var MS_LABEL = {
+  5:['\uD83D\uDD25','5-Day Streak Badge unlocked!'],
+  7:['\uD83C\uDF81','Special Reward Chest opened!'],
+  15:['\uD83C\uDFC5','Premium Achievement Badge earned!'],
+  30:['\uD83D\uDC51','Monthly Champion Badge earned!'],
+  50:['\u2728','Golden Learner Badge earned!'],
+  100:['\uD83C\uDFC6','Legendary Learner Badge earned!'],
+  180:['\uD83E\uDDED','Master Explorer Badge earned!'],
+  365:['\uD83D\uDC8E','GyaanPe LEGEND! Certificate + Frame unlocked!']
+};
+/* push new badges into the existing BADGES array (safe, additive) */
+try{
+  var _add=[['stk5','\uD83D\uDD25 5-Day Streak'],['stk15','\uD83C\uDFC5 15-Day Achiever'],['stk30','\uD83D\uDC51 Monthly Champion'],
+    ['stk50','\u2728 Golden Learner'],['stk100','\uD83C\uDFC6 Legendary Learner'],['stk180','\uD83E\uDDED Master Explorer'],['stk365','\uD83D\uDC8E GyaanPe Legend']];
+  if(typeof BADGES!=='undefined'){_add.forEach(function(b){if(!BADGES.some(function(x){return x[0]===b[0];}))BADGES.push(b);});}
+}catch(e){}
+
+function g(k,d){try{var v=localStorage.getItem(k);return v==null?d:v;}catch(e){return d;}}
+function gJ(k,d){try{return JSON.parse(localStorage.getItem(k))||d;}catch(e){return d;}}
+function s(k,v){try{localStorage.setItem(k,v);}catch(e){}}
+function todayStr(dt){var t=dt||new Date();return t.getFullYear()+'-'+(t.getMonth()+1)+'-'+t.getDate();}
+function monthKey(dt){var t=dt||new Date();return t.getFullYear()+'-'+(t.getMonth()+1);}
+function stkPremium(){try{return typeof isPremium==='function'?isPremium():false;}catch(e){return false;}}
+
+/* ---------------- FREEZE (premium: 2/month, auto-consumed) ---------------- */
+function stkEnsureMonthlyFreeze(){
+  if(!stkPremium())return;
+  var mk=monthKey();
+  if(g('gp_stk_freeze_month','')!==mk){ s('gp_stk_freeze_month',mk); s('gp_stk_freeze_avail','2'); }
+}
+function stkFreezesLeft(){ return stkPremium() ? (parseInt(g('gp_stk_freeze_avail','0'))||0) : 0; }
+
+/* If exactly one day was missed and a freeze is available, silently consume it
+   by nudging gp_last forward one day so the EXISTING updateStreak() sees a
+   1-day gap (continues the streak) instead of a break (resets to 1). */
+function stkMaybeConsumeFreeze(){
+  try{
+    var last=localStorage.getItem('gp_last')||'';
+    if(!last)return;
+    var today=new Date(); var td=todayStr(today);
+    if(last===td)return; // already logged today, nothing to freeze
+    var y=new Date(today); y.setDate(y.getDate()-1); var ys=todayStr(y);
+    if(last===ys)return; // yesterday — normal continue, no freeze needed
+    // gap of exactly one missed day?
+    var y2=new Date(today); y2.setDate(y2.getDate()-2); var y2s=todayStr(y2);
+    if(last===y2s && stkFreezesLeft()>0){
+      s('gp_stk_freeze_avail', String(stkFreezesLeft()-1));
+      stkLogCal(ys,'freeze');
+      localStorage.setItem('gp_last', ys); // makes updateStreak() see a 1-day gap
+      if(typeof showToast==='function')showToast('\u2744\uFE0F Streak Freeze used — your streak is safe!');
+    }
+  }catch(e){}
+}
+
+/* ---------------- CALENDAR LOG ---------------- */
+function stkCal(){ return gJ('gp_stk_cal',{}); }
+function stkLogCal(dateStr,status){ var c=stkCal(); c[dateStr]=status; s('gp_stk_cal',JSON.stringify(c)); }
+
+/* ---------------- MAIN ENTRY — call this when ANY qualifying
+   activity completes (lesson/practice/quiz/story/braingym/10 Qs/
+   weekly exam/olympiad). Safe to call multiple times per day. */
+function stkRecordActivity(){
+  stkEnsureMonthlyFreeze();
+  stkMaybeConsumeFreeze();
+  if(typeof updateStreak==='function')updateStreak();   // reuses existing streak counter — not duplicated
+  var streak=parseInt(g('gp_streak','0'))||0;
+  stkLogCal(todayStr(),'done');
+  stkDailyBonus(streak);
+  stkMilestoneCheck(streak);
+  stkRenderCard();
+}
+
+/* escalating small bonus, once per day (separate key from existing login reward) */
+function stkDailyBonus(streak){
+  var today=todayStr();
+  if(g('gp_stk_bonus_day','')===today)return;
+  s('gp_stk_bonus_day',today);
+  var d=((streak-1)%3)+1; // cycles 1,2,3 -> +10,+20,+30
+  var coins=d*10;
+  if(typeof addCoins==='function')addCoins(coins);
+}
+
+function stkMilestoneCheck(streak){
+  if(MILESTONES.indexOf(streak)===-1)return;
+  var seen=gJ('gp_stk_ms_seen',{});
+  if(seen[streak])return;
+  seen[streak]=true; s('gp_stk_ms_seen',JSON.stringify(seen));
+  stkLogCal(todayStr(),'done'); // ensure marked, milestone badge added visually via class below
+  var badgeKey=MS_BADGE[streak];
+  if(badgeKey && typeof awardBadge==='function')awardBadge(badgeKey);
+  if(streak===7 && typeof addCoins==='function'){addCoins(30);if(typeof addXP==='function')addXP(30);}
+  stkShowCelebration(streak);
+}
+
+function stkShowCelebration(streak){
+  var info=MS_LABEL[streak]||['\uD83C\uDF89','Milestone reached!'];
+  var box=document.getElementById('stkCelebBox');
+  if(!box)return;
+  box.innerHTML='<div class="stk-celeb-emoji">'+info[0]+'</div>'+
+    '<h2>'+streak+'-Day Streak!</h2>'+
+    '<p>'+info[1]+'</p>'+
+    '<button class="stk-celeb-btn" onclick="stkCloseCelebration()">Awesome! \uD83C\uDF89</button>';
+  document.getElementById('stkCelebModal').classList.add('show');
+  if(typeof gpConfetti==='function')gpConfetti();
+  if(typeof playLevelUp==='function')playLevelUp();
+}
+function stkCloseCelebration(){ var m=document.getElementById('stkCelebModal'); if(m)m.classList.remove('show'); }
+
+/* ---------------- HOME STREAK CARD ---------------- */
+function nextMilestone(streak){ for(var i=0;i<MILESTONES.length;i++){ if(MILESTONES[i]>streak) return MILESTONES[i]; } return null; }
+
+function stkRenderCard(targetId){
+  var host=document.getElementById(targetId||'stkHomeCard');
+  if(!host)return;
+  var streak=parseInt(g('gp_streak','0'))||0;
+  var longest=parseInt(g('gp_longest_streak','0'))||0;
+  var doneToday=stkCal()[todayStr()]==='done';
+  var nm=nextMilestone(streak);
+  var pct=nm?Math.min(100,Math.round((streak/nm)*100)):100;
+  var freezeTxt=stkPremium()?('\u2744\uFE0F '+stkFreezesLeft()+' freeze left'):'';
+  host.innerHTML='<div class="stk-card">'+
+    '<div class="stk-card-top"><div class="stk-flame">\uD83D\uDD25</div><div>'+
+    '<div class="stk-num">'+streak+'</div><div class="stk-label">DAY STREAK'+(doneToday?' \u2705 Today done':' \u2022 Not done today')+'</div></div></div>'+
+    '<div class="stk-stats-row"><div><b>'+longest+'</b>Longest</div>'+(freezeTxt?'<div><b>&nbsp;</b>'+freezeTxt+'</div>':'')+'</div>'+
+    (nm?'<div class="stk-progress-wrap"><div class="stk-progress-bar" style="width:'+pct+'%"></div></div><div class="stk-next">Next: '+nm+'-day milestone ('+(nm-streak)+' to go)</div>':'<div class="stk-next">\uD83C\uDF1F All milestones unlocked!</div>')+
+    '<button class="stk-cal-btn" onclick="stkOpenCalendar()">View Calendar</button>'+
+    '</div>';
+}
+
+/* ---------------- CALENDAR VIEW ---------------- */
+function stkOpenCalendar(){
+  var modal=document.getElementById('stkCalModal'); if(!modal)return;
+  stkRenderCalendar();
+  modal.classList.add('show');
+}
+function stkCloseCalendar(){ var m=document.getElementById('stkCalModal'); if(m)m.classList.remove('show'); }
+
+function stkRenderCalendar(){
+  var grid=document.getElementById('stkCalGrid'); if(!grid)return;
+  var now=new Date(); var y=now.getFullYear(), m=now.getMonth();
+  var first=new Date(y,m,1); var startDow=first.getDay();
+  var daysInMonth=new Date(y,m+1,0).getDate();
+  var cal=stkCal(); var today=now.getDate();
+  var msDays={}; // which calendar day-numbers are milestone hits this month (for star icon), best-effort
+  var html='<div class="stk-cal-grid">';
+  ['S','M','T','W','T','F','S'].forEach(function(d){html+='<div class="stk-cal-dow">'+d+'</div>';});
+  for(var i=0;i<startDow;i++) html+='<div></div>';
+  for(var day=1; day<=daysInMonth; day++){
+    var ds=y+'-'+(m+1)+'-'+day;
+    var status=cal[ds];
+    var cls='stk-cal-day';
+    if(day>today) cls+=' future';
+    else if(status==='done') cls+=' done';
+    else if(status==='freeze') cls+=' freeze';
+    else if(day<today) cls+=' missed';
+    if(day===today) cls+=' today';
+    html+='<div class="'+cls+'">'+day+'</div>';
+  }
+  html+='</div>';
+  html+='<div class="stk-cal-legend">'+
+    '<span><i class="stk-cal-dot" style="background:#4CAF50"></i>Completed</span>'+
+    '<span><i class="stk-cal-dot" style="background:#42A5F5"></i>Freeze used</span>'+
+    '<span><i class="stk-cal-dot" style="background:#FFEBEE;border:1px solid #C62828"></i>Missed</span>'+
+    '</div>';
+  grid.innerHTML=html;
+}
+
+/* ---------------- IN-APP REMINDER (not an OS push notification —
+   see integration guide for why) ---------------- */
+function stkReminderCardHTML(){
+  if(stkCal()[todayStr()]==='done')return '';
+  var msgs=['\uD83D\uDD25 Your streak is waiting!','\uD83D\uDCDA Read one story to keep your streak alive.','\uD83E\uDDE0 One Brain Gym game keeps your streak going.','\u2B50 Just one activity left today!'];
+  var msg=msgs[new Date().getDate()%msgs.length];
+  return '<div class="stk-reminder"><span>'+msg+'</span></div>';
+}
+
+/* ---------------- PARENT DASHBOARD STATS ---------------- */
+function stkDashboardStats(){
+  var cal=stkCal(); var now=new Date(); var y=now.getFullYear(), m=now.getMonth();
+  var daysInMonth=new Date(y,m+1,0).getDate(); var today=now.getDate();
+  var done=0, missed=0, freeze=0;
+  for(var day=1; day<=today; day++){
+    var st=cal[y+'-'+(m+1)+'-'+day];
+    if(st==='done')done++; else if(st==='freeze')freeze++; else missed++;
+  }
+  var consistency=today>0?Math.round((done+freeze)/today*100):0;
+  return {
+    streak: parseInt(g('gp_streak','0'))||0,
+    longest: parseInt(g('gp_longest_streak','0'))||0,
+    consistency: consistency, missedDays: missed, freezeDays: freeze, completedDays: done
+  };
+}
+function stkDashboardCardHTML(){
+  var st=stkDashboardStats();
+  return '<div class="p-sec"><h4>\uD83D\uDD25 STREAK CONSISTENCY</h4>'+
+    '<div style="display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:#333;">'+
+    '<span><b>'+st.streak+'</b> current</span><span><b>'+st.longest+'</b> longest</span>'+
+    '<span><b>'+st.consistency+'%</b> this month</span>'+
+    '<span><b>'+st.missedDays+'</b> missed</span>'+
+    (st.freezeDays?('<span><b>'+st.freezeDays+'</b> freeze used</span>'):'')+
+    '</div></div>';
+}
+
+/* ---------------- expose ---------------- */
+window.stkRecordActivity=stkRecordActivity;
+window.stkRenderCard=stkRenderCard;
+window.stkOpenCalendar=stkOpenCalendar;
+window.stkCloseCalendar=stkCloseCalendar;
+window.stkCloseCelebration=stkCloseCelebration;
+window.stkReminderCardHTML=stkReminderCardHTML;
+window.stkDashboardStats=stkDashboardStats;
+window.stkDashboardCardHTML=stkDashboardCardHTML;
+window.stkFreezesLeft=stkFreezesLeft;
+
+})();
+
  function gpStageAction(sec,idx,stage){if(window._gpStageActions&&window._gpStageActions[stage])window._gpStageActions[stage]();}
 
 
@@ -11149,7 +11429,9 @@ function gpDailyReward(){var t=new Date();var d=t.getFullYear()+'-'+(t.getMonth(
 
 var SUBLABEL={c6sst:'Social Science (C6)',c7sst:'Social Science (C7)',c7maths:'Maths (C7)',c7eng:'English (C7)',c7hin:'हिंदी (C7)',c7evs:'Science (C7)',c7gk:'GK (C7)',c7art:'Art (C7)',c7comp:'Computer (C7)',c6maths:'Maths (C6)',c6eng:'English (C6)',c6hin:'हिंदी (C6)',c6evs:'Science (C6)',c6gk:'GK (C6)',c6art:'Art (C6)',c6comp:'Computer (C6)',c5maths:'Maths (C5)',c5eng:'English (C5)',c5hin:'हिंदी (C5)',c5evs:'EVS (C5)',c5gk:'GK (C5)',c5art:'Art (C5)',c5comp:'Computer (C5)',c4maths:'Maths (C4)',c4eng:'English (C4)',c4hin:'हिंदी (C4)',c4evs:'EVS (C4)',c4gk:'GK (C4)',c4art:'Art (C4)',c4comp:'Computer (C4)',c3maths:'Maths (C3)',c3eng:'English (C3)',c3hin:'हिंदी (C3)',c3evs:'EVS (C3)',c3gk:'GK (C3)',c3art:'Art (C3)',c3comp:'Computer (C3)',c2maths:'Maths (C2)',c2eng:'English (C2)',c2hin:'हिंदी (C2)',c2evs:'EVS (C2)',c2gk:'GK (C2)',c2art:'Art (C2)',c2comp:'Computer (C2)',english:'English',maths:'Maths',evs:'EVS',hindi:'Hindi',poetry:'Poetry',gk:'GK',art:'Art'};
 function gpRenderHome(){var p=gpProfile();var av=document.getElementById('gpAvatar');if(av)av.textContent=p.avatar;var nm=document.getElementById('gpName');if(nm)nm.textContent=p.name;gpPills();var f=document.getElementById('gpFact');if(f){var doy=Math.floor((Date.now()-new Date(new Date().getFullYear(),0,0))/86400000);f.textContent=FACTS[doy%FACTS.length];}var r=gpJSON('gp_recent');var cc=document.getElementById('gpContinue');if(cc&&r&&allData[r.sec]){var lvl=(r.lvl>=maxLvOf(r.sec))?maxLvOf(r.sec):(r.lvl+1);cc.style.display='block';document.getElementById('gpContinueSub').textContent=(SUBLABEL[r.sec]||r.sec)+' \u2022 Level '+lvl;}else if(cc){cc.style.display='none';}renderBadges();var wn=document.getElementById('gpWelcomeName');if(wn)wn.textContent=p.name;gpRenderQuote();gpDailyGoal();gpRenderAchievement();if(typeof stRenderHomeSotd==='function')stRenderHomeSotd('stMainSotd');}
-
+if(typeof stkRenderCard==='function')stkRenderCard('stkHomeCard');
+var _stkRem=document.getElementById('stkReminderSlot');
+if(_stkRem && typeof stkReminderCardHTML==='function')_stkRem.innerHTML=stkReminderCardHTML();
 function gpInit(){gpDailyReward();gpRenderHome();if(!localStorage.getItem('gp_seen_hero')){var hw=document.getElementById('heroImageWrap');if(hw)hw.style.display='block';localStorage.setItem('gp_seen_hero','1');}}
 gpInit();
 

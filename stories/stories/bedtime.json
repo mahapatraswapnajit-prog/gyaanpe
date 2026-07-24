@@ -1,0 +1,49 @@
+{
+  "category": "bedtime",
+  "stories": [
+    {
+      "id": "bt001",
+      "title": "The Little Star Who Couldn't Sleep",
+      "emoji": "\u2B50",
+      "image": "",
+      "time": "3 min",
+      "difficulty": "easy",
+      "body": [
+        "High up in the night sky lived a tiny star named Tara. Every night, all the stars twinkled softly and then went to sleep. But little Tara could never sleep. She twinkled and twinkled all night long.",
+        "\"Why can't I sleep like the others?\" Tara wondered sadly. The gentle Moon noticed her worry and floated close. \"Little Tara, what is troubling you?\" he asked in a soft, silvery voice.",
+        "\"Everyone sleeps but me,\" said Tara. The Moon smiled. \"That is because you have a special job. You are the star that children look at when they cannot sleep. Your light tells them, do not be afraid, I am here with you.\"",
+        "Tara felt warm and happy. That very night, a little girl on Earth looked up, saw Tara's gentle glow, and fell peacefully asleep, feeling safe and loved.",
+        "From then on, Tara was proud to be the watching star. And do you know? Watching over sleepy children made Tara feel so peaceful that she began to drift into sweet dreams too. Goodnight, little Tara. Goodnight, dear reader."
+      ],
+      "quiz": [
+        {"q": "What was the little star's name?", "opts": ["Tara", "Luna", "Sunny", "Nova"], "a": 0},
+        {"q": "What could Tara not do?", "opts": ["Shine", "Sleep", "Fly", "Sing"], "a": 1},
+        {"q": "Who came to help Tara?", "opts": ["The Sun", "The Moon", "A cloud", "A comet"], "a": 1},
+        {"q": "What was Tara's special job?", "opts": ["To watch over sleepy children", "To make it rain", "To wake the sun", "To count stars"], "a": 0},
+        {"q": "How did Tara feel at the end?", "opts": ["Angry", "Peaceful and proud", "Scared", "Bored"], "a": 1}
+      ]
+    },
+    {
+      "id": "bt002",
+      "title": "Mama Owl's Lullaby",
+      "emoji": "\uD83E\uDD89",
+      "image": "",
+      "time": "3 min",
+      "difficulty": "easy",
+      "body": [
+        "In a cozy hole inside a big old oak tree lived Mama Owl and her three little owlets \u2014 Fluffy, Puffy, and Sleepy. Every night when the forest grew dark, it was time for bed.",
+        "But the three owlets were not sleepy at all. \"We want to play!\" hooted Fluffy. \"We want to fly!\" hooted Puffy. Only little Sleepy yawned quietly.",
+        "Mama Owl wrapped her soft wings around them and began to hum a gentle lullaby. \"Hush now, my darlings, the day is done, the moon is up, and gone is the sun. Close your eyes, my little dears, dreams are near, dry your tears.\"",
+        "As Mama Owl hummed, Fluffy's eyes grew heavy. Puffy snuggled close. And Sleepy was already fast asleep, dreaming of floating through soft, white clouds.",
+        "Soon all three owlets were sleeping peacefully under Mama Owl's warm wings. And Mama Owl watched over them all night, full of love. The forest was quiet, and everyone slept safe and sound."
+      ],
+      "quiz": [
+        {"q": "Where did Mama Owl live?", "opts": ["In a big oak tree", "In a cave", "By the river", "On a mountain"], "a": 0},
+        {"q": "How many owlets did she have?", "opts": ["Two", "Three", "Four", "Five"], "a": 1},
+        {"q": "Which owlet was already sleepy?", "opts": ["Fluffy", "Puffy", "Sleepy", "None"], "a": 2},
+        {"q": "What did Mama Owl do to help them sleep?", "opts": ["Told a joke", "Hummed a lullaby", "Flew away", "Turned on a light"], "a": 1},
+        {"q": "How did the owlets feel at the end?", "opts": ["Scared", "Safe and peaceful", "Hungry", "Angry"], "a": 1}
+      ]
+    }
+  ]
+}

@@ -763,6 +763,9 @@ transform:scale(0.96);filter:brightness(0.97);
 .stk-reminder{background:#FFF3E0;border-left:4px solid #FF9800;border-radius:12px;padding:10px 14px;font-size:12px;color:#5D4037;margin:8px 0;display:flex;align-items:center;justify-content:space-between;gap:8px;}
 .stk-reminder button{background:none;border:none;font-size:16px;cursor:pointer;color:#999;}
 .stk-freeze-toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#42A5F5;color:#fff;padding:12px 18px;border-radius:24px;z-index:100000;font-size:13px;box-shadow:0 4px 14px rgba(0,0,0,.3);}
+</style> ---- */
+.cc-tag.gp-locked{background:linear-gradient(135deg,#5E35B1,#3949AB)!important;color:#fff!important;}
+
 
 </style>
 </head>
@@ -8237,6 +8240,25 @@ window.stkDashboardCardHTML=stkDashboardCardHTML;
 window.stkFreezesLeft=stkFreezesLeft;
 
 })();
+ }catch(e){}
+  }
+  window.gpApplyClassLocks = gpApplyClassLocks;gpStageAction ---- */
+(function(){
+  function gpApplyClassLocks(){
+    try{
+      var premium = typeof isPremium==='function' ? isPremium() : false;
+      ['c5','c6','c7'].forEach(function(cls){
+        var chip = document.querySelector('.class-chip.'+cls+' .cc-tag');
+        if(!chip) return;
+        if(premium){
+          chip.innerHTML = '\u2B50 NEW';
+          chip.classList.remove('gp-locked');
+        }else{
+          chip.innerHTML = '\uD83D\uDD12 PRO';
+          chip.classList.add('gp-locked');
+        }
+      });
+})();
 
  function gpStageAction(sec,idx,stage){if(window._gpStageActions&&window._gpStageActions[stage])window._gpStageActions[stage]();}
 
@@ -11428,6 +11450,7 @@ function gpDailyReward(){var t=new Date();var d=t.getFullYear()+'-'+(t.getMonth(
 
 var SUBLABEL={c6sst:'Social Science (C6)',c7sst:'Social Science (C7)',c7maths:'Maths (C7)',c7eng:'English (C7)',c7hin:'हिंदी (C7)',c7evs:'Science (C7)',c7gk:'GK (C7)',c7art:'Art (C7)',c7comp:'Computer (C7)',c6maths:'Maths (C6)',c6eng:'English (C6)',c6hin:'हिंदी (C6)',c6evs:'Science (C6)',c6gk:'GK (C6)',c6art:'Art (C6)',c6comp:'Computer (C6)',c5maths:'Maths (C5)',c5eng:'English (C5)',c5hin:'हिंदी (C5)',c5evs:'EVS (C5)',c5gk:'GK (C5)',c5art:'Art (C5)',c5comp:'Computer (C5)',c4maths:'Maths (C4)',c4eng:'English (C4)',c4hin:'हिंदी (C4)',c4evs:'EVS (C4)',c4gk:'GK (C4)',c4art:'Art (C4)',c4comp:'Computer (C4)',c3maths:'Maths (C3)',c3eng:'English (C3)',c3hin:'हिंदी (C3)',c3evs:'EVS (C3)',c3gk:'GK (C3)',c3art:'Art (C3)',c3comp:'Computer (C3)',c2maths:'Maths (C2)',c2eng:'English (C2)',c2hin:'हिंदी (C2)',c2evs:'EVS (C2)',c2gk:'GK (C2)',c2art:'Art (C2)',c2comp:'Computer (C2)',english:'English',maths:'Maths',evs:'EVS',hindi:'Hindi',poetry:'Poetry',gk:'GK',art:'Art'};
 function gpRenderHome(){var p=gpProfile();var av=document.getElementById('gpAvatar');if(av)av.textContent=p.avatar;var nm=document.getElementById('gpName');if(nm)nm.textContent=p.name;gpPills();var f=document.getElementById('gpFact');if(f){var doy=Math.floor((Date.now()-new Date(new Date().getFullYear(),0,0))/86400000);f.textContent=FACTS[doy%FACTS.length];}var r=gpJSON('gp_recent');var cc=document.getElementById('gpContinue');if(cc&&r&&allData[r.sec]){var lvl=(r.lvl>=maxLvOf(r.sec))?maxLvOf(r.sec):(r.lvl+1);cc.style.display='block';document.getElementById('gpContinueSub').textContent=(SUBLABEL[r.sec]||r.sec)+' \u2022 Level '+lvl;}else if(cc){cc.style.display='none';}renderBadges();var wn=document.getElementById('gpWelcomeName');if(wn)wn.textContent=p.name;gpRenderQuote();gpDailyGoal();gpRenderAchievement();if(typeof stRenderHomeSotd==='function')stRenderHomeSotd('stMainSotd');}
+ if(typeof gpApplyClassLocks==='function')gpApplyClassLocks();
 if(typeof stkRenderCard==='function')stkRenderCard('stkHomeCard');
 var _stkRem=document.getElementById('stkReminderSlot');
 if(_stkRem && typeof stkReminderCardHTML==='function')_stkRem.innerHTML=stkReminderCardHTML();

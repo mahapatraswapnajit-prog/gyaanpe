@@ -1,0 +1,71 @@
+{
+  "category": "moral",
+  "stories": [
+    {
+      "id": "mo001",
+      "title": "The Two Friends and the Bear",
+      "emoji": "\uD83D\uDC3B",
+      "image": "",
+      "time": "3 min",
+      "difficulty": "easy",
+      "body": [
+        "Once, two friends named Aman and Rohit were walking through a forest. They had promised to always help each other, no matter what.",
+        "Suddenly, a big bear appeared on the path! Aman was quick. He climbed up a tall tree at once, forgetting all about his friend. Rohit did not know how to climb trees.",
+        "Rohit remembered that bears do not touch things that seem dead. So he lay down on the ground, held his breath, and stayed very still. The bear came close, sniffed his ears, and walked away, thinking he was lifeless.",
+        "When the bear was gone, Aman climbed down and laughed, \"What did the bear whisper in your ear?\" Rohit replied calmly, \"The bear told me to stay away from friends who leave me alone in times of danger.\"",
+        "Aman felt ashamed. A true friend is one who stays with you in difficult times, not one who runs away to save only himself."
+      ],
+      "quiz": [
+        {"q": "What did the two friends promise?", "opts": ["To always help each other", "To never talk", "To race", "To fight"], "a": 0},
+        {"q": "What appeared on the path?", "opts": ["A tiger", "A bear", "A snake", "A wolf"], "a": 1},
+        {"q": "What did Rohit do?", "opts": ["Ran away", "Climbed a tree", "Lay still like he was dead", "Shouted"], "a": 2},
+        {"q": "What did the bear think about Rohit?", "opts": ["He was sleeping", "He was lifeless", "He was playing", "He was food"], "a": 1},
+        {"q": "Who is a true friend?", "opts": ["One who runs away", "One who stays in hard times", "One who is fast", "One who is rich"], "a": 1}
+      ]
+    },
+    {
+      "id": "mo002",
+      "title": "The Golden Touch",
+      "emoji": "\u2728",
+      "image": "",
+      "time": "4 min",
+      "difficulty": "medium",
+      "body": [
+        "There was once a king named Veer who loved gold more than anything. He had rooms full of gold coins, yet he always wanted more.",
+        "One day, a kind fairy appeared and said, \"I will grant you one wish.\" Without thinking, the king said, \"Let everything I touch turn to gold!\" The fairy smiled sadly and granted his wish.",
+        "At first, the king was overjoyed. He touched a chair \u2014 gold! A table \u2014 gold! But then he grew hungry. He picked up an apple, and it turned into hard gold. He touched water, and it became solid gold. He could not eat or drink!",
+        "Worst of all, when his little daughter ran to hug him, she too turned into a cold golden statue. The king wept bitterly. \"I have been so foolish! Gold is not more precious than love and life.\"",
+        "The kind fairy returned and took back the golden touch. The king hugged his living daughter and gave away most of his gold to the poor. He had learned that the real treasures in life are not made of gold."
+      ],
+      "quiz": [
+        {"q": "What did King Veer love most?", "opts": ["Food", "Gold", "Music", "Animals"], "a": 1},
+        {"q": "What was his wish?", "opts": ["To fly", "Everything he touched to turn to gold", "To live forever", "To be strong"], "a": 1},
+        {"q": "What happened when he touched the apple?", "opts": ["It turned to gold", "It vanished", "It grew bigger", "Nothing"], "a": 0},
+        {"q": "Who turned into a golden statue?", "opts": ["The fairy", "His daughter", "His horse", "A servant"], "a": 1},
+        {"q": "What did the king learn?", "opts": ["Gold is everything", "Love and life are more precious than gold", "To wish again", "To hide gold"], "a": 1}
+      ]
+    },
+    {
+      "id": "mo003",
+      "title": "The Honest Woodcutter",
+      "emoji": "\uD83E\uDE93",
+      "image": "",
+      "time": "3 min",
+      "difficulty": "easy",
+      "body": [
+        "A poor woodcutter named Hari worked hard every day, chopping wood near a deep river. One afternoon, his old iron axe slipped from his hands and fell splash! into the river.",
+        "Hari sat down and cried, for that axe was his only way to earn food. Suddenly, a shining river spirit rose from the water. \"Why do you weep?\" she asked kindly. Hari told her about his lost axe.",
+        "The spirit dived in and came back holding a golden axe. \"Is this yours?\" she asked. \"No,\" said Hari honestly, \"mine was only iron.\" She dived again and brought a silver axe. \"No, that is not mine either,\" said Hari.",
+        "Finally she brought his old iron axe. \"Yes! That is mine!\" Hari cried with joy. The spirit smiled. \"Because you were so honest, I will give you all three axes as a gift.\"",
+        "Hari thanked her and went home rich, having learned that honesty is always rewarded, sooner or later."
+      ],
+      "quiz": [
+        {"q": "What was Hari's job?", "opts": ["Farmer", "Woodcutter", "Fisherman", "Teacher"], "a": 1},
+        {"q": "What fell into the river?", "opts": ["His hat", "His axe", "His shoe", "His bag"], "a": 1},
+        {"q": "Who came out of the river?", "opts": ["A fish", "A river spirit", "A crocodile", "A boat"], "a": 1},
+        {"q": "Which axe did Hari say was his?", "opts": ["Golden", "Silver", "Iron", "Wooden"], "a": 2},
+        {"q": "What did Hari's honesty bring him?", "opts": ["A punishment", "All three axes", "Nothing", "A scolding"], "a": 1}
+      ]
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "category": "folk",
+  "stories": [
+    {
+      "id": "fk001",
+      "title": "The Magic Pot of Bengal",
+      "emoji": "\uD83C\uDFED",
+      "image": "",
+      "time": "4 min",
+      "difficulty": "medium",
+      "body": [
+        "In a small village in Bengal lived a poor but kind farmer named Nitai. He had very little, but he always shared his food with anyone who was hungry.",
+        "One day, while ploughing his field, his plough struck something hard. Nitai dug it out and found a large brass pot. \"Perhaps I can sell it,\" he thought, and dropped a mango inside to carry it home.",
+        "To his surprise, when he looked inside, there were now TWO mangoes! He dropped in a coin, and there were two coins! It was a magic pot that doubled anything placed inside it!",
+        "Nitai used the pot wisely. He doubled grains to feed the hungry, doubled medicines for the sick, and helped his whole village. He never became greedy, taking only what he needed.",
+        "The greedy village landlord heard of it and stole the pot. But in his hurry, he fell into a well while carrying it! The villagers found the pot and returned it to Nitai, saying, \"Only a kind heart deserves such a gift.\" And so the magic pot stayed with the one who used it for good."
+      ],
+      "quiz": [
+        {"q": "Where does this story take place?", "opts": ["Bengal", "Punjab", "Kerala", "Assam"], "a": 0},
+        {"q": "What did Nitai find in his field?", "opts": ["Gold", "A magic brass pot", "A snake", "A treasure map"], "a": 1},
+        {"q": "What did the pot do?", "opts": ["Made things vanish", "Doubled anything inside", "Cooked food", "Sang songs"], "a": 1},
+        {"q": "How did Nitai use the pot?", "opts": ["Only for himself", "To help his village", "To become king", "He hid it"], "a": 1},
+        {"q": "Who deserves such a gift?", "opts": ["A greedy person", "A kind heart", "A rich person", "A strong person"], "a": 1}
+      ]
+    }
+  ]
+}

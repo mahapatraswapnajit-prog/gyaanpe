@@ -1,0 +1,49 @@
+{
+  "category": "akbar",
+  "stories": [
+    {
+      "id": "ak001",
+      "title": "Birbal and the Line",
+      "emoji": "\uD83D\uDC51",
+      "image": "",
+      "time": "3 min",
+      "difficulty": "medium",
+      "body": [
+        "One day, Emperor Akbar was in a playful mood. He drew a line on the floor of his court and asked all his ministers, \"Can any of you make this line shorter \u2014 but without erasing any part of it?\"",
+        "The ministers scratched their heads. How could a line become shorter without rubbing any of it away? It seemed impossible! One by one, they gave up.",
+        "Then Birbal stepped forward with a calm smile. He did not touch the emperor's line at all. Instead, he simply drew a much longer line right next to it.",
+        "Everyone looked, and sure enough \u2014 next to the new longer line, the emperor's line now looked shorter, even though nothing had been erased!",
+        "Akbar clapped with delight. \"Wonderful, Birbal! You did not remove anything, yet you made my line smaller.\" Birbal bowed and said, \"Your Majesty, to make something look smaller, we need not destroy it \u2014 we only have to build something greater beside it.\" The whole court smiled at Birbal's wisdom."
+      ],
+      "quiz": [
+        {"q": "What did Akbar draw on the floor?", "opts": ["A circle", "A line", "A star", "A square"], "a": 1},
+        {"q": "What was the challenge?", "opts": ["Erase the line", "Make it shorter without erasing", "Colour the line", "Copy the line"], "a": 1},
+        {"q": "What did Birbal do?", "opts": ["Rubbed the line", "Drew a longer line beside it", "Ignored it", "Cut it"], "a": 1},
+        {"q": "How did the first line look then?", "opts": ["Longer", "Shorter", "Same", "Gone"], "a": 1},
+        {"q": "What is the lesson?", "opts": ["Destroy to win", "Build something greater instead of destroying", "Never draw lines", "Always erase"], "a": 1}
+      ]
+    },
+    {
+      "id": "ak002",
+      "title": "The Pot of Wisdom",
+      "emoji": "\uD83C\uDFFA",
+      "image": "",
+      "time": "3 min",
+      "difficulty": "medium",
+      "body": [
+        "A rich but foolish merchant came to Akbar's court. \"Your Majesty,\" he boasted, \"I have heard Birbal is very wise. But I have travelled the world and learned much. Let me test him!\"",
+        "The merchant handed Birbal an empty pot. \"Fill this pot with something, and I must not be able to take it out, pour it out, or empty it in any way. If you can do it, I will accept you are wiser than me.\"",
+        "The court fell silent. What could fill a pot yet never be taken out? Birbal thought for only a moment. He walked to the garden, dug a small hole, and buried the pot deep in the earth, leaving only the rim showing.",
+        "Then he poured water into the pot until it overflowed. \"There,\" said Birbal. \"The pot is full of water, but since it is buried in the ground, you cannot lift it, pour it, or tip it over to empty it.\"",
+        "The merchant was amazed and bowed his head. \"You are indeed the wisest man I have met, Birbal.\" Akbar laughed heartily, proud of his clever minister. True wisdom, he knew, was not about how far you travel, but how well you think."
+      ],
+      "quiz": [
+        {"q": "Who came to test Birbal?", "opts": ["A soldier", "A rich merchant", "A farmer", "A king"], "a": 1},
+        {"q": "What did the merchant give Birbal?", "opts": ["A pot", "A coin", "A book", "A sword"], "a": 0},
+        {"q": "What was the challenge?", "opts": ["Break the pot", "Fill it so nothing can be taken out", "Sell the pot", "Hide the pot"], "a": 1},
+        {"q": "How did Birbal solve it?", "opts": ["Buried the pot and filled it with water", "Threw it away", "Filled it with sand", "Left it empty"], "a": 0},
+        {"q": "What is true wisdom about?", "opts": ["Travelling far", "Thinking well", "Being rich", "Being loud"], "a": 1}
+      ]
+    }
+  ]
+}

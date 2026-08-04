@@ -12130,5 +12130,52 @@ if ('serviceWorker' in navigator) {
   }catch(e){ console.error('[GyaanPe FTE] init error', e); }
 })();
 </script>
+ <!-- ==================== LEARNING VIDEOS PAGE ==================== -->
+<div id="gpvPage">
+  <div class="gpv-page-head">
+    <button class="gpv-page-back" onclick="gpvClosePage()">&#8592; Back</button>
+    <div class="gpv-page-title">&#127916; Learning Videos</div>
+  </div>
+
+  <!-- default view: spotlight + continue + categories -->
+  <div id="gpvMainView">
+    <div class="gpv-spotlight-row" id="gpvSpotlightRow"></div>
+
+    <div id="gpvContinueSection" style="display:none;">
+      <div class="gpv-section-head"><span class="gpv-h-emoji">&#9654;&#65039;</span><h4>Continue Watching</h4></div>
+      <div class="gpv-cw-row" id="gpvContinueRow"></div>
+    </div>
+
+    <div class="gpv-section-head"><span class="gpv-h-emoji">&#128218;</span><h4>All Categories</h4></div>
+    <div class="gpv-cat-grid" id="gpvCatGrid"></div>
+  </div>
+
+  <!-- video list view (opens when a category is tapped) -->
+  <div id="gpvListView">
+    <button class="gpv-page-back" onclick="gpvCloseList()" style="margin-bottom:12px;">&#8592; Categories</button>
+    <div class="gpv-page-title" id="gpvListTitle" style="font-size:20px;margin-bottom:12px;">Category</div>
+    <div id="gpvVideoList"></div>
+  </div>
+</div>
+
+<!-- PLAYER MODAL -->
+<div id="gpvPlayer">
+  <div class="gpv-player-box">
+    <iframe id="gpvIframe" src="" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+  </div>
+  <div class="gpv-player-title" id="gpvPlayerTitle">Video</div>
+  <button class="gpv-player-close" onclick="gpvClosePlayer()">Close</button>
+</div>
+
+<!-- PAYWALL MODAL -->
+<div id="gpvPaywall">
+  <div class="gpv-paywall-box">
+    <div class="gpv-pw-emoji">&#11088;</div>
+    <h3>Premium Video</h3>
+    <p>Unlock all Learning Videos, rhymes, and stories with GyaanPe Premium.</p>
+    <button class="gpv-pw-btn" onclick="gpvGoPremium()">Unlock Premium</button>
+    <button class="gpv-pw-cancel" onclick="gpvClosePaywall()">Maybe later</button>
+  </div>
+</div>
 </body>
 </html>

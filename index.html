@@ -12177,5 +12177,191 @@ if ('serviceWorker' in navigator) {
     <button class="gpv-pw-cancel" onclick="gpvClosePaywall()">Maybe later</button>
   </div>
 </div>
+ <script>
+(function(){
+  try{
+    var GPV_URL = 'https://zapzone-98727-default-rtdb.firebaseio.com/gyaanpeVideos.json';
+    var GPV = { categories:[], videos:{}, storyOfDay:null, todaysVideo:null };
+    var GPV_LOADED = false;
+
+    function gpvIsPremium(){ try{ return (typeof isPremium==='function') ? isPremium() : false; }catch(e){ return false; } }
+    function gpvGetProgress(){ try{ return JSON.parse(localStorage.getItem('gpv_progress')||'{}'); }catch(e){ return {}; } }
+    function gpvGetContinue(){ try{ return JSON.parse(localStorage.getItem('gpv_continue')||'[]'); }catch(e){ return []; } }
+    function gpvSetContinue(c){ try{ localStorage.setItem('gpv_continue', JSON.stringify(c)); }catch(e){} }
+
+    // Load data from Firebase (same fetch pattern as your quiz/challenge)
+    function gpvLoad(cb){
+      if(GPV_LOADED){ cb&&cb(); return; }
+      fetch(GPV_URL).then(function(r){ return r.json(); }).then(function(d){
+        if(d){
+          // categories: object keyed by id -> array sorted by order
+          var cats=[];
+          if(d.categories){
+            Object.keys(d.categories).forEach(function(id){
+              var c=d.categories[id]; c.id=id; cats.push(c);
+            });
+            cats.sort(function(a,b){ return (a.order||0)-(b.order||0); });
+          }
+          GPV.categories=cats;
+          // videos: object per category keyed by vid -> array sorted by order
+          var vids={};
+          if(d.videos){
+            Object.keys(d.videos).forEach(function(cid){
+              var arr=[];
+              Object.keys(d.videos[cid]).forEach(function(vk){
+                arr.push(d.videos[cid][vk]);
+              });
+              arr.sort(function(a,b){ return (a.order||0)-(b.order||0); });
+              vids[cid]=arr;
+            });
+          }
+          GPV.videos=vids;
+          GPV.storyOfDay=d.storyOfDay||null;
+          GPV.todaysVideo=d.todaysVideo||null;
+        }
+        GPV_LOADED=true; cb&&cb();
+      }).catch(function(e){ console.error('[GPV] load error',e); GPV_LOADED=true; cb&&cb(); });
+    }
+
+    // ---- Home preview section (auto-injected) ----
+    window.gpvRenderHomePreview = function(){
+      var mount=document.getElementById('gpvHomeMount');
+      if(!mount) return;
+      gpvLoad(function(){
+        var html='<div class="gpv-home-section"><div class="gpv-home-head">'+
+          '<div class="gpv-hh-left"><span class="gpv-hh-emoji">\uD83C\uDFAC</span><h3>Learning Videos</h3></div>'+
+          '<span class="gpv-see-all" onclick="gpvOpenPage()">See all \u2192</span></div>'+
+          '<div class="gpv-home-scroll">';
+        GPV.categories.forEach(function(cat){
+          var count=(GPV.videos[cat.id]||[]).length;
+          var locked=(cat.premium && !gpvIsPremium());
+          html+='<div class="gpv-home-card" style="background:'+cat.color+'" onclick="gpvOpenPage()">'+
+            (locked?'<div class="gpv-hc-lock">\uD83D\uDD12</div>':'')+
+            '<div class="gpv-hc-emoji">'+cat.emoji+'</div>'+
+            '<div><div class="gpv-hc-title">'+cat.title+'</div>'+
+            '<div class="gpv-hc-count">'+count+' Videos</div></div></div>';
+        });
+        html+='</div></div>';
+        mount.innerHTML=html;
+      });
+    };
+
+    // ---- Open / close full page ----
+    window.gpvOpenPage = function(){
+      gpvLoad(function(){
+        gpvRenderSpotlight(); gpvRenderContinue(); gpvRenderCategories();
+        document.getElementById('gpvMainView').style.display='block';
+        document.getElementById('gpvListView').classList.remove('gpv-show');
+        document.getElementById('gpvPage').classList.add('gpv-show');
+        window.scrollTo(0,0);
+      });
+    };
+    window.gpvClosePage = function(){ document.getElementById('gpvPage').classList.remove('gpv-show'); };
+
+    function gpvRenderSpotlight(){
+      var row=document.getElementById('gpvSpotlightRow'); row.innerHTML='';
+      if(GPV.storyOfDay) row.appendChild(gpvSpotCard('Story of the Day','\uD83D\uDCD6',GPV.storyOfDay,'linear-gradient(135deg,#5E35B1,#3949AB)'));
+      if(GPV.todaysVideo) row.appendChild(gpvSpotCard("Today's Video",'\uD83C\uDF1F',GPV.todaysVideo,'linear-gradient(135deg,#FF6F00,#FFB300)'));
+    }
+    function gpvSpotCard(tag,emoji,v,color){
+      var d=document.createElement('div'); d.className='gpv-spotlight'; d.style.background=color;
+      d.onclick=function(){ gpvVideoClick(v,(!v.free&&!gpvIsPremium())); };
+      d.innerHTML='<div class="gpv-sp-tag">'+tag+'</div><div class="gpv-sp-emoji">'+emoji+'</div>'+
+        '<div class="gpv-sp-title">'+v.title+'</div><div class="gpv-sp-sub">'+(v.duration||'')+'</div>';
+      return d;
+    }
+
+    function gpvRenderContinue(){
+      var cont=gpvGetContinue(); var sec=document.getElementById('gpvContinueSection'); var row=document.getElementById('gpvContinueRow');
+      if(!cont.length){ sec.style.display='none'; return; }
+      sec.style.display='block'; row.innerHTML='';
+      cont.slice(0,10).forEach(function(v){
+        var card=document.createElement('div'); card.className='gpv-cw-card';
+        card.onclick=function(){ gpvOpenPlayer(v); };
+        var thumb='https://img.youtube.com/vi/'+v.youtubeId+'/hqdefault.jpg';
+        card.innerHTML='<div class="gpv-cw-thumb" style="background-image:url(\''+thumb+'\')"></div>'+
+          '<div class="gpv-cw-info"><h5>'+v.title+'</h5><div class="gpv-cw-bar"><div class="gpv-cw-fill" style="width:'+(v.progress||30)+'%"></div></div></div>';
+        row.appendChild(card);
+      });
+    }
+
+    function gpvRenderCategories(){
+      var grid=document.getElementById('gpvCatGrid'); grid.innerHTML=''; var progress=gpvGetProgress();
+      GPV.categories.forEach(function(cat){
+        var vids=GPV.videos[cat.id]||[]; var total=vids.length;
+        var watched=(progress[cat.id]&&progress[cat.id].watched)?progress[cat.id].watched:0;
+        var pct=total?Math.round((watched/total)*100):0;
+        var locked=(cat.premium&&!gpvIsPremium());
+        var r=16,c=2*Math.PI*r,off=c-(pct/100)*c;
+        var card=document.createElement('div'); card.className='gpv-cat-card'; card.style.background=cat.color;
+        card.onclick=function(){ gpvOpenCategory(cat.id,cat.title,locked); };
+        card.innerHTML=(cat.isNew?'<div class="gpv-cat-new">NEW</div>':'')+
+          '<div class="gpv-cat-badge '+(cat.premium?'gpv-badge-premium':'gpv-badge-free')+'">'+(cat.premium?'\uD83D\uDD12 PREMIUM':'FREE')+'</div>'+
+          '<div class="gpv-cat-emoji">'+cat.emoji+'</div>'+
+          '<div><div class="gpv-cat-title">'+cat.title+'</div><div class="gpv-cat-count">'+total+' Videos</div></div>'+
+          '<div class="gpv-ring-wrap"><svg width="44" height="44" class="gpv-ring">'+
+          '<circle class="gpv-ring-bg" cx="22" cy="22" r="'+r+'"></circle>'+
+          '<circle class="gpv-ring-fg" cx="22" cy="22" r="'+r+'" stroke-dasharray="'+c+'" stroke-dashoffset="'+off+'"></circle>'+
+          '<text class="gpv-ring-txt" x="22" y="25">'+watched+'/'+total+'</text></svg></div>';
+        grid.appendChild(card);
+      });
+    }
+
+    function gpvOpenCategory(catId,catTitle,locked){
+      if(locked){ gpvOpenPaywall(); return; }
+      document.getElementById('gpvMainView').style.display='none';
+      document.getElementById('gpvListView').classList.add('gpv-show');
+      document.getElementById('gpvListTitle').textContent=catTitle;
+      var list=document.getElementById('gpvVideoList'); list.innerHTML='';
+      (GPV.videos[catId]||[]).forEach(function(v){
+        var vlocked=(!v.free&&!gpvIsPremium());
+        var card=document.createElement('div'); card.className='gpv-video-card';
+        card.onclick=function(){ gpvVideoClick(v,vlocked); };
+        var thumb='https://img.youtube.com/vi/'+v.youtubeId+'/hqdefault.jpg';
+        card.innerHTML='<div class="gpv-thumb" style="background-image:url(\''+thumb+'\')"></div>'+
+          '<div class="gpv-play-badge">&#9654;</div>'+
+          (v.isNew?'<div class="gpv-new-badge2">NEW</div>':'')+
+          (vlocked?'<div class="gpv-lock-badge">&#128274; PRO</div>':(v.free?'<div class="gpv-free-badge">FREE</div>':''))+
+          '<div class="gpv-video-info"><h3>'+v.title+'</h3><div class="gpv-meta">'+(v.duration||'')+'</div></div>';
+        list.appendChild(card);
+      });
+      window.scrollTo(0,0);
+    }
+    window.gpvCloseList=function(){
+      document.getElementById('gpvListView').classList.remove('gpv-show');
+      document.getElementById('gpvMainView').style.display='block';
+    };
+
+    function gpvVideoClick(v,locked){ if(locked){ gpvOpenPaywall(); return; } gpvOpenPlayer(v); }
+    function gpvOpenPlayer(v){
+      var iframe=document.getElementById('gpvIframe');
+      iframe.src='https://www.youtube.com/embed/'+v.youtubeId+'?autoplay=1&rel=0';
+      document.getElementById('gpvPlayerTitle').textContent=v.title;
+      document.getElementById('gpvPlayer').classList.add('gpv-show');
+      var cont=gpvGetContinue().filter(function(x){return x.youtubeId!==v.youtubeId;});
+      cont.unshift({title:v.title,youtubeId:v.youtubeId,duration:v.duration,free:v.free,progress:30});
+      gpvSetContinue(cont.slice(0,10));
+    }
+    window.gpvClosePlayer=function(){
+      document.getElementById('gpvIframe').src='';
+      document.getElementById('gpvPlayer').classList.remove('gpv-show');
+    };
+
+    window.gpvOpenPaywall=function(){ document.getElementById('gpvPaywall').classList.add('gpv-show'); };
+    window.gpvClosePaywall=function(){ document.getElementById('gpvPaywall').classList.remove('gpv-show'); };
+    window.gpvGoPremium=function(){
+      gpvClosePaywall();
+      try{ if(typeof gpBuy==='function'){ gpBuy('gyaanpe_premium'); return; } }catch(e){}
+      try{ if(window.GyaanPePremium && typeof window.GyaanPePremium.showPaywall==='function'){ window.GyaanPePremium.showPaywall(); return; } }catch(e){}
+      console.log('[GPV] premium purchase entry not found');
+    };
+
+    // auto-render home preview once DOM is ready
+    if(document.readyState==='loading'){ document.addEventListener('DOMContentLoaded', gpvRenderHomePreview); }
+    else { gpvRenderHomePreview(); }
+
+  }catch(e){ console.error('[GPV] init error', e); }
+})();
+</script>
 </body>
 </html>

@@ -898,6 +898,9 @@ transform:scale(0.96);filter:brightness(0.97);
   .gpv-paywall-box p{font-size:13px;color:#666;margin-bottom:18px;line-height:1.5;}
   .gpv-pw-btn{background:linear-gradient(135deg,#FF6F00,#FFA000);color:#fff;border:none;border-radius:14px;padding:13px 20px;font-weight:800;font-size:15px;cursor:pointer;width:100%;margin-bottom:10px;}
   .gpv-pw-cancel{background:none;border:none;color:#999;font-size:13px;cursor:pointer;}
+ #screenEnglish30{position:fixed;inset:0;background:#FFF9F0;z-index:99998;overflow-y:auto;display:none;}
+#screenEnglish30.gp-show{display:block;}
+#eng30Back{position:sticky;top:0;background:#fff;border:none;padding:12px 16px;font-weight:800;color:#1A237E;cursor:pointer;font-size:14px;}
 /* ===== MERGE:CSS — paste inside your existing <style> block in index.html ===== */
 .eng30-wrap{font-family:'Segoe UI',Roboto,sans-serif;max-width:480px;margin:0 auto;padding:16px;background:#fdfaf5;min-height:100vh;box-sizing:border-box}
 .eng30-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
@@ -996,7 +999,13 @@ function eng30MarkComplete(day){
   eng30SaveState(s);
   eng30Render();
 }
-
+function openEnglish30(){
+  document.getElementById('screenEnglish30').classList.add('gp-show');
+  eng30Render();
+}
+function closeEnglish30(){
+  document.getElementById('screenEnglish30').classList.remove('gp-show');
+}
 /* ---- 3. Render ---- */
 function eng30Render(){
   const root = document.getElementById('eng30Root');
@@ -1177,6 +1186,10 @@ function eng30OpenLesson(day){
  <div onclick="openStoriesHome()" style="background:linear-gradient(135deg,#7C4DFF,#448AFF);border-radius:16px;padding:16px;color:#fff;text-align:center;cursor:pointer;margin:10px 0;box-shadow:0 4px 12px rgba(124,77,255,.3);"><div style="font-size:32px;">&#128218;</div><div style="font-family:'Anton',sans-serif;font-size:16px;margin-top:4px;">KIDS STORIES</div><div style="font-size:11px;opacity:.9;">Read &amp; earn XP, coins, badges!</div></div>
 <div style="font-family:'Anton',sans-serif;font-size:17px;color:#4E2600;">&#11088; QUIZ OF THE DAY</div>
 <div id="dqStatus" style="font-size:11px;font-weight:700;color:#6D4C00;margin-top:2px;">Tap to play today's special question!</div>
+</div>
+ <div onclick="openEnglish30()" style="background:linear-gradient(135deg,#FF9F43,#EE5A24);border-radius:16px;padding:16px;color:#fff;text-align:center;cursor:pointer;margin:10px 0;">
+  <div style="font-family:'Anton',sans-serif;font-size:17px;">&#128218; LEARN ENGLISH IN 30 DAYS</div>
+  <div style="font-size:11px;font-weight:700;margin-top:2px;">Daily lessons &middot; Grammar &middot; Speaking practice</div>
 </div>
 <div id="dailyQuizBox" style="display:none;background:white;border:3px solid #FF8F00;border-radius:16px;padding:16px;margin:10px 0;text-align:center;">
 <div style="font-family:'Anton',sans-serif;font-size:13px;color:#FF8F00;margin-bottom:6px;">&#11088; QUIZ OF THE DAY</div>
@@ -12515,5 +12528,9 @@ if ('serviceWorker' in navigator) {
   }catch(e){ console.error('[GPV] init error', e); }
 })();
 </script>
+ <div id="screenEnglish30">
+  <button id="eng30Back" onclick="closeEnglish30()">← Back</button>
+  <div id="eng30Root" class="eng30-wrap"></div>
+</div>
 </body>
 </html>

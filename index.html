@@ -1015,7 +1015,12 @@ function closeEnglish30(){
     var request = new PaymentRequest([{
       supportedMethods: 'https://play.google.com/billing',
       data: { sku: 'english_30days_course' }
-    }]);
+    }], {
+      total: {
+        label: 'Learn English in 30 Days',
+        amount: { currency: 'INR', value: '0' }
+      }
+    });
     var response = await request.show();
     await response.complete('success');
     eng30OnPurchaseSuccess();

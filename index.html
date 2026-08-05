@@ -1006,6 +1006,23 @@ function openEnglish30(){
 function closeEnglish30(){
   document.getElementById('screenEnglish30').classList.remove('gp-show');
 }
+ async function eng30Buy(){
+  if(!window.PaymentRequest){
+    alert('Ye course sirf GyaanPe ki Play Store app me kharida ja sakta hai.');
+    return;
+  }
+  try{
+    var request = new PaymentRequest([{
+      supportedMethods: 'https://play.google.com/billing',
+      data: { sku: 'english_30days_course' }
+    }]);
+    var response = await request.show();
+    await response.complete('success');
+    eng30OnPurchaseSuccess();
+  }catch(e){
+    console.log('eng30 purchase cancelled/failed:', e);
+  }
+}
 /* ---- 3. Render ---- */
 function eng30Render(){
   const root = document.getElementById('eng30Root');
@@ -1018,7 +1035,7 @@ function eng30Render(){
   if(!state.owned){
     html += `
       <div class="eng30-locked-banner">Unlock all 30 daily lessons — vocabulary, grammar, and speaking practice.</div>
-      <button class="eng30-buy-btn" onclick="gpBuy('english_30days_course')">Buy Course</button>`;
+      <button class="eng30-buy-btn" onclick="eng30Buy()">Buy Course</button>
     root.innerHTML = html;
     return;
   }
@@ -11805,7 +11822,11 @@ el.innerHTML=html;
 }
 function gpBuy(p){
 if(p==='restore'){GyaanPePremium.restore();return;}
-if(p==='english_30days_course'){GyaanPePremium.buy('english_30days_course');return;}
+function gpBuy(p){
+if(p==='restore'){GyaanPePremium.restore();return;}
+if(p==='yearly'||p==='annual'){GyaanPePremium.buy('yearly');return;}
+GyaanPePremium.buy('monthly');
+}
 if(p==='yearly'||p==='annual'){GyaanPePremium.buy('yearly');return;}
 GyaanPePremium.buy('monthly');
 }
@@ -11941,6 +11962,7 @@ if ('serviceWorker' in navigator) {
 
   function fmtPrice(p) {
     if (!p) return '';
+   
     try {
       return new Intl.NumberFormat('en-IN', { style: 'currency', currency: p.currency, maximumFractionDigits: 0 }).format(p.value);
     } catch (e) { return p.currency + ' ' + p.value; }

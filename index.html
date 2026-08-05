@@ -898,36 +898,58 @@ transform:scale(0.96);filter:brightness(0.97);
   .gpv-paywall-box p{font-size:13px;color:#666;margin-bottom:18px;line-height:1.5;}
   .gpv-pw-btn{background:linear-gradient(135deg,#FF6F00,#FFA000);color:#fff;border:none;border-radius:14px;padding:13px 20px;font-weight:800;font-size:15px;cursor:pointer;width:100%;margin-bottom:10px;}
   .gpv-pw-cancel{background:none;border:none;color:#999;font-size:13px;cursor:pointer;}
- #screenEnglish30{position:fixed;inset:0;background:#FFF9F0;z-index:99998;overflow-y:auto;display:none;}
-#screenEnglish30.gp-show{display:block;}
-#eng30Back{position:sticky;top:0;background:#fff;border:none;padding:12px 16px;font-weight:800;color:#1A237E;cursor:pointer;font-size:14px;}
-/* ===== MERGE:CSS — paste inside your existing <style> block in index.html ===== */
-.eng30-wrap{font-family:'Segoe UI',Roboto,sans-serif;max-width:480px;margin:0 auto;padding:16px;background:#fdfaf5;min-height:100vh;box-sizing:border-box}
-.eng30-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
-.eng30-header h2{margin:0;font-size:20px;color:#2d2a26}
-.eng30-progress-bar{height:8px;background:#eee2cf;border-radius:8px;overflow:hidden;margin:10px 0 18px}
-.eng30-progress-fill{height:100%;background:linear-gradient(90deg,#ff9f43,#ee5a24);transition:width .4s ease}
-.eng30-locked-banner{background:#fff3e0;border:1px solid #ffcc80;border-radius:10px;padding:12px;font-size:14px;color:#8d5a00;margin-bottom:16px;text-align:center}
-.eng30-buy-btn{display:block;width:100%;padding:14px;border:none;border-radius:10px;background:#ee5a24;color:#fff;font-size:16px;font-weight:600;margin-top:10px}
-.eng30-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
-.eng30-day{aspect-ratio:1;border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;position:relative;cursor:pointer;border:none}
-.eng30-day.done{background:#4caf50;color:#fff}
-.eng30-day.today{background:#ee5a24;color:#fff;box-shadow:0 0 0 3px rgba(238,90,36,.25)}
-.eng30-day.unlocked{background:#fff;color:#2d2a26;border:2px solid #ffcc80}
-.eng30-day.locked{background:#eee;color:#aaa;cursor:not-allowed}
-.eng30-day .lock-ic{position:absolute;bottom:2px;right:4px;font-size:9px}
-.eng30-lesson{background:#fff;border-radius:14px;padding:18px;margin-top:16px;box-shadow:0 2px 10px rgba(0,0,0,.06)}
-.eng30-lesson h3{margin:0 0 4px;color:#ee5a24;font-size:18px}
-.eng30-lesson .focus{font-size:13px;color:#888;margin-bottom:14px}
-.eng30-section-title{font-size:13px;font-weight:700;color:#2d2a26;margin:14px 0 6px;text-transform:uppercase;letter-spacing:.5px}
-.eng30-vocab-item{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f2ece2;font-size:14px}
-.eng30-vocab-item b{color:#2d2a26}
-.eng30-vocab-item span{color:#888;font-style:italic}
-.eng30-example{background:#fdf6ec;border-left:3px solid #ffcc80;padding:8px 12px;border-radius:6px;font-size:14px;margin:6px 0}
-.eng30-task{background:#eefaf0;border-left:3px solid #4caf50;padding:10px 12px;border-radius:6px;font-size:14px;margin-top:10px}
-.eng30-complete-btn{width:100%;margin-top:16px;padding:12px;border:none;border-radius:10px;background:#2d2a26;color:#fff;font-weight:600;font-size:15px}
-.eng30-complete-btn.done{background:#4caf50}
-.eng30-close{background:none;border:none;font-size:22px;color:#888;cursor:pointer}
+#screenCourse{position:fixed;inset:0;background:#FFF9F0;z-index:99998;overflow-y:auto;display:none;}
+#screenCourse.gp-show{display:block;}
+.gpc-top{position:sticky;top:0;background:#1A237E;color:#fff;padding:12px 16px;display:flex;align-items:center;gap:10px;z-index:5;}
+.gpc-top button{background:rgba(255,255,255,.15);border:none;color:#fff;font-weight:800;font-size:13px;padding:6px 12px;border-radius:10px;cursor:pointer;}
+.gpc-top h2{margin:0;font-family:'Anton',sans-serif;font-size:16px;letter-spacing:.5px;flex:1;}
+.gpc-body{padding:16px;max-width:520px;margin:0 auto;}
+.gpc-hero{border-radius:18px;padding:20px 16px;color:#fff;text-align:center;margin-bottom:14px;}
+.gpc-hero .em{font-size:40px;}
+.gpc-hero h3{font-family:'Anton',sans-serif;font-size:22px;margin:6px 0 4px;letter-spacing:.5px;}
+.gpc-hero p{font-size:13px;opacity:.95;margin:0;}
+.gpc-meta{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:12px;}
+.gpc-meta span{background:rgba(255,255,255,.22);font-size:11px;font-weight:800;padding:4px 10px;border-radius:20px;}
+.gpc-card{background:#fff;border-radius:16px;padding:16px;margin-bottom:12px;box-shadow:0 3px 12px rgba(0,0,0,.06);border-left:5px solid #FF6F00;}
+.gpc-card h4{font-family:'Anton',sans-serif;font-size:15px;color:#1A237E;margin:0 0 8px;letter-spacing:.4px;}
+.gpc-card li{font-size:13.5px;color:#444;line-height:1.65;margin-bottom:4px;}
+.gpc-buy{display:block;width:100%;padding:15px;border:none;border-radius:14px;background:linear-gradient(135deg,#FF6F00,#FFA000);color:#fff;font-size:16px;font-weight:800;cursor:pointer;box-shadow:0 4px 14px rgba(255,111,0,.35);}
+.gpc-buy.sec{background:#fff;color:#1A237E;border:2px solid #1A237E;box-shadow:none;margin-top:10px;font-size:14px;padding:11px;}
+.gpc-prog{background:#fff;border-radius:14px;padding:14px;margin-bottom:14px;box-shadow:0 3px 12px rgba(0,0,0,.06);}
+.gpc-prog-top{display:flex;justify-content:space-between;font-size:12px;font-weight:800;color:#1A237E;margin-bottom:8px;}
+.gpc-bar{height:10px;background:#EEE2CF;border-radius:10px;overflow:hidden;}
+.gpc-bar i{display:block;height:100%;background:linear-gradient(90deg,#FF9F43,#EE5A24);transition:width .4s;}
+.gpc-stats{display:flex;gap:8px;margin-top:10px;}
+.gpc-stats div{flex:1;background:#F3F0FF;border-radius:10px;padding:7px;text-align:center;}
+.gpc-stats b{display:block;font-family:'Anton',sans-serif;font-size:16px;color:#5E35B1;}
+.gpc-stats small{font-size:9.5px;color:#666;font-weight:700;}
+.gpc-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:14px;}
+.gpc-day{aspect-ratio:1;border-radius:12px;border:none;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'Anton',sans-serif;font-size:15px;cursor:pointer;position:relative;}
+.gpc-day.done{background:#4CAF50;color:#fff;}
+.gpc-day.now{background:#FF6F00;color:#fff;box-shadow:0 0 0 3px rgba(255,111,0,.25);}
+.gpc-day.lock{background:#EDEDED;color:#BBB;cursor:not-allowed;}
+.gpc-day small{font-size:8px;font-family:'Nunito',sans-serif;font-weight:800;opacity:.9;}
+.gpc-lesson h3{font-family:'Anton',sans-serif;color:#1A237E;font-size:19px;margin:0 0 2px;letter-spacing:.4px;}
+.gpc-lesson .sub{font-size:12px;color:#888;margin-bottom:14px;font-weight:700;}
+.gpc-act{background:#FFF3E0;border-left:5px solid #FF6F00;}
+.gpc-prac{background:#EEFAF0;border-left:5px solid #4CAF50;}
+.gpc-chal{background:#F3F0FF;border-left:5px solid #5E35B1;}
+.gpc-q{background:#fff;border-radius:14px;padding:16px;margin-bottom:12px;box-shadow:0 3px 12px rgba(0,0,0,.06);}
+.gpc-q p{font-weight:800;font-size:14px;color:#1A237E;margin:0 0 10px;}
+.gpc-opt{display:block;width:100%;text-align:left;background:#F7F7FB;border:2px solid transparent;border-radius:10px;padding:11px 13px;margin-bottom:7px;font-size:13.5px;font-weight:700;color:#333;cursor:pointer;}
+.gpc-opt.sel{border-color:#1A237E;background:#EDEBFF;}
+.gpc-opt.ok{border-color:#4CAF50;background:#E8F5E9;}
+.gpc-opt.no{border-color:#E53935;background:#FFEBEE;}
+.gpc-result{text-align:center;padding:22px 16px;background:#fff;border-radius:18px;box-shadow:0 3px 12px rgba(0,0,0,.06);}
+.gpc-result .big{font-size:46px;}
+.gpc-result h3{font-family:'Anton',sans-serif;color:#1A237E;font-size:21px;margin:8px 0;}
+.gpc-reward{display:inline-block;background:#FFF3E0;color:#E65100;font-weight:800;font-size:12px;padding:5px 12px;border-radius:20px;margin:3px;}
+.gpc-cert{background:#fff;border:6px double #FF6F00;border-radius:14px;padding:26px 18px;text-align:center;margin-bottom:12px;}
+.gpc-cert .em{font-size:44px;}
+.gpc-cert h3{font-family:'Anton',sans-serif;font-size:20px;color:#1A237E;margin:10px 0 4px;letter-spacing:1px;}
+.gpc-cert .nm{font-family:'Anton',sans-serif;font-size:26px;color:#EE5A24;margin:12px 0;border-bottom:2px dashed #ddd;padding-bottom:10px;}
+.gpc-cert p{font-size:12.5px;color:#555;line-height:1.7;margin:4px 0;}
+.gpc-load{text-align:center;padding:50px 20px;color:#888;font-weight:700;font-size:14px;}
 </style>
 <script>
 /* ===== MERGE:JS — paste inside your main <script> block in index.html ===== */

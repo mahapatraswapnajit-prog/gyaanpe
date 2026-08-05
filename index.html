@@ -898,13 +898,6 @@ transform:scale(0.96);filter:brightness(0.97);
   .gpv-paywall-box p{font-size:13px;color:#666;margin-bottom:18px;line-height:1.5;}
   .gpv-pw-btn{background:linear-gradient(135deg,#FF6F00,#FFA000);color:#fff;border:none;border-radius:14px;padding:13px 20px;font-weight:800;font-size:15px;cursor:pointer;width:100%;margin-bottom:10px;}
   .gpv-pw-cancel{background:none;border:none;color:#999;font-size:13px;cursor:pointer;}
- <!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Learn English in 30 Days — GyaanPe Module Preview</title>
-<style>
 /* ===== MERGE:CSS — paste inside your existing <style> block in index.html ===== */
 .eng30-wrap{font-family:'Segoe UI',Roboto,sans-serif;max-width:480px;margin:0 auto;padding:16px;background:#fdfaf5;min-height:100vh;box-sizing:border-box}
 .eng30-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
@@ -933,10 +926,6 @@ transform:scale(0.96);filter:brightness(0.97);
 .eng30-complete-btn.done{background:#4caf50}
 .eng30-close{background:none;border:none;font-size:22px;color:#888;cursor:pointer}
 </style>
-</head>
-<body>
-<div id="eng30Root" class="eng30-wrap"></div>
-
 <script>
 /* ===== MERGE:JS — paste inside your main <script> block in index.html ===== */
 
@@ -1064,23 +1053,7 @@ function eng30OpenLesson(day){
 }
 
 /* ---- 4. Init — call eng30Render() wherever you mount this screen ---- */
-eng30Render();
-
-/* NOTE: gpBuy() stub below is only for THIS standalone preview file.
-   Do not copy this stub into index.html — your real gpBuy() from
-   GyaanPePremium already handles Play Billing; just add
-   'english_30days_course' as a recognized product ID there,
-   and call eng30OnPurchaseSuccess() on successful purchase. */
-if(typeof gpBuy === 'undefined'){
-  window.gpBuy = function(productId){
-    alert('[Preview only] Simulating purchase of: ' + productId);
-    eng30OnPurchaseSuccess();
-  };
-}
 </script>
-</body>
-</html>
-</style>
 </head>
 <body>
 <div id="gpFTE">
@@ -1089,10 +1062,6 @@ if(typeof gpBuy === 'undefined'){
   <button class="gp-fte-btn gp-fte-btn-secondary" onclick="gpOpenDemo()">&#128064; Explore Demo (Optional)</button>
   <button class="gp-fte-btn gp-fte-btn-primary" onclick="gpGoToRealSetup()">&#128640; Start My Learning Journey</button>
 </div>
-
-<div id="gpDemoBar">
-  You're viewing Demo Data — nothing is saved
-  <button id="gpDemoExitBtn" onclick="gpCloseDemo()">Exit Demo</button>
 </div>
 
 <div id="gpDemoScreen">

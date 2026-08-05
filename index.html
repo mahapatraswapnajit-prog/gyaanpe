@@ -1104,7 +1104,229 @@ function eng30OpenLesson(day){
       </button>
     </div>`;
 }
+var GPC_FB = 'https://zapzone-98727-default-rtdb.firebaseio.com';
+var GPC_UNLOCK_MODE = 'complete';
 
+var gpcCourse = null, gpcId = null, gpcView = 'detail', gpcDay = null, gpcAnswers = {}, gpcLastResult = null;
+
+function gpcState(id){
+  try{ var raw = localStorage.getItem('gpc_' + id); if(raw) return JSON.parse(raw); }catch(e){}
+  return {owned:false, purchaseDate:null, completedDays:[], scores:{}, xp:0, coins:0, badges:[]};
+}
+function gpcSave(id, s){
+  try{ localStorage.setItem('gpc_' + id, JSON.stringify(s)); }catch(e){}
+  gpcSyncUp(id, s);
+}
+function gpcUid(){
+  try{ if(typeof GyaanPePremium!=='undefined' && GyaanPePremium.uid) return GyaanPePremium.uid(); }catch(e){}
+  var u = localStorage.getItem('gpc_uid');
+  if(!u){ u = 'u' + Date.now() + Math.random().toString(36).slice(2,7); localStorage.setItem('gpc_uid', u); }
+  return u;
+}
+function gpcSyncUp(id, s){
+  try{ fetch(GPC_FB + '/gyaanpeCourseProgress/' + gpcUid() + '/' + id + '.json', {method:'PUT', body: JSON.stringify(s)}).catch(function(){}); }catch(e){}
+}
+function gpcSyncDown(id, cb){
+  fetch(GPC_FB + '/gyaanpeCourseProgress/' + gpcUid() + '/' + id + '.json')
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      if(d && d.completedDays){
+        var local = gpcState(id);
+        if((d.completedDays||[]).length > (local.completedDays||[]).length){
+          try{ localStorage.setItem('gpc_'+id, JSON.stringify(d)); }catch(e){}
+        }
+      }
+      cb && cb();
+    }).catch(function(){ cb && cb(); });
+}
+function gpcOpen(id){
+  gpcId = id; gpcView = 'detail';
+  document.getElementById('screenCourse').classList.add('gp-show');
+  document.getElementById('gpcBody').innerHTML = '<div class="gpc-load">Course load ho raha hai...</div>';
+  if(gpcCourse && gpcCourse.id === id){ gpcSyncDown(id, gpcRender); return; }
+  fetch(GPC_FB + '/gyaanpeCourses/' + id + '.json')
+    .then(function(r){ return r.json(); })
+    .then(function(c){
+      if(!c){ document.getElementById('gpcBody').innerHTML = '<div class="gpc-load">Course abhi available nahi hai.</div>'; return; }
+      gpcCourse = c;
+      document.getElementById('gpcTitle').textContent = c.title;
+      gpcSyncDown(id, gpcRender);
+    }).catch(function(){
+      document.getElementById('gpcBody').innerHTML = '<div class="gpc-load">Internet check karo aur dobara try karo.</div>';
+    });
+}
+function gpcBack(){
+  if(gpcView==='lesson'||gpcView==='cert'||gpcView==='quiz'||gpcView==='result'){ gpcView='days'; gpcRender(); return; }
+  document.getElementById('screenCourse').classList.remove('gp-show');
+}
+function gpcUnlocked(s){
+  if(!s.owned) return 0;
+  if(GPC_UNLOCK_MODE === 'daily'){
+    var days = Math.floor((new Date() - new Date(s.purchaseDate)) / 86400000);
+    return Math.min(gpcCourse.totalDays, days + 1);
+  }
+  return Math.min(gpcCourse.totalDays, (s.completedDays.length || 0) + 1);
+}
+function gpcEsc(t){ return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function gpcRender(){
+  if(!gpcCourse) return;
+  var s = gpcState(gpcId);
+  if(!s.owned){ gpcRenderDetail(s); return; }
+  if(gpcView === 'lesson'){ gpcRenderLesson(s); return; }
+  if(gpcView === 'quiz'){ gpcRenderQuiz(s); return; }
+  if(gpcView === 'cert'){ gpcRenderCert(s); return; }
+  if(gpcView === 'result'){ gpcRenderResult(s); return; }
+  gpcRenderDays(s);
+}
+function gpcRenderDetail(s){
+  var c = gpcCourse, qc = 0;
+  c.days.forEach(function(d){ qc += (d.quiz||[]).length; });
+  var h = '<div class="gpc-hero" style="background:' + c.color + '"><div class="em">' + c.emoji + '</div><h3>' + gpcEsc(c.title) + '</h3><p>' + gpcEsc(c.tagline) + '</p><div class="gpc-meta"><span>' + gpcEsc(c.duration) + '</span><span>' + gpcEsc(c.difficulty) + '</span><span>' + c.totalDays + ' Lessons</span><span>' + qc + ' Quiz</span>' + (c.certificate ? '<span>Certificate</span>' : '') + '</div></div>';
+  h += '<div class="gpc-card"><h4>Ye course kya hai</h4><p style="font-size:13.5px;color:#444;line-height:1.7;margin:0">' + gpcEsc(c.description) + '</p></div>';
+  if(c.skills){ h += '<div class="gpc-card"><h4>Kya seekhoge</h4><ul style="margin:0;padding-left:18px">'; c.skills.forEach(function(x){ h += '<li>' + gpcEsc(x) + '</li>'; }); h += '</ul></div>'; }
+  if(c.benefits){ h += '<div class="gpc-card gpc-prac"><h4>Fayde</h4><ul style="margin:0;padding-left:18px">'; c.benefits.forEach(function(x){ h += '<li>' + gpcEsc(x) + '</li>'; }); h += '</ul></div>'; }
+  h += '<div class="gpc-card gpc-chal"><h4>Rewards</h4><ul style="margin:0;padding-left:18px"><li>Har din XP aur coins</li><li>Badge: ' + gpcEsc(c.badge) + '</li><li>Course poora hone par certificate</li><li>Lifetime access</li></ul></div>';
+  h += '<button class="gpc-buy" onclick="gpcBuy()">Buy Now &middot; ' + gpcEsc(c.price) + '</button>';
+  h += '<button class="gpc-buy sec" onclick="gpcRestore()">Pehle kharida hai? Restore karo</button>';
+  document.getElementById('gpcBody').innerHTML = h;
+}
+function gpcRenderDays(s){
+  var c = gpcCourse, un = gpcUnlocked(s);
+  var pct = Math.round((s.completedDays.length / c.totalDays) * 100);
+  var h = '<div class="gpc-prog"><div class="gpc-prog-top"><span>' + s.completedDays.length + ' / ' + c.totalDays + ' days poore</span><span>' + pct + '%</span></div><div class="gpc-bar"><i style="width:' + pct + '%"></i></div><div class="gpc-stats"><div><b>' + (s.xp||0) + '</b><small>XP</small></div><div><b>' + (s.coins||0) + '</b><small>COINS</small></div><div><b>' + (s.badges||[]).length + '</b><small>BADGES</small></div></div></div><div class="gpc-grid">';
+  c.days.forEach(function(d){
+    var done = s.completedDays.indexOf(d.day) > -1, open = d.day <= un;
+    var cls = done ? 'done' : open ? 'now' : 'lock';
+    h += '<button class="gpc-day ' + cls + '" ' + (open ? 'onclick="gpcOpenDay(' + d.day + ')"' : 'disabled') + '>' + (done ? '&#10003;' : d.day) + '<small>' + (done ? 'DONE' : open ? 'DAY ' + d.day : '&#128274;') + '</small></button>';
+  });
+  h += '</div>';
+  if(s.completedDays.length >= c.totalDays && c.certificate){
+    h += '<button class="gpc-buy" onclick="gpcView=\'cert\';gpcRender()">&#127942; Certificate dekho</button>';
+  }
+  document.getElementById('gpcBody').innerHTML = h;
+}
+function gpcOpenDay(n){
+  gpcDay = gpcCourse.days.filter(function(d){ return d.day === n; })[0];
+  gpcView = 'lesson'; gpcAnswers = {}; gpcRender();
+  document.getElementById('screenCourse').scrollTop = 0;
+}
+function gpcRenderLesson(s){
+  var d = gpcDay, done = s.completedDays.indexOf(d.day) > -1;
+  var h = '<div class="gpc-lesson"><h3>' + (d.emoji||'') + ' Day ' + d.day + ': ' + gpcEsc(d.title) + '</h3><div class="sub">' + gpcEsc(d.intro) + '</div></div>';
+  h += '<div class="gpc-card"><h4>Aaj ka Lesson</h4><ul style="margin:0;padding-left:18px">';
+  (d.lesson||[]).forEach(function(x){ h += '<li>' + gpcEsc(x) + '</li>'; });
+  h += '</ul></div>';
+  if(d.activity){ h += '<div class="gpc-card gpc-act"><h4>&#127917; Activity: ' + gpcEsc(d.activity.title) + '</h4><p style="font-size:13.5px;color:#444;line-height:1.7;margin:0">' + gpcEsc(d.activity.content) + '</p></div>'; }
+  if(d.practice){ h += '<div class="gpc-card gpc-prac"><h4>&#9997;&#65039; Practice</h4><ul style="margin:0;padding-left:18px">'; d.practice.forEach(function(x){ h += '<li>' + gpcEsc(x) + '</li>'; }); h += '</ul></div>'; }
+  if(d.challenge){ h += '<div class="gpc-card gpc-chal"><h4>&#127919; Daily Challenge</h4><p style="font-size:13.5px;color:#444;line-height:1.7;margin:0">' + gpcEsc(d.challenge) + '</p></div>'; }
+  h += '<button class="gpc-buy" onclick="gpcStartQuiz()">' + (done ? 'Quiz dobara do' : 'Quiz shuru karo') + ' (' + (d.quiz||[]).length + ' sawaal)</button>';
+  document.getElementById('gpcBody').innerHTML = h;
+}
+function gpcStartQuiz(){ gpcAnswers = {}; gpcView = 'quiz'; gpcRender(); document.getElementById('screenCourse').scrollTop = 0; }
+function gpcPick(qi, oi){ gpcAnswers[qi] = oi; gpcRender(); }
+function gpcRenderQuiz(s){
+  var d = gpcDay;
+  var h = '<div class="gpc-lesson"><h3>Day ' + d.day + ' Quiz</h3><div class="sub">Har sawaal ka sahi jawab chuno</div></div>';
+  (d.quiz||[]).forEach(function(q, qi){
+    h += '<div class="gpc-q"><p>' + (qi+1) + '. ' + gpcEsc(q.q) + '</p>';
+    q.options.forEach(function(o, oi){
+      h += '<button class="gpc-opt' + (gpcAnswers[qi]===oi ? ' sel' : '') + '" onclick="gpcPick(' + qi + ',' + oi + ')">' + gpcEsc(o) + '</button>';
+    });
+    h += '</div>';
+  });
+  var all = Object.keys(gpcAnswers).length === (d.quiz||[]).length;
+  h += '<button class="gpc-buy" ' + (all ? '' : 'style="opacity:.5"') + ' onclick="' + (all ? 'gpcSubmit()' : 'alert(\'Pehle saare sawaal ka jawab do\')') + '">Jawab jama karo</button>';
+  document.getElementById('gpcBody').innerHTML = h;
+}
+function gpcSubmit(){
+  var d = gpcDay, s = gpcState(gpcId), correct = 0;
+  (d.quiz||[]).forEach(function(q, qi){ if(gpcAnswers[qi] === q.answer) correct++; });
+  var total = (d.quiz||[]).length, pct = Math.round((correct/total)*100), pass = pct >= 60;
+  var first = s.completedDays.indexOf(d.day) === -1;
+  s.scores[d.day] = pct;
+  if(pass && first){
+    s.completedDays.push(d.day);
+    s.xp = (s.xp||0) + (d.xp||20);
+    s.coins = (s.coins||0) + (d.coins||5);
+    if(pct === 100 && s.badges.indexOf('Perfect Score') === -1) s.badges.push('Perfect Score');
+    if(s.completedDays.length === 7 && s.badges.indexOf('7 Day Streak') === -1) s.badges.push('7 Day Streak');
+    if(s.completedDays.length === 15 && s.badges.indexOf('15 Day Streak') === -1) s.badges.push('15 Day Streak');
+    if(s.completedDays.length === gpcCourse.totalDays && s.badges.indexOf(gpcCourse.badge) === -1) s.badges.push(gpcCourse.badge);
+    gpcAwardGlobal(d.xp||20, d.coins||5);
+  }
+  gpcSave(gpcId, s);
+  gpcLastResult = {correct:correct, total:total, pct:pct, pass:pass, first:first, day:d};
+  gpcView = 'result'; gpcRenderResult(s);
+  document.getElementById('screenCourse').scrollTop = 0;
+}
+function gpcRenderResult(s){
+  var r = gpcLastResult, d = r.day;
+  var h = '<div class="gpc-result"><div class="big">' + (r.pass ? '&#127881;' : '&#128170;') + '</div><h3>' + (r.pass ? 'Shabaash!' : 'Thoda aur practice') + '</h3><p style="font-size:15px;font-weight:800;color:#1A237E;margin:6px 0">' + r.correct + ' / ' + r.total + ' sahi (' + r.pct + '%)</p>';
+  if(r.pass && r.first){
+    h += '<div><span class="gpc-reward">+' + (d.xp||20) + ' XP</span><span class="gpc-reward">+' + (d.coins||5) + ' Coins</span></div><p style="font-size:12.5px;color:#666;margin-top:10px">Day ' + (d.day+1) + ' unlock ho gaya!</p>';
+  } else if(!r.pass){
+    h += '<p style="font-size:12.5px;color:#666;margin-top:10px">Pass hone ke liye 60% chahiye. Lesson dobara padho.</p>';
+  }
+  h += '</div><button class="gpc-buy" style="margin-top:14px" onclick="gpcView=\'days\';gpcRender()">Wapas Days par</button>';
+  if(!r.pass) h += '<button class="gpc-buy sec" onclick="gpcView=\'lesson\';gpcRender()">Lesson dobara padho</button>';
+  document.getElementById('gpcBody').innerHTML = h;
+}
+function gpcRenderCert(s){
+  var c = gpcCourse, name = 'Learner';
+  try{ var p = gpProfile && gpProfile(); if(p && p.name) name = p.name; }catch(e){}
+  var avg = 0, k = Object.keys(s.scores);
+  k.forEach(function(x){ avg += s.scores[x]; }); avg = k.length ? Math.round(avg/k.length) : 0;
+  var h = '<div class="gpc-cert"><div class="em">&#127942;</div><h3>CERTIFICATE OF COMPLETION</h3><p>Ye certificate diya jaata hai</p><div class="nm">' + gpcEsc(name) + '</div><p>ne <b>' + gpcEsc(c.title) + '</b> course<br>safaltapoorvak poora kiya.</p><p style="margin-top:14px">Average Quiz Score: <b>' + avg + '%</b><br>Total XP: <b>' + (s.xp||0) + '</b> &middot; Coins: <b>' + (s.coins||0) + '</b></p><p style="margin-top:14px;font-size:11px;color:#888">GyaanPe &middot; ' + new Date().toLocaleDateString('en-IN') + '</p></div>';
+  h += '<button class="gpc-buy" onclick="window.print()">Certificate save karo</button><button class="gpc-buy sec" onclick="gpcView=\'days\';gpcRender()">Wapas</button>';
+  document.getElementById('gpcBody').innerHTML = h;
+}
+async function gpcBuy(){
+  var c = gpcCourse;
+  if(!window.PaymentRequest){ alert('Ye course sirf GyaanPe ki Play Store app me kharida ja sakta hai.'); return; }
+  try{
+    var request = new PaymentRequest(
+      [{ supportedMethods:'https://play.google.com/billing', data:{ sku: c.productId } }],
+      { total:{ label: c.title, amount:{ currency:'INR', value:'0' } } }
+    );
+    var response = await request.show();
+    var token = response.details && response.details.purchaseToken;
+    await response.complete('success');
+    gpcUnlock(token);
+  }catch(e){ console.log('course purchase cancelled/failed:', e); }
+}
+function gpcUnlock(token){
+  var s = gpcState(gpcId);
+  s.owned = true;
+  s.purchaseDate = s.purchaseDate || new Date().toISOString();
+  if(token) s.token = token;
+  gpcSave(gpcId, s);
+  gpcAcknowledge(token);
+  gpcView = 'days'; gpcRender();
+}
+async function gpcAcknowledge(token){
+  if(!token || !window.getDigitalGoodsService) return;
+  try{
+    var svc = await window.getDigitalGoodsService('https://play.google.com/billing');
+    if(svc.acknowledge) await svc.acknowledge(token, 'onetime');
+  }catch(e){ console.log('ack failed', e); }
+}
+async function gpcRestore(){
+  if(!window.getDigitalGoodsService){ alert('Restore sirf Play Store app me chalta hai.'); return; }
+  try{
+    var svc = await window.getDigitalGoodsService('https://play.google.com/billing');
+    var list = await svc.listPurchases();
+    var found = list.filter(function(p){ return p.itemId === gpcCourse.productId; })[0];
+    if(found){ gpcUnlock(found.purchaseToken); alert('Course restore ho gaya!'); }
+    else alert('Is account par ye course nahi mila.');
+  }catch(e){ alert('Restore nahi ho paya. Dobara try karo.'); }
+}
+function gpcAwardGlobal(xp, coins){
+  try{ if(typeof gpAddXP === 'function') gpAddXP(xp); }catch(e){}
+  try{ if(typeof gpAddCoins === 'function') gpAddCoins(coins); }catch(e){}
+  try{ if(typeof gpDailyReward === 'function') gpDailyReward(); }catch(e){}
+}
+function openEnglish30(){ gpcOpen('english30'); }
+function openMaths30(){ gpcOpen('maths30'); }
 /* ---- 4. Init — call eng30Render() wherever you mount this screen ---- */
 </script>
 </head>

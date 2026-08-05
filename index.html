@@ -12578,9 +12578,13 @@ if ('serviceWorker' in navigator) {
   }catch(e){ console.error('[GPV] init error', e); }
 })();
 </script>
- <div id="screenEnglish30">
-  <button id="eng30Back" onclick="closeEnglish30()">← Back</button>
-  <div id="eng30Root" class="eng30-wrap"></div>
+ <div id="screenCourse">
+  <div class="gpc-top">
+    <button onclick="gpcBack()">&larr; Back</button>
+    <h2 id="gpcTitle">Course</h2>
+  </div>
+  <div class="gpc-body" id="gpcBody"></div>
+</div>>
 </div>
 </body>
 </html>

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en">div id="screenCourse">
 <head>
 <meta charset="UTF-8">
  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
@@ -950,6 +950,25 @@ transform:scale(0.96);filter:brightness(0.97);
 .gpc-cert .nm{font-family:'Anton',sans-serif;font-size:26px;color:#EE5A24;margin:12px 0;border-bottom:2px dashed #ddd;padding-bottom:10px;}
 .gpc-cert p{font-size:12.5px;color:#555;line-height:1.7;margin:4px 0;}
 .gpc-load{text-align:center;padding:50px 20px;color:#888;font-weight:700;font-size:14px;}
+ #screenStore{position:fixed;inset:0;background:#FFF9F0;z-index:99998;overflow-y:auto;display:none;}
+#screenStore.gp-show{display:block;}
+.gps-search{position:relative;margin-bottom:12px;}
+.gps-search input{width:100%;padding:12px 14px;border:2px solid #EEE2CF;border-radius:12px;font-family:'Nunito',sans-serif;font-size:14px;font-weight:700;color:#1A237E;box-sizing:border-box;outline:none;background:#fff;}
+.gps-search input:focus{border-color:#FF6F00;}
+.gps-chips{display:flex;gap:7px;overflow-x:auto;padding-bottom:8px;margin-bottom:14px;-webkit-overflow-scrolling:touch;}
+.gps-chips::-webkit-scrollbar{display:none;}
+.gps-chip{flex:0 0 auto;background:#fff;border:2px solid #EEE2CF;border-radius:20px;padding:7px 14px;font-family:'Nunito',sans-serif;font-size:12px;font-weight:800;color:#666;cursor:pointer;white-space:nowrap;}
+.gps-chip.on{background:#1A237E;border-color:#1A237E;color:#fff;}
+.gps-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px;}
+.gps-card{border-radius:16px;padding:14px 12px;color:#fff;cursor:pointer;position:relative;min-height:132px;display:flex;flex-direction:column;justify-content:space-between;overflow:hidden;}
+.gps-card .em{font-size:30px;line-height:1;}
+.gps-card h4{font-family:'Anton',sans-serif;font-size:13.5px;margin:7px 0 3px;letter-spacing:.3px;line-height:1.25;}
+.gps-card p{font-size:10px;font-weight:700;opacity:.92;margin:0;line-height:1.35;}
+.gps-card .foot{display:flex;justify-content:space-between;align-items:center;margin-top:9px;font-size:10px;font-weight:800;}
+.gps-tag{position:absolute;top:9px;right:9px;background:rgba(255,255,255,.25);font-size:8.5px;font-weight:800;padding:3px 7px;border-radius:10px;letter-spacing:.3px;}
+.gps-card.soon{opacity:.72;}
+.gps-empty{text-align:center;padding:40px 20px;color:#888;font-weight:700;font-size:13.5px;}
+.gps-count{font-size:11px;font-weight:800;color:#888;margin-bottom:10px;}
 </style>
 <script>
 /* ===== MERGE:JS — paste inside your main <script> block in index.html ===== */
@@ -1326,6 +1345,85 @@ function gpcAwardGlobal(xp, coins){
   try{ if(typeof gpDailyReward === 'function') gpDailyReward(); }catch(e){}
 }
 function openEnglish30(){ gpcOpen('english30'); }
+ var GPS_LIVE = ['english30'];
+
+var gpsIndex = null;
+var gpsCat = 'All';
+var gpsQuery = '';
+
+function gpsOpen(){
+  document.getElementById('screenStore').classList.add('gp-show');
+  if(gpsIndex){ gpsRender(); return; }
+  document.getElementById('gpsBody').innerHTML = '<div class="gpc-load">Courses load ho rahe hain...</div>';
+  fetch(GPC_FB + '/gyaanpeCoursesIndex.json')
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      if(!d){ document.getElementById('gpsBody').innerHTML = '<div class="gpc-load">Courses abhi available nahi hain.</div>'; return; }
+      gpsIndex = d;
+      gpsRender();
+    })
+    .catch(function(){
+      document.getElementById('gpsBody').innerHTML = '<div class="gpc-load">Internet check karo aur dobara try karo.</div>';
+    });
+}
+function gpsClose(){ document.getElementById('screenStore').classList.remove('gp-show'); }
+
+function gpsList(){
+  var arr = [];
+  for(var k in gpsIndex){ if(gpsIndex.hasOwnProperty(k)) arr.push(gpsIndex[k]); }
+  arr.sort(function(a,b){ return (a.order||99) - (b.order||99); });
+  return arr;
+}
+
+function gpsSetCat(c){ gpsCat = c; gpsRender(); }
+function gpsSearch(v){ gpsQuery = (v || '').toLowerCase(); gpsRenderGrid(); }
+
+function gpsRender(){
+  var all = gpsList();
+  var cats = ['All'];
+  all.forEach(function(c){ if(cats.indexOf(c.category) === -1) cats.push(c.category); });
+
+  var h = '<div class="gps-search"><input type="text" id="gpsInput" placeholder="Course dhundo..." oninput="gpsSearch(this.value)" value="' + gpcEsc(gpsQuery) + '"></div>';
+  h += '<div class="gps-chips">';
+  cats.forEach(function(c){
+    h += '<button class="gps-chip' + (gpsCat === c ? ' on' : '') + '" onclick="gpsSetCat(\'' + c.replace(/'/g,"\\'") + '\')">' + gpcEsc(c) + '</button>';
+  });
+  h += '</div><div id="gpsGrid"></div>';
+  document.getElementById('gpsBody').innerHTML = h;
+  gpsRenderGrid();
+}
+
+function gpsRenderGrid(){
+  var all = gpsList();
+  var shown = all.filter(function(c){
+    if(gpsCat !== 'All' && c.category !== gpsCat) return false;
+    if(!gpsQuery) return true;
+    return (c.title + ' ' + c.tagline + ' ' + c.category).toLowerCase().indexOf(gpsQuery) > -1;
+  });
+
+  var h = '';
+  if(!shown.length){
+    h = '<div class="gps-empty">Koi course nahi mila.<br>Doosra naam ya category try karo.</div>';
+  } else {
+    h += '<div class="gps-count">' + shown.length + ' course' + (shown.length > 1 ? 's' : '') + '</div>';
+    h += '<div class="gps-grid">';
+    shown.forEach(function(c){
+      var live = GPS_LIVE.indexOf(c.id) > -1;
+      var s = gpcState(c.id);
+      var tag = s.owned ? 'MERA' : (live ? c.price : 'COMING SOON');
+      var click = live ? 'gpcOpen(\'' + c.id + '\')' : 'alert(\'' + gpcEsc(c.title).replace(/'/g,"\\'") + ' jaldi aa raha hai!\')';
+      h += '<div class="gps-card' + (live ? '' : ' soon') + '" style="background:' + c.color + '" onclick="' + click + '">' +
+           '<span class="gps-tag">' + tag + '</span>' +
+           '<div><div class="em">' + c.emoji + '</div>' +
+           '<h4>' + gpcEsc(c.title) + '</h4>' +
+           '<p>' + gpcEsc(c.tagline) + '</p></div>' +
+           '<div class="foot"><span>' + c.totalDays + ' Days</span><span>' + c.quizCount + ' Quiz</span></div>' +
+           '</div>';
+    });
+    h += '</div>';
+  }
+  document.getElementById('gpsGrid').innerHTML = h;
+}
 function openMaths30(){ gpcOpen('maths30'); }
 /* ---- 4. Init — call eng30Render() wherever you mount this screen ---- */
 </script>
@@ -1453,9 +1551,9 @@ function openMaths30(){ gpcOpen('maths30'); }
 <div style="font-family:'Anton',sans-serif;font-size:17px;color:#4E2600;">&#11088; QUIZ OF THE DAY</div>
 <div id="dqStatus" style="font-size:11px;font-weight:700;color:#6D4C00;margin-top:2px;">Tap to play today's special question!</div>
 </div>
- <div onclick="openEnglish30()" style="background:linear-gradient(135deg,#FF9F43,#EE5A24);border-radius:16px;padding:16px;color:#fff;text-align:center;cursor:pointer;margin:10px 0;">
-  <div style="font-family:'Anton',sans-serif;font-size:17px;">&#128218; LEARN ENGLISH IN 30 DAYS</div>
-  <div style="font-size:11px;font-weight:700;margin-top:2px;">Daily lessons &middot; Grammar &middot; Speaking practice</div>
+<div onclick="gpsOpen()" style="background:linear-gradient(135deg,#1A237E,#5E35B1);border-radius:16px;padding:16px;color:#fff;text-align:center;cursor:pointer;margin:10px 0;">
+  <div style="font-family:'Anton',sans-serif;font-size:17px;">&#127891; PREMIUM COURSES</div>
+  <div style="font-size:11px;font-weight:700;margin-top:2px;">30-Day Courses &middot; Lessons &middot; Quiz &middot; Certificate</div>
 </div>
 <div id="dailyQuizBox" style="display:none;background:white;border:3px solid #FF8F00;border-radius:16px;padding:16px;margin:10px 0;text-align:center;">
 <div style="font-family:'Anton',sans-serif;font-size:13px;color:#FF8F00;margin-bottom:6px;">&#11088; QUIZ OF THE DAY</div>
@@ -12806,7 +12904,14 @@ if ('serviceWorker' in navigator) {
     <h2 id="gpcTitle">Course</h2>
   </div>
   <div class="gpc-body" id="gpcBody"></div>
-</div>>
+</div>
+</div>
+ <div id="screenStore">
+  <div class="gpc-top">
+    <button onclick="gpsClose()">&larr; Back</button>
+    <h2>&#127891; Premium Courses</h2>
+  </div>
+  <div class="gpc-body" id="gpsBody"></div>
 </div>
 </body>
 </html>

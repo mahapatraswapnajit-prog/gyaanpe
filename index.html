@@ -1377,6 +1377,13 @@ function gpToast(msg){
   clearTimeout(_gpToastT);
   _gpToastT=setTimeout(function(){ t.classList.remove('on'); },2600);
 }
+ var _gpToastT=null;
+function gpToast(msg){
+  var t=document.getElementById('gpToast'); if(!t)return;
+  t.textContent=msg; t.classList.add('on');
+  clearTimeout(_gpToastT);
+  _gpToastT=setTimeout(function(){ t.classList.remove('on'); },2600);
+}
 /* ---- 4. Init — call eng30Render() wherever you mount this screen ---- */
 </script>
 </head>

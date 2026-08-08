@@ -1009,8 +1009,8 @@ function gpcSave(id, s){
 }
 function gpcUid(){
   try{ if(typeof GyaanPePremium!=='undefined' && GyaanPePremium.uid) return GyaanPePremium.uid(); }catch(e){}
-  var u = localStorage.getItem('gpc_uid');
-  if(!u){ u = 'u' + Date.now() + Math.random().toString(36).slice(2,7); localStorage.setItem('gpc_uid', u); }
+  var u = localStorage.getItem('gp_uid');
+  if(!u){ u = 'u' + Date.now() + Math.random().toString(36).slice(2,7); localStorage.setItem('gp_uid', u); }
   return u;
 }
 function gpcSyncUp(id, s){
@@ -2242,7 +2242,50 @@ var DQ_URL='https://zapzone-98727-default-rtdb.firebaseio.com/gyaanpeQuiz.json';
 var dqData=null;
 function loadDailyQuiz(){fetch(DQ_URL).then(function(r){return r.json();}).then(function(pool){if(!pool)return;var arr=[];for(var k in pool){if(pool.hasOwnProperty(k)&&pool[k]&&pool[k].q)arr.push(pool[k]);}if(!arr.length)return;var t=new Date();var today=t.getFullYear()+'-'+(t.getMonth()+1)+'-'+t.getDate();var idx=Math.floor(Date.UTC(t.getFullYear(),t.getMonth(),t.getDate())/86400000)%arr.length;var d=arr[idx];d.date=today;dqData=d;var done=localStorage.getItem('gp_dq_done')===d.date;var card=document.getElementById('dailyQuizCard');card.style.display='block';if(done){document.getElementById('dqStatus').innerHTML='Done for today! Come back tomorrow '+emoImg('2705',14);document.getElementById('dqReminder').style.display='none';}else{document.getElementById('dqReminder').style.display='block';}}).catch(function(e){});}
 function openDailyQuiz(){if(!dqData)return;if(localStorage.getItem('gp_dq_done')===dqData.date){return;}document.getElementById('dqReminder').style.display='none';document.getElementById('dailyQuizCard').style.display='none';var box=document.getElementById('dailyQuizBox');box.style.display='block';document.getElementById('dqQuestion').textContent=dqData.q;var og=document.getElementById('dqOptions');og.innerHTML='';[dqData.o1,dqData.o2,dqData.o3,dqData.o4].forEach(function(op,i){var b=document.createElement('button');b.className='option-btn';b.textContent=op;b.onclick=function(){dqAnswer(i+1,b);};og.appendChild(b);});}
-function dqAnswer(n,btn){if(localStorage.getItem('gp_dq_done')===dqData.date)return;localStorage.setItem('gp_dq_done',dqData.date);var res=document.getElementById('dqResult');if(n===parseInt(dqData.ans)){btn.classList.add('correct');res.textContent='CORRECT! You are a star!';res.style.color='#2E7D32';playCorrect();}else{btn.classList.add('wrong');var ab=document.getElementById('dqOptions').children;ab[parseInt(dqData.ans)-1].classList.add('correct');res.textContent='Oops! Try again tomorrow!';res.style.color='#C62828';playWrong();}}
+function dqAnswer(n,btn){
+  if(localStorage.getItem('gp_dq_done')===dqData.date)return;
+  localStorage.setItem('gp_dq_done',dqData.date);
+  var res=document.getElementById('dqResult');
+  if(n===parseInt(dqData.ans)){
+    btn.classList.add('correct');
+    res.textContent='CORRECT! You are a star! +15 XP, +10 coins';
+    res.style.color='#2E7D32';
+    playCorrect();
+    try{ addXP(15); addCoins(10); }catch(e){}
+    try{ if(typeof gpConfetti==='function') gpConfetti(); }catch(e){}
+  }else{
+    btn.classList.add('wrong');
+    var ab=document.getElementById('dqOptions').children;
+    ab[parseInt(dqData.ans)-1].classList.add('correct');
+    res.textContent='Oops! Kal phir try karo! +5 XP koshish ke liye';
+    res.style.color='#C62828';
+    playWrong();
+    try{ addXP(5); }catch(e){}
+  }
+  try{ if(typeof gpDailyGoal==='function') gpDailyGoal(); }catch(e){}
+}
+ function dqAnswer(n,btn){
+  if(localStorage.getItem('gp_dq_done')===dqData.date)return;
+  localStorage.setItem('gp_dq_done',dqData.date);
+  var res=document.getElementById('dqResult');
+  if(n===parseInt(dqData.ans)){
+    btn.classList.add('correct');
+    res.textContent='CORRECT! You are a star! +15 XP, +10 coins';
+    res.style.color='#2E7D32';
+    playCorrect();
+    try{ addXP(15); addCoins(10); }catch(e){}
+    try{ if(typeof gpConfetti==='function') gpConfetti(); }catch(e){}
+  }else{
+    btn.classList.add('wrong');
+    var ab=document.getElementById('dqOptions').children;
+    ab[parseInt(dqData.ans)-1].classList.add('correct');
+    res.textContent='Oops! Kal phir try karo! +5 XP koshish ke liye';
+    res.style.color='#C62828';
+    playWrong();
+    try{ addXP(5); }catch(e){}
+  }
+  try{ if(typeof gpDailyGoal==='function') gpDailyGoal(); }catch(e){}
+}
 loadDailyQuiz();
 
 // ============ CHALLENGE A FRIEND ============

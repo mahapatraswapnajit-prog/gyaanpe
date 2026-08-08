@@ -992,6 +992,8 @@ transform:scale(0.96);filter:brightness(0.97);
 .gpst-go{display:block;width:100%;margin-top:24px;padding:16px;border:none;border-radius:16px;background:linear-gradient(135deg,#FF6F00,#FFA000);color:#fff;font-family:'Anton',sans-serif;font-size:18px;letter-spacing:.6px;cursor:pointer;box-shadow:0 5px 16px rgba(255,111,0,.35);}
 .gpst-go:disabled{opacity:.45;box-shadow:none;cursor:not-allowed;}
 .gpst-note{text-align:center;font-size:11px;font-weight:700;color:#999;margin-top:12px;}
+ #gpToast{position:fixed;left:50%;bottom:80px;transform:translateX(-50%) translateY(20px);background:#1A237E;color:#fff;padding:13px 20px;border-radius:14px;font-family:'Nunito',sans-serif;font-size:14px;font-weight:800;box-shadow:0 8px 24px rgba(0,0,0,.25);z-index:100001;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;max-width:88%;text-align:center;}
+#gpToast.on{opacity:1;transform:translateX(-50%) translateY(0);}
 </style>
 <script>
 var GPC_FB = 'https://zapzone-98727-default-rtdb.firebaseio.com';
@@ -1367,6 +1369,13 @@ function gpstOpenMyClass(){
   if(!p.cls) return;
   var m = GPST_CLS.filter(function(x){ return x.k === p.cls; })[0];
   if(m && typeof window[m.fn] === 'function') window[m.fn]();
+}
+ var _gpToastT=null;
+function gpToast(msg){
+  var t=document.getElementById('gpToast'); if(!t)return;
+  t.textContent=msg; t.classList.add('on');
+  clearTimeout(_gpToastT);
+  _gpToastT=setTimeout(function(){ t.classList.remove('on'); },2600);
 }
 /* ---- 4. Init — call eng30Render() wherever you mount this screen ---- */
 </script>
@@ -12908,5 +12917,6 @@ if ('serviceWorker' in navigator) {
     <div class="gpst-note">Ye baad mein bhi badal sakte ho</div>
   </div>
 </div>
+ <div id="gpToast"></div>
 </body>
 </html>

@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,6 +5,11 @@
  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>GyaanPe – Loved by Kids, Trusted by Parents</title><link rel="manifest" href="/gyaanpe/manifest.json">
  <link rel="icon" href="/gyaanpe/GyaanPe_Logo_Final.png">
+ <meta name="theme-color" content="#1A237E">
+<meta name="description" content="GyaanPe - Nursery se Class 7 tak ke bacchon ke liye CBSE learning app. Lessons, quiz, videos, kahaniyan aur 30-day courses. Loved by Kids, Trusted by Parents.">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="GyaanPe">
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Anton&family=Nunito:wght@400;600;700;800&display=swap');
 *{margin:0;padding:0;box-sizing:border-box;}
@@ -990,158 +994,6 @@ transform:scale(0.96);filter:brightness(0.97);
 .gpst-note{text-align:center;font-size:11px;font-weight:700;color:#999;margin-top:12px;}
 </style>
 <script>
-/* ===== MERGE:JS — paste inside your main <script> block in index.html ===== */
-
-/* ---- 1. Lesson content: 30 days, 4-week arc (Foundations -> Grammar -> Vocabulary -> Conversation) ---- */
-const ENG30_LESSONS = [
-  {day:1,title:"Greetings & Introductions",focus:"Speaking basics",vocab:[["Hello","greeting"],["Nice to meet you","polite intro"],["Good morning/afternoon/evening","time-based greeting"],["How are you?","asking wellbeing"]],grammar:"Use 'I am' + name to introduce yourself: 'I am Priya.'",example:"A: Hello, how are you? B: I am fine, thank you. And you?",task:"Introduce yourself in 3 sentences out loud."},
-  {day:2,title:"Alphabet & Pronunciation",focus:"Phonics",vocab:[["Vowel","a, e, i, o, u"],["Consonant","non-vowel letter"],["Syllable","a beat in a word"]],grammar:"Every English word has at least one vowel sound.",example:"'Ba-na-na' has 3 syllables.",task:"Say the alphabet aloud, then clap syllables in your own name."},
-  {day:3,title:"Personal Pronouns",focus:"Grammar basics",vocab:[["I / you / he / she / it","subject pronouns"],["we / they","plural pronouns"]],grammar:"Pronoun replaces a noun: 'Ram is happy' -> 'He is happy.'",example:"She is my sister. They are my friends.",task:"Rewrite 3 sentences from your day using pronouns."},
-  {day:4,title:"Numbers 1-100",focus:"Vocabulary",vocab:[["Twenty","20"],["Fifty","50"],["Hundred","100"]],grammar:"Numbers 21-99 combine tens + ones: 'twenty-three' = 23.",example:"I have thirty-five rupees.",task:"Count aloud from 1 to 50."},
-  {day:5,title:"Days, Months & Time",focus:"Vocabulary",vocab:[["Monday-Sunday","days of week"],["January-December","months"],["o'clock","exact hour"]],grammar:"'It is + time' tells the time: 'It is five o'clock.'",example:"Today is Monday, the 5th of August.",task:"Say today's full date in English."},
-  {day:6,title:"Family Words",focus:"Vocabulary",vocab:[["Parents","mother + father"],["Sibling","brother/sister"],["Grandparents","dada-dadi/nana-nani"]],grammar:"Possessive 's shows belonging: 'My mother's name.'",example:"My father's brother is my uncle.",task:"Draw your family tree with English labels."},
-  {day:7,title:"Week 1 Review",focus:"Practice",vocab:[["Review","dohrana"],["Recall","yaad karna"]],grammar:"Mix Day 1-6: greetings + pronouns + numbers + time + family.",example:"Hello, I am Aryan. Today is Sunday. My mother's name is Sunita.",task:"Record a 1-minute self-intro using all Week 1 words."},
-  {day:8,title:"Present Simple Tense",focus:"Grammar",vocab:[["Habit","daily routine action"],["Fact","always-true statement"]],grammar:"Subject + verb(s/es for he/she/it): 'She plays cricket.'",example:"I go to school. He goes to office.",task:"Write 3 sentences about your daily routine."},
-  {day:9,title:"Present Continuous Tense",focus:"Grammar",vocab:[["Now","is ho raha hai"],["Currently","abhi"]],grammar:"Subject + is/am/are + verb+ing: 'I am reading.'",example:"She is cooking dinner right now.",task:"Describe what you are doing right now, in one sentence."},
-  {day:10,title:"Past Simple Tense",focus:"Grammar",vocab:[["Yesterday","pichle din"],["Ago","pehle"]],grammar:"Regular verbs add -ed: 'walk -> walked'. Irregular verbs change form: 'go -> went'.",example:"I visited my grandmother yesterday.",task:"Write what you did yesterday in 3 sentences."},
-  {day:11,title:"Future Simple Tense",focus:"Grammar",vocab:[["Tomorrow","kal (aane wala)"],["Plan","yojana"]],grammar:"Subject + will + verb: 'I will study tomorrow.'",example:"We will visit Delhi next month.",task:"Write one plan for next week using 'will'."},
-  {day:12,title:"Articles: a, an, the",focus:"Grammar",vocab:[["Article","a/an/the"],["Specific","particular"]],grammar:"'a/an' for one unspecified thing; 'the' for a specific one.",example:"I saw a dog. The dog was brown.",task:"Fill articles in 5 sentences from a newspaper."},
-  {day:13,title:"Prepositions of Place",focus:"Grammar",vocab:[["in / on / under","location words"],["between / near","relative position"]],grammar:"Preposition + noun shows position: 'The book is on the table.'",example:"The cat is under the chair.",task:"Describe your room using 4 prepositions."},
-  {day:14,title:"Week 2 Review",focus:"Practice",vocab:[["Tense","kriya ka samay"],["Sentence structure","vakya rachna"]],grammar:"Mix Day 8-13: 3 tenses + articles + prepositions.",example:"Yesterday I went to market. Today I am studying. Tomorrow I will play.",task:"Write a 5-sentence paragraph using all 3 tenses."},
-  {day:15,title:"Food & Dining Vocabulary",focus:"Vocabulary",vocab:[["Meal","khaana"],["Recipe","vidhi"],["Delicious","bahut swadisht"]],grammar:"Countable vs uncountable: 'an apple' but 'some rice'.",example:"I would like some water, please.",task:"Order a meal in English (practice with family)."},
-  {day:16,title:"Shopping & Money",focus:"Vocabulary",vocab:[["Discount","chhoot"],["Bill/Receipt","rasid"],["Bargain","mol-bhaav"]],grammar:"'How much' for price, 'How many' for count.",example:"How much does this shirt cost?",task:"Role-play buying something at a shop."},
-  {day:17,title:"Travel & Directions",focus:"Vocabulary",vocab:[["Left/Right","baayen/daayen"],["Straight","seedha"],["Nearby","paas mein"]],grammar:"Imperatives give directions: 'Turn left at the signal.'",example:"Go straight, then turn right.",task:"Give directions from your home to the nearest market."},
-  {day:18,title:"Weather & Seasons",focus:"Vocabulary",vocab:[["Humid","umas bhara"],["Monsoon","barsaat"],["Chilly","thanda"]],grammar:"'It is' + adjective for weather: 'It is sunny today.'",example:"It is raining heavily today.",task:"Describe today's weather in 2 sentences."},
-  {day:19,title:"Health & Body",focus:"Vocabulary",vocab:[["Fever","bukhar"],["Headache","sar dard"],["Symptom","lakshan"]],grammar:"'I have a...' describes an ailment: 'I have a headache.'",example:"I have a mild fever since morning.",task:"Describe a common illness to a friend in English."},
-  {day:20,title:"Week 3 Review",focus:"Practice",vocab:[["Vocabulary","shabdावali"],["Fluency","pravaah"]],grammar:"Mix Day 15-19: food, shopping, travel, weather, health.",example:"Today it is sunny. I went shopping and bought some fruit.",task:"Speak for 1 minute using Week 3 vocabulary."},
-  {day:21,title:"Making Small Talk",focus:"Conversation",vocab:[["Small talk","halki-phulki baat"],["Weather chat","mausam ki baat"]],grammar:"Question tags invite response: 'Nice weather, isn't it?'",example:"A: Hot today, isn't it? B: Yes, very hot!",task:"Start a small talk with a neighbor in English."},
-  {day:22,title:"Phone Conversations",focus:"Conversation",vocab:[["Hold on","ruko"],["Wrong number","galat number"],["Call back","dobara call karna"]],grammar:"Polite requests: 'Could you please...?'",example:"Could you please call me back later?",task:"Practice a 1-minute phone call script."},
-  {day:23,title:"Asking for Help",focus:"Conversation",vocab:[["Excuse me","suniye"],["Could you help me?","kya aap madad karenge?"]],grammar:"'Could/Can you...?' for polite requests.",example:"Excuse me, could you help me find the station?",task:"Ask for help with 3 different requests."},
-  {day:24,title:"Expressing Opinions",focus:"Conversation",vocab:[["I think","mujhe lagta hai"],["In my opinion","mera vichaar hai"],["I disagree","main sehmat nahi"]],grammar:"'I think that...' introduces an opinion.",example:"I think this movie is very interesting.",task:"Share your opinion on any topic in 3 sentences."},
-  {day:25,title:"Job & Work Vocabulary",focus:"Vocabulary",vocab:[["Colleague","sahyogi"],["Deadline","samay-seema"],["Interview","saakshatkar"]],grammar:"Present perfect for experience: 'I have worked here for 2 years.'",example:"She has completed the project on time.",task:"Describe your job or studies in 3 sentences."},
-  {day:26,title:"Week 4 Review — Speaking",focus:"Practice",vocab:[["Confidence","aatm-vishwas"],["Practice","abhyaas"]],grammar:"Mix Day 21-25: small talk, phone, help, opinions, work.",example:"Excuse me, could you help me? I think this is important.",task:"Record yourself speaking for 2 minutes on any topic."},
-  {day:27,title:"Common Idioms",focus:"Vocabulary",vocab:[["Piece of cake","bahut aasan"],["Break the ice","baat shuru karna"],["Under the weather","tabiyat theek na hona"]],grammar:"Idioms are fixed phrases — don't translate word by word.",example:"This exam was a piece of cake!",task:"Use one idiom in a sentence today."},
-  {day:28,title:"Writing Simple Emails",focus:"Writing",vocab:[["Dear","sammanit sambodhan"],["Regards","shubhkamnayein"],["Attached","sanlagn"]],grammar:"Email structure: Greeting -> Body -> Closing.",example:"Dear Sir, Please find the attached document. Regards, Aman.",task:"Write a short formal email requesting information."},
-  {day:29,title:"Interview Practice",focus:"Conversation",vocab:[["Strength","majbooti"],["Weakness","kamzori"],["Achievement","upalabdhi"]],grammar:"'Tell me about yourself' — answer with background + strength + goal.",example:"I am a hardworking student who enjoys learning new skills.",task:"Prepare and speak a 1-minute self-introduction for an interview."},
-  {day:30,title:"Final Review & Certificate",focus:"Course completion",vocab:[["Fluent","dhaara-pravaah"],["Confident","aatm-vishwaasi"],["Achievement","upalabdhi"]],grammar:"You've covered greetings, all 3 tenses, articles, prepositions, vocabulary, and conversation.",example:"I have completed 30 days of English learning!",task:"Record a 2-minute video introducing yourself fully in English — you're ready!"}
-];
-
-/* ---- 2. Purchase + progress state ---- */
-function eng30GetState(){
-  let raw = localStorage.getItem('eng30_state');
-  if(!raw){
-    return {owned:false, purchaseDate:null, completedDays:[]};
-  }
-  return JSON.parse(raw);
-}
-function eng30SaveState(s){ localStorage.setItem('eng30_state', JSON.stringify(s)); }
-
-/* Call this from your existing gpBuy() success handler when productId === 'english_30days_course' */
-function eng30OnPurchaseSuccess(){
-  const s = eng30GetState();
-  s.owned = true;
-  s.purchaseDate = s.purchaseDate || new Date().toISOString();
-  eng30SaveState(s);
-  eng30Render();
-}
-
-function eng30UnlockedDayCount(state){
-  if(!state.owned) return 0;
-  const start = new Date(state.purchaseDate);
-  const now = new Date();
-  const diffDays = Math.floor((now - start) / (1000*60*60*24));
-  return Math.min(30, diffDays + 1); // day 1 unlocks immediately on purchase
-}
-
-function eng30MarkComplete(day){
-  const s = eng30GetState();
-  if(!s.completedDays.includes(day)) s.completedDays.push(day);
-  eng30SaveState(s);
-  eng30Render();
-}
-function openEnglish30(){
-  document.getElementById('screenEnglish30').classList.add('gp-show');
-  eng30Render();
-}
-function closeEnglish30(){
-  document.getElementById('screenEnglish30').classList.remove('gp-show');
-}
- async function eng30Buy(){
-  if(!window.PaymentRequest){
-    alert('Ye course sirf GyaanPe ki Play Store app me kharida ja sakta hai.');
-    return;
-  }
-  try{
-    var request = new PaymentRequest([{
-      supportedMethods: 'https://play.google.com/billing',
-      data: { sku: 'english_30days_course' }
-    }], {
-      total: {
-        label: 'Learn English in 30 Days',
-        amount: { currency: 'INR', value: '0' }
-      }
-    });
-    var response = await request.show();
-    await response.complete('success');
-    eng30OnPurchaseSuccess();
-  }catch(e){
-    console.log('eng30 purchase cancelled/failed:', e);
-  }
-}
-/* ---- 3. Render ---- */
-function eng30Render(){
-  const root = document.getElementById('eng30Root');
-  const state = eng30GetState();
-  const unlockedCount = eng30UnlockedDayCount(state);
-  const pct = Math.round((state.completedDays.length/30)*100);
-
-  let html = `<div class="eng30-header"><h2>Learn English in 30 Days</h2></div>`;
-
-  if(!state.owned){
-    html += `
-      <div class="eng30-locked-banner">Unlock all 30 daily lessons — vocabulary, grammar, and speaking practice.</div>
-      <button class="eng30-buy-btn" onclick="eng30Buy()">Buy Course</button>`;
-    root.innerHTML = html;
-    return;
-  }
-
-  html += `<div class="eng30-progress-bar"><div class="eng30-progress-fill" style="width:${pct}%"></div></div>`;
-  html += `<div class="eng30-grid">`;
-  ENG30_LESSONS.forEach(l=>{
-    const isDone = state.completedDays.includes(l.day);
-    const isUnlocked = l.day <= unlockedCount;
-    const isToday = l.day === unlockedCount && !isDone;
-    let cls = 'eng30-day ' + (isDone ? 'done' : isToday ? 'today' : isUnlocked ? 'unlocked' : 'locked');
-    html += `<button class="${cls}" ${isUnlocked ? `onclick="eng30OpenLesson(${l.day})"` : 'disabled'}>
-      ${l.day}${!isUnlocked ? '<span class="lock-ic">🔒</span>' : ''}
-    </button>`;
-  });
-  html += `</div><div id="eng30LessonView"></div>`;
-  root.innerHTML = html;
-}
-
-function eng30OpenLesson(day){
-  const l = ENG30_LESSONS.find(x=>x.day===day);
-  const state = eng30GetState();
-  const isDone = state.completedDays.includes(day);
-  const vocabHtml = l.vocab.map(v=>`<div class="eng30-vocab-item"><b>${v[0]}</b><span>${v[1]}</span></div>`).join('');
-  document.getElementById('eng30LessonView').innerHTML = `
-    <div class="eng30-lesson">
-      <button class="eng30-close" onclick="document.getElementById('eng30LessonView').innerHTML=''">×</button>
-      <h3>Day ${l.day}: ${l.title}</h3>
-      <div class="focus">${l.focus}</div>
-      <div class="eng30-section-title">Vocabulary</div>
-      ${vocabHtml}
-      <div class="eng30-section-title">Grammar Point</div>
-      <div>${l.grammar}</div>
-      <div class="eng30-example">${l.example}</div>
-      <div class="eng30-section-title">Today's Task</div>
-      <div class="eng30-task">${l.task}</div>
-      <button class="eng30-complete-btn ${isDone?'done':''}" onclick="eng30MarkComplete(${l.day})">
-        ${isDone ? '✓ Completed' : 'Mark as Complete'}
-      </button>
-    </div>`;
-}
 var GPC_FB = 'https://zapzone-98727-default-rtdb.firebaseio.com';
 var GPC_UNLOCK_MODE = 'complete';
 
@@ -12260,11 +12112,6 @@ el.innerHTML=html;
 }
 function gpBuy(p){
 if(p==='restore'){GyaanPePremium.restore();return;}
-function gpBuy(p){
-if(p==='restore'){GyaanPePremium.restore();return;}
-if(p==='yearly'||p==='annual'){GyaanPePremium.buy('yearly');return;}
-GyaanPePremium.buy('monthly');
-}
 if(p==='yearly'||p==='annual'){GyaanPePremium.buy('yearly');return;}
 GyaanPePremium.buy('monthly');
 }

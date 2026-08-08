@@ -970,6 +970,24 @@ transform:scale(0.96);filter:brightness(0.97);
 .gps-card.soon{opacity:.72;}
 .gps-empty{text-align:center;padding:40px 20px;color:#888;font-weight:700;font-size:13.5px;}
 .gps-count{font-size:11px;font-weight:800;color:#888;margin-bottom:10px;}
+ #gpSetup{position:fixed;inset:0;background:linear-gradient(160deg,#FFF9F0,#FFF3E0);z-index:99999;overflow-y:auto;display:none;padding:24px 18px;}
+#gpSetup.gp-show{display:block;}
+.gpst-wrap{max-width:420px;margin:0 auto;}
+.gpst-logo{font-family:'Anton',sans-serif;font-size:34px;color:#1A237E;text-align:center;letter-spacing:1px;}
+.gpst-logo span{color:#FF6F00;}
+.gpst-sub{text-align:center;font-size:13px;font-weight:800;color:#666;margin-bottom:22px;}
+.gpst-q{font-family:'Anton',sans-serif;font-size:16px;color:#1A237E;letter-spacing:.4px;margin:18px 0 10px;}
+.gpst-input{width:100%;padding:14px 16px;border:2px solid #EEE2CF;border-radius:14px;font-family:'Nunito',sans-serif;font-size:16px;font-weight:800;color:#1A237E;box-sizing:border-box;outline:none;background:#fff;}
+.gpst-input:focus{border-color:#FF6F00;}
+.gpst-avatars{display:flex;gap:9px;flex-wrap:wrap;}
+.gpst-av{width:52px;height:52px;border-radius:50%;border:3px solid transparent;background:#fff;font-size:26px;line-height:1;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.07);}
+.gpst-av.on{border-color:#FF6F00;background:#FFF3E0;}
+.gpst-classes{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
+.gpst-cls{padding:12px 4px;border:2px solid #EEE2CF;border-radius:12px;background:#fff;font-family:'Anton',sans-serif;font-size:14px;color:#1A237E;cursor:pointer;letter-spacing:.3px;}
+.gpst-cls.on{background:#1A237E;border-color:#1A237E;color:#fff;}
+.gpst-go{display:block;width:100%;margin-top:24px;padding:16px;border:none;border-radius:16px;background:linear-gradient(135deg,#FF6F00,#FFA000);color:#fff;font-family:'Anton',sans-serif;font-size:18px;letter-spacing:.6px;cursor:pointer;box-shadow:0 5px 16px rgba(255,111,0,.35);}
+.gpst-go:disabled{opacity:.45;box-shadow:none;cursor:not-allowed;}
+.gpst-note{text-align:center;font-size:11px;font-weight:700;color:#999;margin-top:12px;}
 </style>
 <script>
 /* ===== MERGE:JS — paste inside your main <script> block in index.html ===== */
@@ -1426,6 +1444,78 @@ function gpsRenderGrid(){
   document.getElementById('gpsGrid').innerHTML = h;
 }
 function openMaths30(){ gpcOpen('maths30'); }
+ var GPST_AV = ['\uD83D\uDC66','\uD83D\uDC67','\uD83E\uDDD2','\uD83D\uDC68\u200D\uD83C\uDF93','\uD83D\uDC69\u200D\uD83C\uDF93','\uD83E\uDD81','\uD83D\uDC2F','\uD83E\uDD89'];
+var GPST_CLS = [
+  {k:'nursery', label:'Nur', fn:'openNursery'},
+  {k:'lkg',     label:'LKG', fn:'openLKG'},
+  {k:'ukg',     label:'UKG', fn:'openUKG'},
+  {k:'c1',      label:'1',   fn:'openClass1'},
+  {k:'c2',      label:'2',   fn:'openClass2'},
+  {k:'c3',      label:'3',   fn:'openClass3'},
+  {k:'c4',      label:'4',   fn:'openClass4'},
+  {k:'c5',      label:'5',   fn:'openClass5'},
+  {k:'c6',      label:'6',   fn:'openClass6'},
+  {k:'c7',      label:'7',   fn:'openClass7'}
+];
+var gpstAv = 0;
+var gpstCls = null;
+
+function gpstRender(){
+  var a = '';
+  GPST_AV.forEach(function(e, i){
+    a += '<button class="gpst-av' + (i === gpstAv ? ' on' : '') + '" onclick="gpstPickAv(' + i + ')">' + e + '</button>';
+  });
+  document.getElementById('gpstAvatars').innerHTML = a;
+  var c = '';
+  GPST_CLS.forEach(function(x){
+    c += '<button class="gpst-cls' + (gpstCls === x.k ? ' on' : '') + '" onclick="gpstPickCls(\'' + x.k + '\')">' + x.label + '</button>';
+  });
+  document.getElementById('gpstClasses').innerHTML = c;
+  gpstCheck();
+}
+function gpstPickAv(i){ gpstAv = i; gpstRender(); }
+function gpstPickCls(k){ gpstCls = k; gpstRender(); }
+
+function gpstCheck(){
+  var nm = (document.getElementById('gpstName').value || '').trim();
+  document.getElementById('gpstGo').disabled = !(nm.length >= 2 && gpstCls);
+}
+
+function gpstOpen(){
+  var p = {};
+  try{ p = gpProfile() || {}; }catch(e){}
+  document.getElementById('gpstName').value = (p.name && p.name !== 'Champ') ? p.name : '';
+  gpstCls = p.cls || null;
+  var ai = GPST_AV.indexOf(p.avatar);
+  gpstAv = ai > -1 ? ai : 0;
+  document.getElementById('gpSetup').classList.add('gp-show');
+  gpstRender();
+}
+
+function gpstFinish(){
+  var nm = (document.getElementById('gpstName').value || '').trim();
+  if(nm.length < 2 || !gpstCls) return;
+  var p = {};
+  try{ p = gpProfile() || {}; }catch(e){}
+  p.name = nm;
+  p.avatar = GPST_AV[gpstAv];
+  p.cls = gpstCls;
+  try{ localStorage.setItem('gp_profile', JSON.stringify(p)); }catch(e){}
+  try{ localStorage.setItem('gp_onboarded', '1'); }catch(e){}
+  document.getElementById('gpSetup').classList.remove('gp-show');
+  var fte = document.getElementById('gpFTE');
+  if(fte) fte.classList.add('gp-hidden');
+  try{ if(typeof gpRenderHome === 'function') gpRenderHome(); }catch(e){}
+  try{ if(typeof gpApplyClassLocks === 'function') gpApplyClassLocks(); }catch(e){}
+  try{ if(typeof gpPills === 'function') gpPills(); }catch(e){}
+}
+function gpstOpenMyClass(){
+  var p = {};
+  try{ p = gpProfile() || {}; }catch(e){}
+  if(!p.cls) return;
+  var m = GPST_CLS.filter(function(x){ return x.k === p.cls; })[0];
+  if(m && typeof window[m.fn] === 'function') window[m.fn]();
+}
 /* ---- 4. Init — call eng30Render() wherever you mount this screen ---- */
 </script>
 </head>
@@ -12611,12 +12701,9 @@ if ('serviceWorker' in navigator) {
     };
 
     window.gpGoToRealSetup = function(){
-      document.getElementById('gpFTE').classList.add('gp-hidden');
-      s('gp_onboarded','1');
-      // === INTEGRATION POINT #1 ===
-      // Replace next line with your real setup screen's show logic.
-      console.log('[GyaanPe FTE] TODO: show your real name/class setup screen here');
-    };
+  document.getElementById('gpFTE').classList.add('gp-hidden');
+  gpstOpen();
+};
 
     window.gpAwardReward = function(xp, coins, badgeName){
       s('gp_xp', (parseInt(g('gp_xp','0'))||0) + xp);
@@ -12912,6 +12999,24 @@ if ('serviceWorker' in navigator) {
     <h2>&#127891; Premium Courses</h2>
   </div>
   <div class="gpc-body" id="gpsBody"></div>
+</div>
+ <div id="gpSetup">
+  <div class="gpst-wrap">
+    <div class="gpst-logo">Gyaan<span>Pe</span></div>
+    <div class="gpst-sub">Chalo shuruaat karte hain!</div>
+
+    <div class="gpst-q">&#128075; Tumhara naam kya hai?</div>
+    <input type="text" id="gpstName" class="gpst-input" placeholder="Apna naam likho" maxlength="20" oninput="gpstCheck()">
+
+    <div class="gpst-q">&#128512; Apna avatar chuno</div>
+    <div class="gpst-avatars" id="gpstAvatars"></div>
+
+    <div class="gpst-q">&#127891; Tum kaunsi class mein ho?</div>
+    <div class="gpst-classes" id="gpstClasses"></div>
+
+    <button class="gpst-go" id="gpstGo" disabled onclick="gpstFinish()">&#128640; Shuru Karo</button>
+    <div class="gpst-note">Ye baad mein bhi badal sakte ho</div>
+  </div>
 </div>
 </body>
 </html>

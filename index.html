@@ -5188,7 +5188,19 @@ function openAITutor() {
   }
   var pKey = tutorGetPersonaKey();
   var persona = TUTOR_PERSONAS[pKey];
-  document.getElementById("tutorHeaderName").textContent = persona.avatar + " " + persona.name;
+ var _th = document.getElementById("tutorHeaderName");
+_th.textContent = "";
+if(persona.img){
+  var _im = document.createElement("img");
+  _im.className = "tutor-face";
+  _im.src = persona.img;
+  _im.alt = persona.name;
+  _im.onerror = function(){ _th.textContent = persona.avatar + " " + persona.name; };
+  _th.appendChild(_im);
+  _th.appendChild(document.createTextNode(persona.name));
+}else{
+  _th.textContent = persona.avatar + " " + persona.name;
+}
   if (_tutorState.messages.length === 0) {
     _tutorState.messages.push({ role: "assistant", content: persona.welcome });
   }

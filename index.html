@@ -5267,7 +5267,7 @@ function tutorRenderChat() {
   var html = "";
   _tutorState.messages.forEach(function (m) {
     var cls = m.role === "assistant" ? "bot" : "user";
-    html += '<div class="tutor-msg ' + cls + '">' + esc(m.content) + (m.image ? ''<img class="tutor-chat-img" alt="Bheji gayi tasveer" src="' + m.image + '">' : "") + "</div>";
+   html += '<div class="tutor-msg ' + cls + '">' + esc(m.content) + (m.image ? '<img class="tutor-chat-img" alt="Bheji gayi tasveer" src="' + m.image + '">' : "") + '</div>';
   });
   if (_tutorState.loading) {
     html += '<div class="tutor-typing"><span></span><span></span><span></span></div>';

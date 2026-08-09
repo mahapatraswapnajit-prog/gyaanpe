@@ -525,6 +525,7 @@ button,.n-opt,.option-btn,.class-chip,.n-card,.section-btn{touch-action:manipula
 @media print{
 .j-head,.ws-action-row,.tutor-limit-note,.home-btn-back{display:none!important;}
 }
+ .tutor-face{width:34px;height:34px;border-radius:50%;object-fit:cover;vertical-align:middle;margin-right:6px;background:#FFF9F0;}
 
 .oly-subj-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0;}
 .oly-subj-card{border-radius:14px;padding:14px 10px;text-align:center;cursor:pointer;border:3px solid transparent;background:#FAFAFA;}
@@ -5115,8 +5116,8 @@ var TUTOR_DAILY_LIMIT = 25;
 var _tutorState = {messages: [], loading: false, pendingImage: null};
 
 var TUTOR_PERSONAS = {
-anika: {name:"Anika Ma'am", avatar:"👩‍🏫", classes:["nursery","lkg","ukg","c1","c2","c3"], welcome:"Hi there! I am Anika Ma'am! 🌟 Ask me anything about your studies, or tap a fun idea below!"},
-arjun: {name:"Arjun Sir", avatar:"👨‍🏫", classes:["c4","c5","c6","c7"], welcome:"Hello! I am Arjun Sir, your study helper. Ask me a doubt from any subject, or pick a suggestion below."}
+anika: {name:"Anika Ma'am", avatar:"👩‍🏫", img:"/gyaanpe/anika.png", classes:["nursery","lkg","ukg","c1","c2","c3"], welcome:"Hi there! I am Anika Ma'am! 🌟 Ask me anything about your studies, or tap a fun idea below!"},
+arjun: {name:"Arjun Sir", avatar:"👨‍🏫", img:"/gyaanpe/arjun.png", classes:["c4","c5","c6","c7"], welcome:"Hello! I am Arjun Sir, your study helper. Ask me a doubt from any subject, or pick a suggestion below."}
 };
 
 var TUTOR_SUGGESTIONS_ANIKA = ["Tell me about animals", "Help me count numbers", "What is a rhyming word?", "Tell me a fun fact"];

@@ -493,6 +493,9 @@ button,.n-opt,.option-btn,.class-chip,.n-card,.section-btn{touch-action:manipula
 .tutor-img-preview img{width:44px;height:44px;object-fit:cover;border-radius:8px;}
 .tutor-img-preview-remove{margin-left:auto;background:#E53935;color:#fff;border:none;border-radius:50%;width:22px;height:22px;font-size:12px;cursor:pointer;}
 .tutor-msg img.tutor-chat-img{max-width:160px;border-radius:10px;display:block;margin-top:6px;}
+.tutor-report{display:block;margin:2px 0 8px;font-size:10.5px;color:#9E9E9E;background:none;border:0;padding:2px 0;cursor:pointer;text-align:left;font-family:inherit;}
+.tutor-report:hover{color:#C62828;text-decoration:underline;}
+.tutor-report[disabled]{color:#2E7D32;cursor:default;text-decoration:none;}
 .doubt-hist-row{background:#FAFAFA;border-radius:12px;padding:10px 12px;margin:6px 0;}
 .doubt-hist-q{font-size:12px;font-weight:700;color:#333;margin-bottom:3px;}
 .doubt-hist-meta{display:flex;justify-content:space-between;align-items:center;font-size:10px;color:#888;}
@@ -5259,15 +5262,47 @@ function tutorRenderChat() {
   var area = document.getElementById("tutorChatArea");
   if (!area) return;
   var html = "";
-  _tutorState.messages.forEach(function (m) {
+  _tutorState.messages.forEach(function (m, i) {
     var cls = m.role === "assistant" ? "bot" : "user";
    html += '<div class="tutor-msg ' + cls + '">' + esc(m.content) + (m.image ? '<img class="tutor-chat-img" alt="Bheji gayi tasveer" src="' + m.image + '">' : "") + '</div>';
+    if (m.role === "assistant") {
+      html += m.reported
+        ? '<button class="tutor-report" disabled>&#10003; Report bhej diya gaya. Dhanyawaad!</button>'
+        : '<button class="tutor-report" onclick="tutorReportAnswer(' + i + ')">&#9888; Is jawab ko report karein</button>';
+    }
   });
   if (_tutorState.loading) {
     html += '<div class="tutor-typing"><span></span><span></span><span></span></div>';
   }
   area.innerHTML = html;
   area.scrollTop = area.scrollHeight;
+}
+
+/* In-app reporting for AI-generated answers (Google Play generative AI policy). */
+var TUTOR_REPORT_URL = 'https://zapzone-98727-default-rtdb.firebaseio.com/gyaanpeAIReports.json';
+function tutorReportAnswer(i) {
+  var m = _tutorState.messages[i];
+  if (!m || m.reported) return;
+  if (!confirm('Kya is jawab me kuch galat ya bachchon ke liye anuchit hai?\n\nReport karne par hum ise review karenge.')) return;
+  m.reported = true;
+  tutorRenderChat();
+  var prevUser = '';
+  for (var j = i - 1; j >= 0; j--) {
+    if (_tutorState.messages[j].role !== 'assistant') { prevUser = _tutorState.messages[j].content || ''; break; }
+  }
+  try {
+    fetch(TUTOR_REPORT_URL, {
+      method: 'POST',
+      body: JSON.stringify({
+        uid: (typeof gpcUid === 'function' ? gpcUid() : ''),
+        question: (prevUser + '').slice(0, 500),
+        answer: (m.content + '').slice(0, 1500),
+        persona: (typeof tutorGetPersonaKey === 'function' ? tutorGetPersonaKey() : ''),
+        lang: (typeof tutorGetLang === 'function' ? tutorGetLang() : ''),
+        at: new Date().toISOString()
+      })
+    })["catch"](function () {});
+  } catch (e) {}
 }
 
 function tutorMotivationLine() {

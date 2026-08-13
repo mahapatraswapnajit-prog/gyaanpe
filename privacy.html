@@ -2,108 +2,254 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Privacy Policy - GyaanPe</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Privacy Policy — GyaanPe Kids Learning App</title>
+<meta name="description" content="Privacy Policy for the GyaanPe Kids Learning App, explaining what data we collect from children and parents, and how it is used and protected.">
+<meta name="theme-color" content="#1B2A4A">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-  *{margin:0;padding:0;box-sizing:border-box;}
-  body{font-family:'Nunito',Arial,sans-serif;background:#FFF9F0;color:#333;line-height:1.7;}
-  .container{max-width:760px;margin:0 auto;padding:30px 20px 60px;}
-  .header{text-align:center;padding:20px 0 30px;}
-  .logo-text{font-size:32px;font-family:'Anton',Arial,sans-serif;color:#1A237E;letter-spacing:1px;}
-  .logo-text span{color:#FF6F00;}
-  h1{font-size:22px;color:#1A237E;margin-bottom:6px;}
-  .updated{font-size:13px;color:#777;margin-bottom:30px;}
-  h2{font-size:17px;color:#1A237E;margin-top:28px;margin-bottom:8px;border-left:4px solid #FF6F00;padding-left:10px;}
-  p{font-size:14.5px;margin-bottom:10px;}
-  ul{margin:10px 0 10px 22px;}
-  li{font-size:14.5px;margin-bottom:6px;}
-  a{color:#1A237E;font-weight:700;}
-  .contact-box{background:#fff;border-radius:16px;padding:18px 20px;margin-top:20px;box-shadow:0 4px 14px rgba(0,0,0,0.06);border-top:4px solid #FF6F00;}
-  .footer{text-align:center;font-size:12px;color:#999;margin-top:40px;}
-  table{width:100%;border-collapse:collapse;margin:14px 0;font-size:13.5px;}
-  th,td{border:1px solid #eee;padding:8px 10px;text-align:left;}
-  th{background:#FFF3E0;color:#1A237E;}
+  :root{
+    --ink:#16202F;
+    --ink-soft:#4A5768;
+    --paper:#FBFAF7;
+    --rule:#DFDCD4;
+    --navy:#1B2A4A;
+    --marigold:#C8791A;
+    --wrap:44rem;
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    font-size:1.0625rem;
+    line-height:1.65;
+  }
+  .wrap{max-width:var(--wrap);margin:0 auto;padding:0 1.5rem}
+
+  header{border-bottom:1px solid var(--rule);padding:3.5rem 0 2.25rem;margin-bottom:2.5rem}
+  .eyebrow{
+    font-size:.75rem;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--marigold);font-weight:600;margin:0 0 .75rem
+  }
+  h1{
+    font-family:Newsreader,Georgia,serif;
+    font-weight:600;font-size:clamp(2rem,6vw,2.75rem);
+    line-height:1.15;margin:0 0 .75rem;letter-spacing:-.01em
+  }
+  .dates{color:var(--ink-soft);font-size:.9375rem;margin:0}
+
+  /* signature element: the plain-language summary */
+  .glance{
+    border:1px solid var(--rule);
+    border-left:3px solid var(--navy);
+    background:#fff;
+    padding:1.5rem 1.5rem .5rem;
+    margin:0 0 3rem;
+  }
+  .glance h2{
+    font-family:Inter,sans-serif;font-size:.75rem;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--navy);margin:0 0 1rem;font-weight:600
+  }
+  .glance ul{margin:0;padding:0;list-style:none}
+  .glance li{
+    display:flex;gap:.75rem;align-items:flex-start;
+    padding:0 0 1rem;font-size:1rem
+  }
+  .mark{
+    flex:0 0 auto;width:1.25rem;height:1.25rem;margin-top:.25rem;
+    font-size:.8125rem;font-weight:600;line-height:1.25rem;text-align:center;
+    border-radius:50%;color:#fff;background:var(--navy)
+  }
+  .mark.no{background:#8C3B2E}
+
+  h2{
+    font-family:Newsreader,Georgia,serif;font-weight:600;
+    font-size:1.5rem;line-height:1.25;margin:2.75rem 0 .875rem;
+    padding-top:1.75rem;border-top:1px solid var(--rule)
+  }
+  h3{font-size:1rem;font-weight:600;margin:1.75rem 0 .5rem}
+  p{margin:0 0 1rem}
+  ul.body,ol.body{margin:0 0 1.25rem;padding-left:1.25rem}
+  ul.body li,ol.body li{margin-bottom:.5rem}
+  strong{font-weight:600}
+  a{color:var(--navy);text-underline-offset:.15em}
+  a:focus-visible,summary:focus-visible{outline:2px solid var(--marigold);outline-offset:3px}
+
+  table{width:100%;border-collapse:collapse;margin:0 0 1.5rem;font-size:.9375rem}
+  th,td{text-align:left;padding:.75rem .75rem .75rem 0;border-bottom:1px solid var(--rule);vertical-align:top}
+  th{font-weight:600;font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft)}
+
+  .fill{background:#FFF3DC;padding:.0625rem .3125rem;border-bottom:1px solid var(--marigold)}
+
+  .contact{border:1px solid var(--rule);background:#fff;padding:1.5rem;margin:1rem 0 0}
+  .contact p:last-child{margin-bottom:0}
+
+  footer{
+    border-top:1px solid var(--rule);margin-top:3.5rem;padding:1.75rem 0 4rem;
+    color:var(--ink-soft);font-size:.875rem
+  }
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
-<div class="container">
 
-  <div class="header">
-    <div class="logo-text">Gyaan<span>Pe</span></div>
+<header>
+  <div class="wrap">
+    <p class="eyebrow">GyaanPe Kids Learning App</p>
+    <h1>Privacy Policy</h1>
+    <p class="dates">Effective 13 August 2026 &nbsp;·&nbsp; Last updated 13 August 2026</p>
   </div>
+</header>
 
-  <h1>Privacy Policy</h1>
-  <p class="updated">Last updated: July 24, 2026</p>
+<main class="wrap">
 
-  <p>GyaanPe ("we", "our", "the app") is a CBSE-aligned kids' learning app. This Privacy Policy explains what information we collect, how we use it, and the choices you and your child have. GyaanPe is designed for use by children under parental supervision, and we take children's privacy seriously.</p>
+  <section class="glance">
+    <h2>The short version</h2>
+    <ul>
+      <li><span class="mark">✓</span><span>A child can use GyaanPe without an account, an email address or a phone number.</span></li>
+      <li><span class="mark no">✕</span><span>We never ask a child for their real name, address, school, photo, contact details or date of birth.</span></li>
+      <li><span class="mark no">✕</span><span>We do not show personalised or interest-based advertising to children, and we do not build advertising profiles.</span></li>
+      <li><span class="mark no">✕</span><span>We do not sell personal data, and we do not share it with data brokers.</span></li>
+      <li><span class="mark">✓</span><span>Most information stays on the device. Learning progress is stored against a random ID that is not linked to a real identity.</span></li>
+      <li><span class="mark no">✕</span><span>AI tutor conversations are not stored by us, and are not used to train AI models.</span></li>
+      <li><span class="mark">✓</span><span>A parent can ask us to delete everything at any time by writing to the email address at the end of this page.</span></li>
+    </ul>
+  </section>
 
-  <h2>1. Information We Collect</h2>
-  <p>GyaanPe is built to work with minimal personal information. We collect:</p>
-  <ul>
-    <li><strong>Learning progress data</strong> — XP points, coins, badges, streaks, quiz scores, and completed lessons, stored to track a learner's progress within the app.</li>
-    <li><strong>Device/app identifiers</strong> — a randomly generated identifier used to store your progress and app preferences (not linked to your real-world identity).</li>
-    <li><strong>Purchase information</strong> — if you subscribe to GyaanPe Premium, purchase status and subscription details are processed via Google Play Billing. We do not receive or store your payment card details.</li>
-    <li><strong>Usage data</strong> — general app usage statistics (e.g. features used, session length) that may be collected automatically to help us improve the app.</li>
-  </ul>
-  <p>We do <strong>not</strong> knowingly collect a child's name, photo, precise location, contact list, or other directly identifying information.</p>
+  <h2>1. Who we are</h2>
+  <p>GyaanPe is a learning app for children from Nursery to Class 7, published on Google Play as <strong>com.gyaanpe.kidslearning</strong>.</p>
+  <p>This app is operated by <strong>Swapnajit Mahapatra</strong>, based in Bhubaneswar, Odisha, India. In this policy, "we", "us" and "our" refer to that operator, and "the app" refers to GyaanPe.</p>
+  <p>This policy explains what information the app handles, why, and what choices parents have. It applies to the GyaanPe mobile app and the GyaanPe web app.</p>
 
-  <h2>2. How We Use Information</h2>
-  <ul>
-    <li>To save and display learning progress (XP, streaks, badges, quiz history)</li>
-    <li>To unlock Premium features for subscribed users</li>
-    <li>To show age-appropriate advertising (see Section 4)</li>
-    <li>To maintain, troubleshoot, and improve the app</li>
-  </ul>
+  <h2>2. A note for parents</h2>
+  <p>GyaanPe is designed for children, so we have built it to work with as little personal information as possible. There is no sign-up, no login, and no need to give an email address or phone number to start learning.</p>
+  <p>If you are a parent or guardian and you have any question about your child's information, or you want it deleted, write to us at the address in section 12. We respond to every request.</p>
 
-  <h2>3. Data Storage</h2>
-  <p>Learning progress and app data are stored using Google Firebase (Realtime Database), a secure cloud service provided by Google. Data is associated with a device-level identifier, not with a child's real name or contact details.</p>
+  <h2>3. Information the app handles</h2>
 
-  <h2>4. Advertising</h2>
-  <p>GyaanPe shows ads through Google AdMob to free-tier users. Ads shown to children are configured to comply with Google's <strong>child-directed treatment</strong> settings, meaning:</p>
-  <ul>
-    <li>No behavioral or interest-based ad targeting is used for child users</li>
-    <li>No personalized advertising based on browsing history</li>
-    <li>Ad content is limited to formats appropriate for a general/family audience</li>
-  </ul>
-  <p>Premium subscribers do not see ads.</p>
-
-  <h2>5. Third-Party Services</h2>
+  <h3>Information a child enters</h3>
   <table>
-    <tr><th>Service</th><th>Purpose</th></tr>
-    <tr><td>Google Firebase</td><td>Storing learning progress, streaks, quiz data</td></tr>
-    <tr><td>Google AdMob</td><td>Displaying ads to free-tier users (child-directed settings)</td></tr>
-    <tr><td>Google Play Billing</td><td>Processing Premium subscription purchases</td></tr>
-    <tr><td>BillDesk</td><td>Payment processing for subscriptions (India)</td></tr>
+    <thead><tr><th>What</th><th>Why</th><th>Where it is stored</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>A display name</td>
+        <td>To greet the child in the app and personalise their dashboard</td>
+        <td>On the device. A nickname is fine — we do not ask for or verify a real name.</td>
+      </tr>
+      <tr>
+        <td>An avatar and a class level</td>
+        <td>To show the right lessons for the child's level</td>
+        <td>On the device</td>
+      </tr>
+      <tr>
+        <td>Questions typed to the AI tutor</td>
+        <td>To generate an answer</td>
+        <td>Sent for processing, see section 5</td>
+      </tr>
+    </tbody>
   </table>
-  <p>These providers may process limited technical data as necessary to deliver their service. We encourage you to review Google's Privacy Policy for details on their data practices.</p>
 
-  <h2>6. Children's Privacy (COPPA &amp; Google Families)</h2>
-  <p>GyaanPe is intended to be used by children with the involvement of a parent or guardian. We do not knowingly collect more personal information from children than is necessary to provide the app's core functionality. We do not allow children to create public profiles, chat with other users, or share personal information within the app.</p>
-  <p>If you are a parent or guardian and believe your child has provided us with personal information beyond what is described here, please contact us using the details below and we will take appropriate action, including deletion of such data.</p>
+  <h3>Information the app generates</h3>
+  <table>
+    <thead><tr><th>What</th><th>Why</th></tr></thead>
+    <tbody>
+      <tr><td>Lessons completed, quiz scores and chapter progress</td><td>To carry on from where the child left off and to show progress in the parent dashboard</td></tr>
+      <tr><td>XP, coins, badges and daily streak</td><td>To run the rewards that keep children motivated</td></tr>
+      <tr><td>A randomly generated device ID</td><td>To keep progress and purchases attached to the right device. It is a random string, not linked to a name, email or phone number.</td></tr>
+      <tr><td>Purchase status for subscriptions and courses</td><td>To unlock what has been bought and to restore it if the app is reinstalled</td></tr>
+    </tbody>
+  </table>
 
-  <h2>7. Parental Controls &amp; Consent</h2>
-  <p>Parents can review, manage, or request deletion of their child's app data at any time by contacting us. Purchases (subscriptions) require parental action through the Google Play payment flow.</p>
+  <h3>Information we never collect</h3>
+  <p>The app does not ask for and does not collect a real name, home address, school name, email address, phone number, date of birth, photographs, camera or microphone access, contacts, or precise location.</p>
 
-  <h2>8. Data Retention</h2>
-  <p>Learning progress data is retained as long as the app is in use. You may request deletion of your data at any time (see Contact section).</p>
+  <h2>4. Where information is stored</h2>
+  <p>Most information — the display name, avatar, class and local settings — stays in the app's storage on the device itself. Uninstalling the app removes it.</p>
+  <p>Learning progress, quiz results and course progress are stored in <strong>Google Firebase Realtime Database</strong> so that progress is not lost. This information is stored against the random device ID described above, which means the records are not tied to a child's real identity.</p>
 
-  <h2>9. Data Sharing</h2>
-  <p>We do not sell personal information. Data is shared only with the third-party service providers listed in Section 5, solely to operate the app's core features (progress storage, ads, billing).</p>
+  <h2>5. The AI tutor and AI-generated practice</h2>
+  <p>GyaanPe includes an AI tutor that answers a child's study questions, and an AI feature that generates practice worksheets. When a question or request is made, that text is sent over an encrypted connection to our processing service, which passes it to <strong>Google's Gemini AI model</strong> to generate a reply. The reply is then shown in the app.</p>
+  <p>We do not store these conversations. Our processing service keeps only a daily count of how many requests a device has made, so that fair usage limits can be applied. The content of what is typed is not saved by us and is not written to any database or log.</p>
+  <p>We use Google's paid Gemini API. Under those terms, the text sent is used only to generate the reply — it is not used to train or improve AI models, and it is not reviewed by human raters.</p>
+  <p>We instruct the AI to give age-appropriate, education-focused answers. AI systems can still occasionally produce an answer that is wrong or unsuitable, so we ask parents to supervise use of this feature. If you see an answer that seems inappropriate, please report it to us at the email address in section 12 and we will review it.</p>
+  <p>Please tell your child not to type personal details — such as their full name, address, school or phone number — into the tutor.</p>
 
-  <h2>10. Security</h2>
-  <p>We use industry-standard practices to protect data stored via Firebase and Google Play Billing. However, no method of electronic storage is 100% secure, and we cannot guarantee absolute security.</p>
+  <h2>6. Advertising</h2>
+  <p>The free version of GyaanPe shows advertisements supplied by <strong>Google AdMob</strong>. Because GyaanPe is a children's app:</p>
+  <ul class="body">
+    <li>Ad requests are marked as child-directed, so advertising is <strong>contextual, not personalised</strong>.</li>
+    <li>We do not allow interest-based advertising, behavioural profiling or remarketing to children.</li>
+    <li>Advertising identifiers are not used to build a profile of a child.</li>
+    <li>Ads are filtered to age-appropriate categories.</li>
+  </ul>
+  <p>Buying a premium subscription or a course removes advertisements.</p>
 
-  <h2>11. Changes to This Policy</h2>
-  <p>We may update this Privacy Policy from time to time. Changes will be posted on this page with an updated "Last updated" date. Continued use of the app after changes constitutes acceptance of the revised policy.</p>
+  <h2>7. Purchases</h2>
+  <p>Subscriptions and one-time course purchases are handled entirely by <strong>Google Play Billing</strong>. Payment details — card numbers, UPI IDs, bank details — go directly to Google. We never see, receive or store them. We only receive confirmation of whether a purchase is active, so the app knows what to unlock.</p>
 
-  <h2>12. Contact Us</h2>
-  <div class="contact-box">
-    <p>If you have questions about this Privacy Policy, or wish to request data deletion, please contact:</p>
-    <p style="margin-top:8px;"><strong>Email:</strong> <a href="mailto:gyaanpe.support@gmail.com">gyaanpe.support@gmail.com</a></p>
+  <h2>8. Service providers</h2>
+  <p>We use a small number of established providers to run the app. Each handles data only for the purpose listed here.</p>
+  <table>
+    <thead><tr><th>Provider</th><th>Purpose</th></tr></thead>
+    <tbody>
+      <tr><td>Google Firebase</td><td>Storing learning progress</td></tr>
+      <tr><td>Google AdMob</td><td>Serving non-personalised advertisements</td></tr>
+      <tr><td>Google Play Billing</td><td>Processing purchases</td></tr>
+      <tr><td>Google Gemini</td><td>Generating AI tutor answers</td></tr>
+      <tr><td>Cloudflare</td><td>Routing AI tutor requests securely</td></tr>
+      <tr><td>GitHub Pages</td><td>Hosting the app's content files</td></tr>
+    </tbody>
+  </table>
+  <p>We do not use third-party analytics, tracking pixels or social media SDKs in the app. We do not sell personal data, and we do not share it with advertisers or data brokers for their own purposes.</p>
+
+  <h2>9. Children's privacy</h2>
+  <p>GyaanPe is intended for children and is designed to comply with children's privacy laws, including India's <strong>Digital Personal Data Protection Act, 2023</strong> and the United States' <strong>Children's Online Privacy Protection Act (COPPA)</strong>.</p>
+  <p>Our approach is data minimisation: the app is built so that a child can learn without providing personal information at all. Specifically:</p>
+  <ul class="body">
+    <li>No account, email address or phone number is required.</li>
+    <li>The app does not track children across other apps or websites.</li>
+    <li>The app does not carry out behavioural monitoring, profiling or targeted advertising directed at children.</li>
+    <li>The display name is optional and may be a nickname.</li>
+  </ul>
+  <p>Indian law treats anyone under 18 as a child and requires verifiable parental consent before a child's personal data is processed. Because a parent installs the app, controls the device and can review or delete everything the app holds, we ask that a parent or guardian install GyaanPe and supervise its use. By installing the app and allowing a child to use it, you confirm that you are the parent or guardian and that you consent to the limited processing described in this policy.</p>
+  <p>If you believe a child has provided us with information we should not hold, contact us and we will delete it.</p>
+
+  <h2>10. Data retention and security</h2>
+  <p>Information stored on the device remains until the app is uninstalled or its data is cleared. Progress records stored in Firebase are kept while the app is in use and are deleted on request.</p>
+  <p>All connections between the app and our services use HTTPS encryption. Access to our database is restricted, and content data is set to read-only for the app. No system can be guaranteed completely secure, but we take reasonable technical and organisational measures to protect the limited information we hold.</p>
+
+  <h2>11. Your rights and how to exercise them</h2>
+  <p>As a parent or guardian, you may ask us to:</p>
+  <ul class="body">
+    <li>tell you what information the app holds about your child;</li>
+    <li>correct anything that is wrong;</li>
+    <li>delete your child's information entirely;</li>
+    <li>stop any further processing.</li>
+  </ul>
+  <p>You can delete most information yourself by uninstalling the app or clearing its data in your device settings. For records held in our database, email us from the address in section 12 with the subject line <strong>Data Deletion Request</strong>. We will confirm within 30 days.</p>
+  <p>Some purchase records are retained by Google Play and by us where tax or accounting law requires it, even after a deletion request.</p>
+
+  <h2>12. Contact us</h2>
+  <div class="contact">
+    <p><strong>Email</strong> &nbsp;<a href="mailto:gyaanpe.support@gmail.com">gyaanpe.support@gmail.com</a></p>
+    <p><strong>App</strong> &nbsp;GyaanPe — Kids Learning App (com.gyaanpe.kidslearning)</p>
+    <p><strong>Operator</strong> &nbsp;Swapnajit Mahapatra</p>
+    <p><strong>Address</strong> &nbsp;Bhubaneswar, Odisha 752038, India</p>
   </div>
 
-  <div class="footer">© 2026 GyaanPe. All rights reserved.</div>
+  <h2>13. Changes to this policy</h2>
+  <p>If we change how the app handles information, we will update this page and change the "Last updated" date at the top. If a change is significant, we will also give notice inside the app. Please check this page from time to time.</p>
 
-</div>
+</main>
+
+<footer class="wrap">
+  <p>© 2026 Swapnajit Mahapatra. GyaanPe — Kids Learning App.</p>
+</footer>
+
 </body>
 </html>

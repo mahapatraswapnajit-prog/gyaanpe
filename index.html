@@ -1483,6 +1483,7 @@ function gpToast(msg){
 <div id="heroImageWrap" style="display:none;margin:0 0 14px 0;border-radius:18px;overflow:hidden;box-shadow:0 6px 18px rgba(0,0,0,0.12);"><img src="gyaanpe-hero.jpg" alt="GyaanPe - Loved by Kids, Trusted by Parents" style="width:100%;display:block;" loading="lazy"></div>
 <div class="home-screen" id="homeScreen">
  <div id="gpvHomeMount"></div>
+ <div id="gplHomeMount"></div>
 <div class="home-top anim-card">
 <div class="gp-teachers-banner" id="gpTeachersBanner" style="margin:0 0 14px;border-radius:16px;overflow:hidden;box-shadow:0 6px 18px rgba(0,0,0,0.12);">
 <img src="gyaanpe-teachers.jpg" alt="Anika Ma'am aur Arjun Sir - GyaanPe ke AI teachers" style="width:100%;display:block;" loading="lazy" onerror="var b=document.getElementById('gpTeachersBanner');if(b)b.style.display='none';">
@@ -12965,5 +12966,430 @@ if ('serviceWorker' in navigator) {
   </div>
 </div>
  <div id="gpToast"></div>
+<!-- ==================== GYAANPE LIBRARY MODULE ==================== -->
+<style>
+  #gplPage{display:none;position:fixed;inset:0;background:#FFF9F0;z-index:9000;overflow-y:auto;padding:16px;}
+  #gplPage.gpl-show{display:block;}
+  .gpl-page-head{display:flex;align-items:center;gap:10px;margin-bottom:6px;}
+  .gpl-page-back{background:#eee;border:none;border-radius:12px;padding:8px 14px;font-weight:800;font-size:13px;cursor:pointer;color:#1A237E;}
+  .gpl-page-title{font-family:Anton,sans-serif;font-size:20px;color:#1A237E;letter-spacing:.5px;}
+  .gpl-sub{font-size:12px;color:#6B7280;margin:0 0 12px 2px;}
+
+  .gpl-search{width:100%;padding:11px 14px;border:2px solid #E5E0D5;border-radius:14px;font-size:14px;
+    font-family:inherit;margin-bottom:14px;background:#fff;box-sizing:border-box;}
+  .gpl-search:focus{outline:none;border-color:#1A237E;}
+
+  .gpl-chip-row{display:flex;gap:8px;overflow-x:auto;padding-bottom:8px;margin-bottom:12px;-webkit-overflow-scrolling:touch;}
+  .gpl-chip{flex:0 0 auto;background:#fff;border:2px solid #E5E0D5;border-radius:999px;padding:7px 14px;
+    font-size:12px;font-weight:700;color:#4A5768;cursor:pointer;white-space:nowrap;}
+  .gpl-chip.on{background:#1A237E;border-color:#1A237E;color:#fff;}
+
+  .gpl-sec-head{display:flex;align-items:center;justify-content:space-between;margin:16px 0 10px;}
+  .gpl-sec-title{font-family:Anton,sans-serif;font-size:16px;color:#1A237E;letter-spacing:.4px;}
+
+  .gpl-scroll{display:flex;gap:12px;overflow-x:auto;padding-bottom:6px;-webkit-overflow-scrolling:touch;}
+
+  .gpl-card{flex:0 0 auto;width:132px;background:#fff;border-radius:16px;overflow:hidden;
+    box-shadow:0 4px 14px rgba(0,0,0,.07);cursor:pointer;position:relative;transition:transform .15s ease;}
+  .gpl-card:active{transform:scale(.97);}
+  .gpl-cover{height:150px;display:flex;align-items:center;justify-content:center;font-size:46px;position:relative;}
+  .gpl-badge{position:absolute;top:7px;right:7px;font-size:9px;font-weight:800;padding:3px 7px;border-radius:999px;
+    background:rgba(255,255,255,.92);color:#1A237E;letter-spacing:.3px;}
+  .gpl-badge.prem{background:#FFC107;color:#3E2723;}
+  .gpl-lock{position:absolute;inset:0;background:rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center;font-size:30px;}
+  .gpl-cbody{padding:9px 10px 11px;}
+  .gpl-ctitle{font-size:12px;font-weight:800;color:#16202F;line-height:1.3;margin-bottom:4px;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+  .gpl-cmeta{font-size:10px;color:#6B7280;}
+  .gpl-prog{height:4px;background:#EEE;border-radius:999px;margin-top:6px;overflow:hidden;}
+  .gpl-prog i{display:block;height:100%;background:#FF6F00;}
+
+  .gpl-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:12px;}
+  .gpl-grid .gpl-card{width:auto;}
+
+  .gpl-empty{text-align:center;color:#6B7280;font-size:13px;padding:26px 10px;}
+
+  /* ---- reader ---- */
+  #gplReader{display:none;position:fixed;inset:0;background:#FFFDF8;z-index:9200;flex-direction:column;}
+  #gplReader.gpl-show{display:flex;}
+  .gplr-top{display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid #EFE9DC;background:#fff;}
+  .gplr-back{background:#eee;border:none;border-radius:10px;padding:7px 12px;font-weight:800;font-size:13px;color:#1A237E;cursor:pointer;}
+  .gplr-name{flex:1;font-size:13px;font-weight:800;color:#1A237E;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .gplr-mark{background:none;border:none;font-size:19px;cursor:pointer;padding:2px 4px;}
+  .gplr-bar{height:4px;background:#EFE9DC;}
+  .gplr-bar i{display:block;height:100%;background:#FF6F00;transition:width .25s ease;}
+  .gplr-body{flex:1;overflow-y:auto;padding:22px 20px 30px;-webkit-overflow-scrolling:touch;}
+  .gplr-pemoji{text-align:center;font-size:66px;margin-bottom:14px;}
+  .gplr-ptitle{font-family:Anton,sans-serif;font-size:19px;color:#1A237E;margin-bottom:10px;letter-spacing:.3px;}
+  .gplr-text{font-size:var(--gplfs,16px);line-height:1.75;color:#16202F;}
+  .gplr-text p{margin:0 0 13px;}
+  .gplr-nav{display:flex;align-items:center;gap:10px;padding:11px 14px;border-top:1px solid #EFE9DC;background:#fff;}
+  .gplr-btn{flex:1;background:#1A237E;color:#fff;border:none;border-radius:12px;padding:11px;font-weight:800;font-size:13px;
+    font-family:inherit;cursor:pointer;}
+  .gplr-btn[disabled]{background:#D5D2CA;}
+  .gplr-count{font-size:12px;font-weight:800;color:#6B7280;min-width:52px;text-align:center;}
+  .gplr-size{background:#eee;border:none;border-radius:10px;padding:7px 10px;font-weight:800;font-size:12px;color:#1A237E;cursor:pointer;}
+
+  /* ---- end of book ---- */
+  .gpl-end{text-align:center;padding:8px 0 4px;}
+  .gpl-end h4{font-family:Anton,sans-serif;font-size:18px;color:#1A237E;margin-bottom:6px;}
+  .gpl-endbtns{display:flex;flex-direction:column;gap:9px;margin-top:14px;}
+  .gpl-endbtn{background:#fff;border:2px solid #E5E0D5;border-radius:14px;padding:12px;font-weight:800;font-size:13px;
+    color:#1A237E;font-family:inherit;cursor:pointer;}
+  .gpl-q{background:#fff;border:2px solid #E5E0D5;border-radius:14px;padding:13px;margin-bottom:11px;text-align:left;}
+  .gpl-q h5{font-size:13px;color:#16202F;margin-bottom:9px;}
+  .gpl-opt{display:block;width:100%;text-align:left;background:#FAF8F3;border:2px solid #EFE9DC;border-radius:11px;
+    padding:9px 11px;font-size:12.5px;margin-bottom:7px;font-family:inherit;cursor:pointer;color:#16202F;}
+  .gpl-opt.ok{background:#E8F5E9;border-color:#43A047;}
+  .gpl-opt.no{background:#FFEBEE;border-color:#E53935;}
+
+  /* ---- premium gate ---- */
+  .gpl-gate{background:linear-gradient(135deg,#4527A0,#7E57C2);color:#fff;border-radius:18px;padding:20px;text-align:center;}
+  .gpl-gate h4{font-family:Anton,sans-serif;font-size:19px;margin-bottom:6px;}
+  .gpl-gate p{font-size:12.5px;opacity:.92;margin-bottom:13px;}
+  .gpl-gate ul{list-style:none;text-align:left;max-width:250px;margin:0 auto 15px;font-size:12.5px;}
+  .gpl-gate li{margin-bottom:6px;}
+  .gpl-gate button{background:#FFC107;color:#3E2723;border:none;border-radius:12px;padding:12px 22px;
+    font-weight:800;font-size:14px;font-family:inherit;cursor:pointer;}
+
+  /* ---- home strip ---- */
+  .gpl-home-section{margin:18px 0;}
+  .gpl-home-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+  .gpl-hh-left{display:flex;align-items:center;gap:7px;}
+  .gpl-hh-left h3{font-family:Anton,sans-serif;font-size:17px;color:#1A237E;letter-spacing:.4px;}
+  .gpl-hh-emoji{font-size:20px;}
+  .gpl-see-all{font-size:12px;font-weight:800;color:#FF6F00;cursor:pointer;}
+</style>
+
+<div id="gplPage">
+  <div class="gpl-page-head">
+    <button class="gpl-page-back" onclick="gplClosePage()">&#8592; Back</button>
+    <div class="gpl-page-title">&#128218; GyaanPe Library</div>
+  </div>
+  <p class="gpl-sub">Read &bull; Learn &bull; Practice &bull; Grow</p>
+
+  <input class="gpl-search" id="gplSearch" type="search" placeholder="&#128269; Search books, stories, topics..." oninput="gplRender()">
+  <div class="gpl-chip-row" id="gplClassChips"></div>
+  <div class="gpl-chip-row" id="gplCatChips"></div>
+  <div id="gplBody"></div>
+</div>
+
+<div id="gplReader">
+  <div class="gplr-top">
+    <button class="gplr-back" onclick="gplCloseReader()">&#8592;</button>
+    <div class="gplr-name" id="gplrName"></div>
+    <button class="gplr-size" onclick="gplFontStep()" title="Text size">A&#177;</button>
+    <button class="gplr-mark" id="gplrMark" onclick="gplToggleMark()">&#128278;</button>
+  </div>
+  <div class="gplr-bar"><i id="gplrBar" style="width:0%"></i></div>
+  <div class="gplr-body" id="gplrBody"></div>
+  <div class="gplr-nav">
+    <button class="gplr-btn" id="gplrPrev" onclick="gplPage(-1)">&#8592; Peeche</button>
+    <span class="gplr-count" id="gplrCount"></span>
+    <button class="gplr-btn" id="gplrNext" onclick="gplPage(1)">Aage &#8594;</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  var GPL_URL = 'https://zapzone-98727-default-rtdb.firebaseio.com/gyaanpeLibrary.json';
+  var GPL = { books: [], categories: [] };
+  var GPL_LOADED = false;
+  var gplFilterClass = 'all', gplFilterCat = 'all';
+  var gplBook = null, gplIdx = 0;
+
+  function gplPrem(){ try{ return (typeof isPremium==='function') ? isPremium() : false; }catch(e){ return false; } }
+  function gplEsc(s){ return (s+'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+  /* ---- local state: bookmarks + reading progress ---- */
+  function gplState(){ try{ return JSON.parse(localStorage.getItem('gpl_state')||'{}'); }catch(e){ return {}; } }
+  function gplSave(s){ try{ localStorage.setItem('gpl_state', JSON.stringify(s)); }catch(e){} }
+  function gplBk(id){ var s=gplState(); return (s.marks||[]).indexOf(id)>-1; }
+  function gplProg(id){ var s=gplState(); return (s.prog||{})[id]||null; }
+
+  /* ---- load ---- */
+  function gplLoad(cb){
+    if(GPL_LOADED){ cb&&cb(); return; }
+    fetch(GPL_URL).then(function(r){ return r.json(); }).then(function(d){
+      if(d){
+        GPL.categories = Object.keys(d.categories||{}).map(function(k){
+          var c=d.categories[k]; c.id=k; return c;
+        }).sort(function(a,b){ return (a.order||0)-(b.order||0); });
+        GPL.books = Object.keys(d.books||{}).map(function(k){
+          var b=d.books[k]; b.id=k; return b;
+        }).sort(function(a,b){ return (a.order||0)-(b.order||0); });
+      }
+      GPL_LOADED=true; cb&&cb();
+    }).catch(function(e){ console.error('[GPL] load error',e); GPL_LOADED=true; cb&&cb(); });
+  }
+
+  /* ---- card ---- */
+  function gplCard(b){
+    var locked = (b.access==='PREMIUM' && !gplPrem());
+    var pr = gplProg(b.id);
+    var pct = pr && b.pages ? Math.round(((pr.page+1)/b.pages.length)*100) : 0;
+    return '<div class="gpl-card" onclick="gplOpenBook(\''+b.id+'\')">'+
+      '<div class="gpl-cover" style="background:'+(b.color||'linear-gradient(135deg,#5E35B1,#3949AB)')+'">'+
+        (b.emoji||'\uD83D\uDCD8')+
+        '<span class="gpl-badge'+(locked?' prem':'')+'">'+(locked?'\u2B50 PREMIUM':'FREE')+'</span>'+
+        (locked?'<div class="gpl-lock">\uD83D\uDD12</div>':'')+
+      '</div>'+
+      '<div class="gpl-cbody">'+
+        '<div class="gpl-ctitle">'+gplEsc(b.title)+'</div>'+
+        '<div class="gpl-cmeta">'+gplEsc(b.classLabel||'')+' \u2022 '+(b.readTime||'5 min')+'</div>'+
+        (pct>0&&pct<100 ? '<div class="gpl-prog"><i style="width:'+pct+'%"></i></div>' : '')+
+      '</div></div>';
+  }
+
+  /* ---- filters + render ---- */
+  function gplMatch(b){
+    if(gplFilterClass!=='all' && (b.classes||[]).indexOf(gplFilterClass)===-1) return false;
+    if(gplFilterCat!=='all' && b.category!==gplFilterCat) return false;
+    var q=(document.getElementById('gplSearch')||{}).value||'';
+    q=q.trim().toLowerCase();
+    if(q){
+      var hay=((b.title||'')+' '+(b.desc||'')+' '+(b.category||'')+' '+(b.classLabel||'')).toLowerCase();
+      if(hay.indexOf(q)===-1) return false;
+    }
+    return true;
+  }
+
+  window.gplSetClass = function(v){ gplFilterClass=v; gplRender(); };
+  window.gplSetCat   = function(v){ gplFilterCat=v;   gplRender(); };
+
+  function gplChips(){
+    var cls=['all','Nursery','LKG','UKG','Class 1','Class 2','Class 3','Class 4','Class 5','Class 6','Class 7'];
+    var h='';
+    cls.forEach(function(c){
+      h+='<div class="gpl-chip'+(gplFilterClass===c?' on':'')+'" onclick="gplSetClass(\''+c+'\')">'+
+         (c==='all'?'All Classes':c)+'</div>';
+    });
+    document.getElementById('gplClassChips').innerHTML=h;
+
+    var h2='<div class="gpl-chip'+(gplFilterCat==='all'?' on':'')+'" onclick="gplSetCat(\'all\')">All</div>';
+    GPL.categories.forEach(function(c){
+      h2+='<div class="gpl-chip'+(gplFilterCat===c.id?' on':'')+'" onclick="gplSetCat(\''+c.id+'\')">'+
+          (c.emoji||'')+' '+gplEsc(c.title)+'</div>';
+    });
+    document.getElementById('gplCatChips').innerHTML=h2;
+  }
+
+  window.gplRender = function(){
+    gplChips();
+    var body=document.getElementById('gplBody');
+    var q=((document.getElementById('gplSearch')||{}).value||'').trim();
+    var list=GPL.books.filter(gplMatch);
+    var h='';
+
+    // Continue reading (only on the unfiltered default view)
+    if(!q && gplFilterClass==='all' && gplFilterCat==='all'){
+      var st=gplState(), prog=st.prog||{};
+      var cont=GPL.books.filter(function(b){
+        var p=prog[b.id];
+        return p && b.pages && p.page>0 && p.page < b.pages.length-1;
+      }).sort(function(a,b){ return (prog[b.id].at||0)-(prog[a.id].at||0); }).slice(0,6);
+      if(cont.length){
+        h+='<div class="gpl-sec-head"><div class="gpl-sec-title">\uD83D\uDCD6 Continue Reading</div></div>'+
+           '<div class="gpl-scroll">'+cont.map(gplCard).join('')+'</div>';
+      }
+      var marks=GPL.books.filter(function(b){ return gplBk(b.id); }).slice(0,6);
+      if(marks.length){
+        h+='<div class="gpl-sec-head"><div class="gpl-sec-title">\uD83D\uDD16 My Bookmarks</div></div>'+
+           '<div class="gpl-scroll">'+marks.map(gplCard).join('')+'</div>';
+      }
+      GPL.categories.forEach(function(c){
+        var inCat=GPL.books.filter(function(b){ return b.category===c.id; });
+        if(!inCat.length) return;
+        h+='<div class="gpl-sec-head"><div class="gpl-sec-title">'+(c.emoji||'')+' '+gplEsc(c.title)+'</div>'+
+           '<span class="gpl-see-all" onclick="gplSetCat(\''+c.id+'\')">See all \u2192</span></div>'+
+           '<div class="gpl-scroll">'+inCat.slice(0,8).map(gplCard).join('')+'</div>';
+      });
+    } else {
+      h+= list.length
+        ? '<div class="gpl-grid">'+list.map(gplCard).join('')+'</div>'
+        : '<div class="gpl-empty">Is filter me abhi koi kitab nahi hai.<br>Doosra class ya category try karo.</div>';
+    }
+    body.innerHTML=h;
+  };
+
+  /* ---- page open/close ---- */
+  window.gplOpenPage = function(){
+    gplLoad(function(){
+      gplRender();
+      document.getElementById('gplPage').classList.add('gpl-show');
+      window.scrollTo(0,0);
+    });
+  };
+  window.gplClosePage = function(){ document.getElementById('gplPage').classList.remove('gpl-show'); };
+
+  /* ---- reader ---- */
+  window.gplOpenBook = function(id){
+    var b=null;
+    for(var i=0;i<GPL.books.length;i++){ if(GPL.books[i].id===id){ b=GPL.books[i]; break; } }
+    if(!b) return;
+    if(b.access==='PREMIUM' && !gplPrem()){ gplGate(); return; }
+    gplBook=b;
+    var pr=gplProg(id);
+    gplIdx = (pr && pr.page && pr.page < (b.pages||[]).length) ? pr.page : 0;
+    document.getElementById('gplrName').textContent=b.title;
+    document.getElementById('gplReader').classList.add('gpl-show');
+    gplPaint();
+  };
+  window.gplCloseReader = function(){
+    document.getElementById('gplReader').classList.remove('gpl-show');
+    gplBook=null; gplRender();
+  };
+
+  function gplPaint(){
+    var b=gplBook; if(!b) return;
+    var pages=b.pages||[], total=pages.length, last=(gplIdx>=total);
+    var body=document.getElementById('gplrBody');
+
+    if(last){
+      var h='<div class="gpl-end"><div style="font-size:56px;">\uD83C\uDF89</div>'+
+        '<h4>Kitab poori ho gayi!</h4>'+
+        '<p style="font-size:13px;color:#6B7280;">'+gplEsc(b.title)+'</p></div>';
+      if(b.quiz && b.quiz.length){
+        h+='<div style="margin-top:18px;"><div class="gpl-sec-title" style="margin-bottom:10px;">\uD83C\uDFAF Chhota Sawaal</div>';
+        b.quiz.forEach(function(q,qi){
+          h+='<div class="gpl-q"><h5>'+gplEsc(q.q)+'</h5>';
+          q.options.forEach(function(o,oi){
+            h+='<button class="gpl-opt" id="gplq'+qi+'_'+oi+'" onclick="gplAns('+qi+','+oi+','+q.answer+')">'+gplEsc(o)+'</button>';
+          });
+          h+='</div>';
+        });
+        h+='</div>';
+      }
+      h+='<div class="gpl-endbtns">'+
+        '<button class="gpl-endbtn" onclick="gplAskTutor()">\uD83E\uDD16 Ask AI Tutor</button>'+
+        '<button class="gpl-endbtn" onclick="gplCloseReader()">\uD83D\uDCDA Library me wapas</button>'+
+        '</div>';
+      body.innerHTML=h;
+      document.getElementById('gplrCount').textContent='\u2713';
+    } else {
+      var p=pages[gplIdx]||{};
+      body.innerHTML =
+        (p.emoji?'<div class="gplr-pemoji">'+p.emoji+'</div>':'')+
+        (p.title?'<div class="gplr-ptitle">'+gplEsc(p.title)+'</div>':'')+
+        '<div class="gplr-text"><p>'+(p.text||'').split('\n').map(gplEsc).join('</p><p>')+'</p></div>';
+      document.getElementById('gplrCount').textContent=(gplIdx+1)+' / '+total;
+    }
+
+    body.scrollTop=0;
+    document.getElementById('gplrPrev').disabled = (gplIdx<=0);
+    document.getElementById('gplrNext').disabled = last;
+    document.getElementById('gplrNext').textContent = (gplIdx===total-1) ? 'Khatam \u2713' : 'Aage \u2192';
+    document.getElementById('gplrBar').style.width = Math.round((Math.min(gplIdx,total)/total)*100)+'%';
+    document.getElementById('gplrMark').textContent = gplBk(b.id) ? '\uD83D\uDD16' : '\uD83E\uDD0D';
+
+    var s=gplState(); s.prog=s.prog||{};
+    s.prog[b.id]={ page:Math.min(gplIdx,total-1), at:Date.now() };
+    gplSave(s);
+  }
+
+  window.gplPage = function(step){
+    if(!gplBook) return;
+    var total=(gplBook.pages||[]).length;
+    var n=gplIdx+step;
+    if(n<0) n=0;
+    if(n>total) n=total;
+    gplIdx=n;
+    gplPaint();
+    if(gplIdx>=total && typeof gpAwardReward==='function'){
+      try{ gpAwardReward(15,5,'Book Reader'); }catch(e){}
+    }
+  };
+
+  window.gplToggleMark = function(){
+    if(!gplBook) return;
+    var s=gplState(); s.marks=s.marks||[];
+    var i=s.marks.indexOf(gplBook.id);
+    if(i>-1) s.marks.splice(i,1); else s.marks.push(gplBook.id);
+    gplSave(s);
+    document.getElementById('gplrMark').textContent = gplBk(gplBook.id) ? '\uD83D\uDD16' : '\uD83E\uDD0D';
+  };
+
+  window.gplFontStep = function(){
+    var cur=parseInt(localStorage.getItem('gpl_fs')||'16',10);
+    cur = cur>=20 ? 14 : cur+2;
+    try{ localStorage.setItem('gpl_fs',String(cur)); }catch(e){}
+    document.documentElement.style.setProperty('--gplfs',cur+'px');
+  };
+
+  window.gplAns = function(qi,oi,ans){
+    var b=gplBook; if(!b||!b.quiz||!b.quiz[qi]) return;
+    b.quiz[qi].options.forEach(function(_,k){
+      var el=document.getElementById('gplq'+qi+'_'+k);
+      if(!el) return;
+      el.disabled=true;
+      if(k===ans) el.classList.add('ok');
+      else if(k===oi) el.classList.add('no');
+    });
+    if(oi===ans && typeof gpAwardReward==='function'){ try{ gpAwardReward(5,2,''); }catch(e){} }
+  };
+
+  window.gplAskTutor = function(){
+    var b=gplBook; if(!b) return;
+    var topic=b.title;
+    gplCloseReader(); gplClosePage();
+    try{
+      if(typeof openTutor==='function'){ openTutor(); }
+      else if(typeof gpOpenTutor==='function'){ gpOpenTutor(); }
+      var inp=document.getElementById('tutorInput');
+      if(inp){ inp.value='Mujhe "'+topic+'" ke baare me aasan bhaasha me samjhao'; inp.focus(); }
+    }catch(e){}
+  };
+
+  function gplGate(){
+    var body=document.getElementById('gplBody');
+    document.getElementById('gplPage').classList.add('gpl-show');
+    body.innerHTML='<div class="gpl-gate"><h4>\u2B50 Premium Library</h4>'+
+      '<p>Aur kitaabein, kahaniyan aur padhne ka saman kholo.</p>'+
+      '<ul><li>\u2713 Premium Books</li><li>\u2713 Story Collections</li>'+
+      '<li>\u2713 Advanced Worksheets</li><li>\u2713 Reference Books</li>'+
+      '<li>\u2713 Aur bahut kuch</li></ul>'+
+      '<button onclick="gplGoPremium()">Unlock Premium</button></div>';
+    window.scrollTo(0,0);
+  }
+  window.gplGoPremium = function(){
+    gplClosePage();
+    try{
+      if(typeof gpOpenPremium==='function') gpOpenPremium();
+      else if(typeof openPremium==='function') openPremium();
+      else if(typeof gpShowPremium==='function') gpShowPremium();
+    }catch(e){}
+  };
+
+  /* ---- home strip ---- */
+  window.gplRenderHomePreview = function(){
+    var mount=document.getElementById('gplHomeMount');
+    if(!mount) return;
+    gplLoad(function(){
+      if(!GPL.books.length){ mount.innerHTML=''; return; }
+      var st=gplState(), prog=st.prog||{};
+      var cont=GPL.books.filter(function(b){
+        var p=prog[b.id]; return p && b.pages && p.page>0 && p.page<b.pages.length-1;
+      }).sort(function(a,b){ return (prog[b.id].at||0)-(prog[a.id].at||0); });
+      var show = cont.length ? cont.slice(0,6) : GPL.books.slice(0,6);
+      mount.innerHTML='<div class="gpl-home-section"><div class="gpl-home-head">'+
+        '<div class="gpl-hh-left"><span class="gpl-hh-emoji">\uD83D\uDCDA</span><h3>Library</h3></div>'+
+        '<span class="gpl-see-all" onclick="gplOpenPage()">See all \u2192</span></div>'+
+        '<div class="gpl-scroll">'+show.map(gplCard).join('')+'</div></div>';
+    });
+  };
+
+  /* restore saved font size */
+  try{
+    var fs=localStorage.getItem('gpl_fs');
+    if(fs) document.documentElement.style.setProperty('--gplfs',fs+'px');
+  }catch(e){}
+
+  /* auto-render home preview once DOM is ready */
+  if(document.readyState==='loading'){ document.addEventListener('DOMContentLoaded', gplRenderHomePreview); }
+  else { gplRenderHomePreview(); }
+})();
+</script>
+<!-- ================== END GYAANPE LIBRARY MODULE ================== -->
+
 </body>
 </html>

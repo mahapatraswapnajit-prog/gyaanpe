@@ -13147,13 +13147,14 @@ if ('serviceWorker' in navigator) {
 
   /* ---- card ---- */
   function gplCard(b){
-    var locked = (b.access==='PREMIUM' && !gplPrem());
+    var prem   = (b.access==='PREMIUM');
+    var locked = (prem && !gplPrem());
     var pr = gplProg(b.id);
     var pct = pr && b.pages ? Math.round(((pr.page+1)/b.pages.length)*100) : 0;
     return '<div class="gpl-card" onclick="gplOpenBook(\''+b.id+'\')">'+
       '<div class="gpl-cover" style="background:'+(b.color||'linear-gradient(135deg,#5E35B1,#3949AB)')+'">'+
         (b.emoji||'\uD83D\uDCD8')+
-        '<span class="gpl-badge'+(locked?' prem':'')+'">'+(locked?'\u2B50 PREMIUM':'FREE')+'</span>'+
+        '<span class="gpl-badge'+(prem?' prem':'')+'">'+(prem?'\u2B50 PREMIUM':'FREE')+'</span>'+
         (locked?'<div class="gpl-lock">\uD83D\uDD12</div>':'')+
       '</div>'+
       '<div class="gpl-cbody">'+

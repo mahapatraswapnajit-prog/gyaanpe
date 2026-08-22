@@ -1394,6 +1394,28 @@ function gpToast(msg){
 </head>
 <body>
 <div id="gpFTE">
+<script>
+/* The real handlers live near the end of this large file. On a slow connection the
+   buttons render long before that code parses, so a tap would throw "not defined".
+   These stubs queue the intent and replay it once the real function exists. */
+(function(){
+  function gpFteWait(name){
+    var tries=0;
+    (function poll(){
+      var fn=window[name];
+      if(typeof fn==='function' && !fn.__fteStub){ try{ fn(); }catch(e){} return; }
+      if(++tries>120) return;              // ~12s then give up quietly
+      setTimeout(poll,100);
+    })();
+  }
+  ['gpOpenDemo','gpGoToRealSetup'].forEach(function(n){
+    if(typeof window[n]==='function') return;
+    var stub=function(){ gpFteWait(n); };
+    stub.__fteStub=true;
+    window[n]=stub;
+  });
+})();
+</script>
   <div class="gp-fte-logo">Gyaan<span>Pe</span></div>
   <div class="gp-fte-tagline">Loved by Kids &middot; Trusted by Parents</div>
   <button class="gp-fte-btn gp-fte-btn-secondary" onclick="gpOpenDemo()">&#128064; Explore Demo (Optional)</button>

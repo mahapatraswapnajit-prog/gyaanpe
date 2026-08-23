@@ -1208,14 +1208,14 @@ async function gpcAcknowledge(token){
   }catch(e){ console.log('ack failed', e); }
 }
 async function gpcRestore(){
-  if(!window.getDigitalGoodsService){ gpstore('Restore sirf Play Store app me chalta hai.'); return; }
+  if(!window.getDigitalGoodsService){ gpToast('Restore sirf Play Store app me chalta hai.'); return; }
   try{
     var svc = await window.getDigitalGoodsService('https://play.google.com/billing');
     var list = await svc.listPurchases();
     var found = list.filter(function(p){ return p.itemId === gpcCourse.productId; })[0];
-    if(found){ gpcUnlock(found.purchaseToken); gpstore('Course restore ho gaya!'); }
-    else gpstore('Is account par ye course nahi mila.');
-  }catch(e){ gpstore('Restore nahi ho paya. Dobara try karo.'); }
+    if(found){ gpcUnlock(found.purchaseToken); gpToast('Course restore ho gaya!'); }
+    else gpToast('Is account par ye course nahi mila.');
+  }catch(e){ gpToast('Restore nahi ho paya. Dobara try karo.'); }
 }
 function gpcAwardGlobal(xp, coins){
   try{ if(typeof gpAddXP === 'function') gpAddXP(xp); }catch(e){}
@@ -1374,13 +1374,6 @@ function gpstOpenMyClass(){
   if(!p.cls) return;
   var m = GPST_CLS.filter(function(x){ return x.k === p.cls; })[0];
   if(m && typeof window[m.fn] === 'function') window[m.fn]();
-}
- var _gpToastT=null;
-function gpToast(msg){
-  var t=document.getElementById('gpToast'); if(!t)return;
-  t.textContent=msg; t.classList.add('on');
-  clearTimeout(_gpToastT);
-  _gpToastT=setTimeout(function(){ t.classList.remove('on'); },2600);
 }
  var _gpToastT=null;
 function gpToast(msg){
@@ -2313,7 +2306,7 @@ loadDailyQuiz();
 
 // ============ CHALLENGE A FRIEND ============
 var CH_URL='https://zapzone-98727-default-rtdb.firebaseio.com/gyaanpeChallenge';
-function sendChallenge(){var nm=prompt('Apna naam likho:')||'A friend';var sc=levelCorrect[currentLevel];fetch(CH_URL+'.json',{method:'POST',body:JSON.stringify({n:nm,s:sc,sec:currentSection,lvl:currentLevel})}).then(function(r){return r.json();}).then(function(d){var link='https://mahapatraswapnajit-prog.github.io/gyaanpe/?ch='+d.name;var msg='\uD83C\uDFC6 '+nm+' ne GyaanPe pe '+sc+'/10 score kiya! Kya aap hara sakte ho? Khelo: '+link;window.open('https://wa.me/?text='+encodeURIComponent(msg));}).catch(function(e){gpstore('Internet check karo!');});}
+function sendChallenge(){var nm=prompt('Apna naam likho:')||'A friend';var sc=levelCorrect[currentLevel];fetch(CH_URL+'.json',{method:'POST',body:JSON.stringify({n:nm,s:sc,sec:currentSection,lvl:currentLevel})}).then(function(r){return r.json();}).then(function(d){var link='https://mahapatraswapnajit-prog.github.io/gyaanpe/?ch='+d.name;var msg='\uD83C\uDFC6 '+nm+' ne GyaanPe pe '+sc+'/10 score kiya! Kya aap hara sakte ho? Khelo: '+link;window.open('https://wa.me/?text='+encodeURIComponent(msg));}).catch(function(e){gpToast('Internet check karo!');});}
 function checkChallenge(){var m=location.search.match(/ch=([^&]+)/);if(!m)return;fetch(CH_URL+'/'+m[1]+'.json').then(function(r){return r.json();}).then(function(d){if(!d||!d.n)return;if(!allData[d.sec])return;localStorage.setItem('gp_ch',JSON.stringify(d));var b=document.getElementById('chBanner');b.style.display='block';document.getElementById('chText').textContent=d.n+' ne '+d.s+'/10 score kiya hai! Hara ke dikhao!';}).catch(function(e){});}
 function acceptChallenge(){var d=JSON.parse(localStorage.getItem('gp_ch')||'null');if(!d)return;if(!allData[d.sec])return;startSection(d.sec);loadLevel(d.lvl);}
 checkChallenge();
@@ -2388,7 +2381,7 @@ html+='<button class="cert-btn" onclick="gpReport()" style="background:linear-gr
 document.getElementById('parentBody').innerHTML=html;renderBadges();renderParentSubjectProgress();}
 
 /* ---- jsPDF loader ---- */
-function gpLoadPDF(cb){if(window.jspdf&&window.jspdf.jsPDF){cb();return;}var sc=document.createElement('script');sc.src='https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';sc.onload=function(){cb();};sc.onerror=function(){gpstore('Certificate ke liye internet chahiye. Online ho ke try karein.');};document.head.appendChild(sc);}
+function gpLoadPDF(cb){if(window.jspdf&&window.jspdf.jsPDF){cb();return;}var sc=document.createElement('script');sc.src='https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';sc.onload=function(){cb();};sc.onerror=function(){gpToast('Certificate ke liye internet chahiye. Online ho ke try karein.');};document.head.appendChild(sc);}
 
 function gpCertNo(sec){var c=gpJSON('gp_certs')||{};if(c[sec])return c[sec];var no='GP-'+(sec.substring(0,3).toUpperCase())+'-'+Date.now().toString().slice(-6);c[sec]=no;localStorage.setItem('gp_certs',JSON.stringify(c));return no;}
 
@@ -2413,7 +2406,7 @@ doc.setFont('helvetica','normal');doc.setFontSize(10);doc.setTextColor(90,90,90)
 doc.text('Date: '+date,50,180);doc.text('Certificate No: '+gpCertNo(sec),W-50,180,{align:'right'});
 doc.setDrawColor(150,150,150);doc.setLineWidth(0.4);doc.line(120,172,177,172);doc.text('GyaanPe Learning',W/2,180,{align:'center'});
 doc.save('GyaanPe_'+subj+'_Certificate.pdf');
-}catch(e){gpstore('Certificate banane me dikkat hui. Dobara try karein.');}});}
+}catch(e){gpToast('Certificate banane me dikkat hui. Dobara try karein.');}});}
 
 function gpReport(){if(!gpRequirePremium("PDF Progress Reports are a Premium feature."))return;gpLoadPDF(function(){try{
 var jsPDF=window.jspdf.jsPDF;var doc=new jsPDF({unit:'mm',format:'a4'});
@@ -2426,7 +2419,7 @@ y+=6;doc.setFont('helvetica','bold');doc.setFontSize(12);doc.text('Subject Progr
 for(var s in SUBLABEL){var mx=maxLvOf(s);var pd=0;var ps=prog[s]||{};for(var l in ps){if(ps[l]>0)pd++;}doc.text(SUBLABEL[s]+':',18,y);doc.text(pd+' / '+mx+' levels ('+Math.round(pd/mx*100)+'%)',90,y);y+=7;}
 doc.setFontSize(9);doc.setTextColor(120,120,120);doc.text('GyaanPe - Nursery to Class 4 Learning App',14,285);
 doc.save('GyaanPe_Report_'+name+'.pdf');
-}catch(e){gpstore('Report banane me dikkat hui. Dobara try karein.');}});}
+}catch(e){gpToast('Report banane me dikkat hui. Dobara try karein.');}});}
 
 
 /* ============ NURSERY ENGINE (Phase A) ============ */
@@ -4690,7 +4683,7 @@ var _weeklyState={classKey:null,questions:[],qi:0,answers:{},startTime:0};
 
 function openWeeklyExam(classKey){
 var exam=gpGenerateWeeklyExam(classKey);
-if(!exam||exam.questions.length===0){gpstore("Not enough questions yet for this class's weekly exam. Keep practicing chapters first!");return;}
+if(!exam||exam.questions.length===0){gpToast("Not enough questions yet for this class's weekly exam. Keep practicing chapters first!");return;}
 gpHideAllScreens();
 document.getElementById('weeklyExamScreen').style.display='block';
 _weeklyState={classKey:classKey,questions:exam.questions,qi:0,answers:{},startTime:Date.now()};
@@ -5771,7 +5764,7 @@ function wsGenerate() {
     return;
   }
   if (!AI_TUTOR_WORKER_URL || AI_TUTOR_WORKER_URL.indexOf("PASTE_YOUR") === 0) {
-    gpstore("Gyaan Buddy is not set up yet! Ask a grown-up to finish the setup.");
+    gpToast("Gyaan Buddy is not set up yet! Ask a grown-up to finish the setup.");
     return;
   }
   _wsState.generating = true;
@@ -5796,7 +5789,7 @@ function wsGenerate() {
     .then(function (data) {
       _wsState.generating = false;
       if (data.error === "limit_reached") {
-       gpstore(data.reply || "Daily limit reached.");
+       gpToast(data.reply || "Daily limit reached.");
         renderWorksheetForm();
         return;
       }
@@ -5813,7 +5806,7 @@ function wsGenerate() {
     })
     .catch(function () {
       _wsState.generating = false;
-      gpstore("Could not connect. Please check your internet and try again.");
+      gpToast("Could not connect. Please check your internet and try again.");
       renderWorksheetForm();
     });
 }
@@ -5925,7 +5918,7 @@ function wsDownloadPDF() {
       });
       doc.save("GyaanPe_Worksheet_" + _wsState.classKey + "_" + Date.now() + ".pdf");
     } catch (e) {
-     gpstore("PDF banane me dikkat hui. Dobara try karein.");
+     gpToast("PDF banane me dikkat hui. Dobara try karein.");
     }
   });
 }
@@ -6115,11 +6108,11 @@ function olyBuildPrompt() {
 function olyGenerate() {
   if (_olyState.generating) return;
   if (!isPremium() && olyTodayCount() >= OLYMPIAD_DAILY_LIMIT) {
-    gpstore("You've generated " + OLYMPIAD_DAILY_LIMIT + " Olympiad sets today! Come back tomorrow for more.");
+    gpToast("You've generated " + OLYMPIAD_DAILY_LIMIT + " Olympiad sets today! Come back tomorrow for more.");
     return;
   }
   if (!AI_TUTOR_WORKER_URL || AI_TUTOR_WORKER_URL.indexOf("PASTE_YOUR") === 0) {
-    gpstore("Gyaan Buddy is not set up yet! Ask a grown-up to finish the setup.");
+    gpToast("Gyaan Buddy is not set up yet! Ask a grown-up to finish the setup.");
     return;
   }
   _olyState.generating = true;
@@ -6141,13 +6134,13 @@ function olyGenerate() {
     .then(function (data) {
       _olyState.generating = false;
       if (data.error === "limit_reached") {
-        gpstore(data.reply || "Daily limit reached.");
+        gpToast(data.reply || "Daily limit reached.");
         renderOlympiadSelect();
         return;
       }
       var parsed = olyParseQuestions(data.reply);
       if (!parsed || parsed.length === 0) {
-        gpstore("Could not generate a valid Olympiad set this time. Please try again.");
+        gpToast("Could not generate a valid Olympiad set this time. Please try again.");
         renderOlympiadSelect();
         return;
       }
@@ -6159,7 +6152,7 @@ function olyGenerate() {
     })
     .catch(function () {
       _olyState.generating = false;
-      gpstore("Could not connect. Please check your internet and try again.");
+      gpToast("Could not connect. Please check your internet and try again.");
       renderOlympiadSelect();
     });
 }
@@ -6992,7 +6985,7 @@ var PREMIUM_CONFIG = {
 function gpDevSetPremium(on, secret) {
   if (secret !== "gyaanpe2026dev") { console.warn("Not authorized."); return; }
   localStorage.setItem("gp_dev_premium", on ? "1" : "0");
-  gpstore(on ? "Developer preview: Premium ON (not a real purchase)" : "Developer preview: Premium OFF");
+  gpToast(on ? "Developer preview: Premium ON (not a real purchase)" : "Developer preview: Premium OFF");
 }
 
 function isPremium() {
@@ -8091,7 +8084,7 @@ function renderNutritionHome() {
 function gpNutriAddGrowthEntry() {
   var h = document.getElementById("nutriNewHeight").value;
   var w = document.getElementById("nutriNewWeight").value;
-  if (!h || !w) { gpstore("Please enter both height and weight."); return; }
+  if (!h || !w) { gpToast("Please enter both height and weight."); return; }
   gpNutriGrowthAdd(h, w);
   renderNutritionHome();
 }
@@ -8137,7 +8130,7 @@ function gpNutriSaveProfile() {
     medical: document.getElementById("npMedical").value.trim(),
     favFoods: document.getElementById("npFavFoods").value.trim(),
   };
-  if (!profile.name || !profile.age) { gpstore("Please enter at least name and age."); return; }
+  if (!profile.name || !profile.age) { gpToast("Please enter at least name and age."); return; }
   gpNutriProfileSave(profile);
   openNutritionHome();
 }
@@ -8300,15 +8293,15 @@ function nutriBuildPrompt(kind) {
 function nutriGenerateMealPlan(kind) {
   if (_nutriMealState.generating) return;
   if (nutriTodayCount() >= NUTRI_DAILY_LIMIT && !isPremium()) {
-    gpstore("You've generated " + NUTRI_DAILY_LIMIT + " meal plans today! Come back tomorrow for more.");
+    gpToast("You've generated " + NUTRI_DAILY_LIMIT + " meal plans today! Come back tomorrow for more.");
     return;
   }
   if (!AI_TUTOR_WORKER_URL || AI_TUTOR_WORKER_URL.indexOf("PASTE_YOUR") === 0) {
-   gpstore("This feature needs setup. Ask a grown-up to finish the AI setup.");
+   gpToast("This feature needs setup. Ask a grown-up to finish the AI setup.");
     return;
   }
   var profile = gpNutriProfileGet();
-  if (!profile.name) { gpstore("Please set up the child profile first."); openNutritionProfile(); return; }
+  if (!profile.name) { gpToast("Please set up the child profile first."); openNutritionProfile(); return; }
 
   _nutriMealState.generating = true;
   var el = document.getElementById("nutritionMealArea");
@@ -8323,7 +8316,7 @@ function nutriGenerateMealPlan(kind) {
     .then(function (data) {
       _nutriMealState.generating = false;
       var parsed = nutriParsePlan(data.reply);
-      if (!parsed) { gpstore("Could not generate a valid meal plan. Please try again."); renderNutritionMealPlan(); return; }
+      if (!parsed) { gpToast("Could not generate a valid meal plan. Please try again."); renderNutritionMealPlan(); return; }
       nutriIncrementCount();
       if (kind === "daily") {
         _nutriMealState.dailyPlan = parsed;
@@ -8336,7 +8329,7 @@ function nutriGenerateMealPlan(kind) {
     })
     .catch(function () {
       _nutriMealState.generating = false;
-      gpstore("Could not connect. Please check your internet and try again.");
+      gpToast("Could not connect. Please check your internet and try again.");
       renderNutritionMealPlan();
     });
 }
@@ -12368,7 +12361,7 @@ if ('serviceWorker' in navigator) {
     var sku = PRODUCTS[planKey];
     if (!sku) { log('unknown plan', planKey); return false; }
     if (!state.supported) {
-      gpstore('Premium purchase sirf GyaanPe ki Play Store app me available hai.');
+      gpToast('Premium purchase sirf GyaanPe ki Play Store app me available hai.');
       return false;
     }
     try {
@@ -12381,7 +12374,7 @@ if ('serviceWorker' in navigator) {
     } catch (e) {
       var msg = String(e && e.message || e);
       if (/cancel/i.test(msg)) log('User cancelled purchase');
-      else { log('Purchase failed:', e); gpstore('Purchase fail ho gaya. Dobara try karo.'); }
+      else { log('Purchase failed:', e); gpToast('Purchase fail ho gaya. Dobara try karo.'); }
       return false;
     }
   }

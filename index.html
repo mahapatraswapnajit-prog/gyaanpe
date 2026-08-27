@@ -1498,6 +1498,7 @@ function gpToast(msg){
 <div id="heroImageWrap" style="display:none;margin:0 0 14px 0;border-radius:18px;overflow:hidden;box-shadow:0 6px 18px rgba(0,0,0,0.12);"><img src="gyaanpe-hero.jpg" alt="GyaanPe - Loved by Kids, Trusted by Parents" style="width:100%;display:block;" loading="lazy"></div>
 <div class="home-screen" id="homeScreen">
  <div id="gpvHomeMount"></div>
+ <div id="gpsmMount"></div>
  <div id="gplHomeMount"></div>
 <div class="home-top anim-card">
 <div class="gp-teachers-banner" id="gpTeachersBanner" style="margin:0 0 14px;border-radius:16px;overflow:hidden;box-shadow:0 6px 18px rgba(0,0,0,0.12);">
@@ -2331,6 +2332,7 @@ html+='<div class="p-stat"><div class="pv">'+longestStreak+'</div><div class="pl
 html+='<div class="p-stat"><div class="pv">'+lessonsCompleted+'</div><div class="pl">Lessons Completed</div></div>';
 html+='<div class="p-stat"><div class="pv">Lv.'+currentLevel+'</div><div class="pl">Current Level</div></div>';
 html+='</div>';
+html+=gpsmParentSection();
 html+='<div class="p-sec">'+renderParentNotifications()+'</div>';
 if(!isPremium()){
 html+='<div class="pdp-lock-banner"><h4>&#11088; Unlock Parent Dashboard Pro</h4><p style="font-size:12px;margin-bottom:10px;">AI Insights, Study Plans, Test Trends, Brain Gym Analytics, Wellness Score, PDF Reports &amp; more.</p><button class="pbc-btn" onclick="gpOpenPremium()">View Premium Plans &#8594;</button></div>';
@@ -13406,6 +13408,264 @@ if ('serviceWorker' in navigator) {
 })();
 </script>
 <!-- ================== END GYAANPE LIBRARY MODULE ================== -->
+
+<!-- ==================== GYAANPE STUDY MODE / LEARNING TIME ==================== -->
+<style>
+  /* ---- home card ---- */
+  .gpsm-card{background:#fff;border-radius:18px;padding:16px;margin:18px 0;
+    box-shadow:0 4px 16px rgba(0,0,0,.07);border:2px solid #EFE9DC;}
+  .gpsm-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+  .gpsm-title{font-family:Anton,sans-serif;font-size:16px;color:#1A237E;letter-spacing:.4px;}
+  .gpsm-time{font-size:12px;font-weight:800;color:#FF6F00;background:#FFF3E0;
+    padding:4px 10px;border-radius:999px;}
+  .gpsm-goal{display:flex;align-items:center;gap:9px;padding:7px 0;font-size:13px;color:#4A5768;}
+  .gpsm-goal.done{color:#2E7D32;font-weight:700;}
+  .gpsm-gicon{width:20px;height:20px;flex:0 0 auto;border-radius:50%;border:2px solid #D5D2CA;
+    display:flex;align-items:center;justify-content:center;font-size:11px;}
+  .gpsm-goal.done .gpsm-gicon{background:#2E7D32;border-color:#2E7D32;color:#fff;}
+  .gpsm-bar{height:7px;background:#EFE9DC;border-radius:999px;overflow:hidden;margin-top:11px;}
+  .gpsm-bar i{display:block;height:100%;background:linear-gradient(90deg,#FF6F00,#FFB300);
+    transition:width .4s ease;}
+  .gpsm-note{font-size:11.5px;color:#6B7280;margin-top:9px;text-align:center;}
+
+  /* ---- break screen ---- */
+  #gpsmBreak{display:none;position:fixed;inset:0;z-index:9500;
+    background:linear-gradient(160deg,#1A237E,#3949AB);color:#fff;
+    align-items:center;justify-content:center;padding:26px;text-align:center;}
+  #gpsmBreak.on{display:flex;}
+  .gpsmb-in{max-width:340px;}
+  .gpsmb-emo{font-size:70px;margin-bottom:14px;}
+  .gpsmb-h{font-family:Anton,sans-serif;font-size:25px;margin-bottom:9px;letter-spacing:.5px;}
+  .gpsmb-p{font-size:14px;opacity:.93;line-height:1.6;margin-bottom:18px;}
+  .gpsmb-tips{background:rgba(255,255,255,.12);border-radius:14px;padding:14px;margin-bottom:20px;
+    font-size:13px;text-align:left;line-height:1.9;}
+  .gpsmb-btn{display:block;width:100%;border:none;border-radius:14px;padding:13px;
+    font-weight:800;font-size:14px;font-family:inherit;cursor:pointer;margin-bottom:10px;}
+  .gpsmb-primary{background:#FFC107;color:#3E2723;}
+  .gpsmb-ghost{background:rgba(255,255,255,.16);color:#fff;}
+
+  /* ---- parent dashboard: weekly bars + limit ---- */
+  .gpsm-wk{display:flex;align-items:flex-end;justify-content:space-between;gap:5px;
+    margin:14px 0 4px;height:82px;}
+  .gpsm-wkcol{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;}
+  .gpsm-wkcol i{display:block;width:100%;max-width:26px;background:linear-gradient(180deg,#FF6F00,#FFB300);
+    border-radius:5px 5px 0 0;}
+  .gpsm-wkval{font-size:9.5px;font-weight:800;color:#6B7280;margin-bottom:3px;min-height:12px;}
+  .gpsm-wkday{font-size:10px;color:#9AA1AC;margin-top:4px;font-weight:700;}
+  .gpsm-limbox{background:#FAF8F3;border-radius:14px;padding:13px;margin-top:14px;}
+  .gpsm-limhead{font-size:12.5px;font-weight:800;color:#1A237E;margin-bottom:9px;}
+  .gpsm-limrow{display:flex;gap:7px;margin-bottom:11px;}
+  .gpsm-limbtn{flex:1;background:#fff;border:2px solid #E5E0D5;border-radius:10px;padding:8px 0;
+    font-size:12px;font-weight:800;color:#4A5768;font-family:inherit;cursor:pointer;}
+  .gpsm-limbtn.on{background:#1A237E;border-color:#1A237E;color:#fff;}
+  .gpsm-strict{display:flex;align-items:center;gap:8px;font-size:12px;color:#4A5768;cursor:pointer;}
+  .gpsm-limnote{font-size:11px;color:#6B7280;margin-top:8px;line-height:1.55;}
+</style>
+
+<div id="gpsmBreak">
+  <div class="gpsmb-in">
+    <div class="gpsmb-emo" id="gpsmbEmo">&#127881;</div>
+    <div class="gpsmb-h" id="gpsmbH">Shabaash!</div>
+    <p class="gpsmb-p" id="gpsmbP">Aaj ki padhai poori ho gayi. Ab thoda break lo.</p>
+    <div class="gpsmb-tips">
+      &#128167; Paani piyo<br>
+      &#129496; Thoda stretch karo<br>
+      &#128064; Khidki se bahar dekho<br>
+      &#9917; Bahar jaakar khelo
+    </div>
+    <button class="gpsmb-btn gpsmb-primary" onclick="gpsmCloseBreak()">Theek hai, break lete hain</button>
+    <button class="gpsmb-btn gpsmb-ghost" onclick="gpsmSnooze()" id="gpsmSnoozeBtn">Thoda aur padhna hai</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  /* --------------------------------------------------------------
+     Learning time + Study Mode.
+     Time is counted only while the app is actually in the
+     foreground, so leaving the app open in a background tab does
+     not inflate the number a parent sees.
+     -------------------------------------------------------------- */
+
+  function today(){
+    try{ if(typeof gpTodayKey==='function') return gpTodayKey(); }catch(e){}
+    return new Date().toISOString().slice(0,10);
+  }
+  function g(k,d){ try{ var v=localStorage.getItem(k); return v===null?d:v; }catch(e){ return d; } }
+  function s(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
+
+  /* ---- seconds studied today ---- */
+  function secsToday(){ return parseInt(g('gpsm_secs_'+today(),'0'),10)||0; }
+  function addSecs(n){ s('gpsm_secs_'+today(), String(secsToday()+n)); }
+
+  window.gpsmMinsToday = function(){ return Math.round(secsToday()/60); };
+
+  /* last 7 days, oldest first — used by the parent dashboard */
+  window.gpsmWeek = function(){
+    var out=[], d=new Date();
+    for(var i=6;i>=0;i--){
+      var t=new Date(d.getTime()-i*86400000).toISOString().slice(0,10);
+      out.push({ date:t, mins: Math.round((parseInt(g('gpsm_secs_'+t,'0'),10)||0)/60) });
+    }
+    return out;
+  };
+
+  /* ---- parent limit (0 = off) ---- */
+  window.gpsmLimit    = function(){ return parseInt(g('gpsm_limit','0'),10)||0; };
+  window.gpsmSetLimit = function(m){ s('gpsm_limit', String(m||0)); gpsmRenderCard(); };
+  window.gpsmStrict   = function(){ return g('gpsm_strict','0')==='1'; };
+  window.gpsmSetStrict= function(on){ s('gpsm_strict', on?'1':'0'); };
+
+  /* ---- the ticker ---- */
+  var tick=null, lastBeat=Date.now();
+
+  function beat(){
+    var now=Date.now();
+    var gap=Math.round((now-lastBeat)/1000);
+    lastBeat=now;
+    if(gap<1 || gap>90) return;      // device slept or tab was frozen — ignore
+    addSecs(gap);
+    gpsmRenderCard();
+    gpsmCheckLimit();
+  }
+
+  function start(){ if(tick) return; lastBeat=Date.now(); tick=setInterval(beat,15000); }
+  function stop(){ if(!tick) return; beat(); clearInterval(tick); tick=null; }
+
+  document.addEventListener('visibilitychange', function(){
+    if(document.hidden) stop(); else start();
+  });
+  window.addEventListener('pagehide', stop);
+  window.addEventListener('beforeunload', stop);
+
+  /* ---- limit + break screen ---- */
+  function snoozedUntil(){ return parseInt(g('gpsm_snooze','0'),10)||0; }
+
+  window.gpsmCheckLimit = function(){
+    var lim=gpsmLimit();
+    if(!lim) return;
+    if(gpsmMinsToday() < lim) return;
+    if(Date.now() < snoozedUntil()) return;
+    if(g('gpsm_break_shown','')===today() && !gpsmStrict()) return;
+    gpsmShowBreak();
+  };
+
+  window.gpsmShowBreak = function(){
+    var el=document.getElementById('gpsmBreak'); if(!el) return;
+    s('gpsm_break_shown', today());
+    var strict=gpsmStrict();
+    var sn=document.getElementById('gpsmSnoozeBtn');
+    if(sn) sn.style.display = strict ? 'none' : 'block';
+    var p=document.getElementById('gpsmbP');
+    if(p) p.textContent = strict
+      ? 'Aaj ke liye padhai ka samay poora ho gaya. Kal phir milte hain!'
+      : 'Aaj ki padhai poori ho gayi. Ab thoda break lo.';
+    el.classList.add('on');
+  };
+  window.gpsmCloseBreak = function(){
+    var el=document.getElementById('gpsmBreak'); if(el) el.classList.remove('on');
+    if(gpsmStrict()){
+      try{ if(typeof goHome==='function') goHome(); else if(typeof gpGoHome==='function') gpGoHome(); }catch(e){}
+    }
+  };
+  window.gpsmSnooze = function(){
+    s('gpsm_snooze', String(Date.now()+5*60*1000));   // 5 more minutes
+    gpsmCloseBreak();
+  };
+
+  /* ---- today's goal card ---- */
+  window.gpsmRenderCard = function(){
+    var mount=document.getElementById('gpsmMount'); if(!mount) return;
+
+    var mins=gpsmMinsToday(), lim=gpsmLimit();
+    var xpToday=0;
+    try{ if(typeof gpXPToday==='function') xpToday=gpXPToday(); }catch(e){}
+
+    var streakOn=false;
+    try{ streakOn = (g('gp_last','')===today()); }catch(e){}
+
+    var lessonDone = xpToday>=20;
+    var practiceDone = xpToday>=40;
+    var quizDone = streakOn;
+
+    var goals=[
+      ['\uD83D\uDCD6 Ek lesson padho', lessonDone],
+      ['\u270F\uFE0F Thoda abhyas karo', practiceDone],
+      ['\uD83C\uDFAF Aaj ka quiz khelo', quizDone]
+    ];
+    var done=goals.filter(function(x){return x[1];}).length;
+    var pct=Math.round(done/goals.length*100);
+
+    var h='<div class="gpsm-card"><div class="gpsm-head">'+
+      '<div class="gpsm-title">\uD83C\uDF1F Aaj Ka Lakshya</div>'+
+      '<span class="gpsm-time">'+mins+' min'+(lim?' / '+lim:'')+'</span></div>';
+
+    goals.forEach(function(gl){
+      h+='<div class="gpsm-goal'+(gl[1]?' done':'')+'">'+
+         '<span class="gpsm-gicon">'+(gl[1]?'\u2713':'')+'</span>'+gl[0]+'</div>';
+    });
+
+    h+='<div class="gpsm-bar"><i style="width:'+pct+'%"></i></div>';
+    h+= done===goals.length
+      ? '<div class="gpsm-note">\uD83C\uDF89 Aaj ka lakshya poora! Ab break lo aur khelo.</div>'
+      : '<div class="gpsm-note">Thoda thoda roz — yahi sabse achha tarika hai.</div>';
+    h+='</div>';
+
+    mount.innerHTML=h;
+  };
+
+  /* ---- parent dashboard section ---- */
+  window.gpsmParentSection = function(){
+    var week=gpsmWeek();
+    var mins=gpsmMinsToday(), lim=gpsmLimit();
+    var total=week.reduce(function(a,b){ return a+b.mins; },0);
+    var active=week.filter(function(d){ return d.mins>0; }).length;
+    var max=Math.max(1, Math.max.apply(null, week.map(function(d){ return d.mins; })));
+    var days=['S','M','T','W','T','F','S'];
+
+    var h='<div class="p-sec"><h4>&#9200; LEARNING TIME</h4>';
+
+    h+='<div class="p-stat-grid">'+
+       '<div class="p-stat"><div class="pv">'+mins+'</div><div class="pl">Today (min)</div></div>'+
+       '<div class="p-stat"><div class="pv">'+total+'</div><div class="pl">This Week (min)</div></div>'+
+       '<div class="p-stat"><div class="pv">'+active+'/7</div><div class="pl">Active Days</div></div>'+
+       '</div>';
+
+    h+='<div class="gpsm-wk">';
+    week.forEach(function(d){
+      var hpx=Math.max(3, Math.round(d.mins/max*54));
+      var lbl=days[new Date(d.date+'T00:00:00').getDay()];
+      h+='<div class="gpsm-wkcol"><span class="gpsm-wkval">'+(d.mins||'')+'</span>'+
+         '<i style="height:'+hpx+'px"></i><span class="gpsm-wkday">'+lbl+'</span></div>';
+    });
+    h+='</div>';
+
+    h+='<div class="gpsm-limbox"><div class="gpsm-limhead">Roz ka padhai ka samay</div>'+
+       '<div class="gpsm-limrow">';
+    [0,15,20,30,45].forEach(function(m){
+      h+='<button class="gpsm-limbtn'+(lim===m?' on':'')+'" onclick="gpsmSetLimit('+m+');gpParent();">'+
+         (m===0?'Off':m+'m')+'</button>';
+    });
+    h+='</div>';
+    h+='<label class="gpsm-strict"><input type="checkbox" id="gpsmStrictBox"'+(gpsmStrict()?' checked':'')+
+       ' onchange="gpsmSetStrict(this.checked)"> Samay poora hone par padhai rok do</label>';
+    h+='<p class="gpsm-limnote">Limit off rakhein to sirf ek pyaara break reminder aayega. '+
+       'Rok dene par bachcha home screen par wapas chala jayega.</p>';
+    h+='</div></div>';
+    return h;
+  };
+
+  /* ---- init ---- */
+  function init(){
+    gpsmRenderCard();
+    if(!document.hidden) start();
+    gpsmCheckLimit();
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
+})();
+</script>
+<!-- ================== END STUDY MODE ================== -->
 
 </body>
 </html>

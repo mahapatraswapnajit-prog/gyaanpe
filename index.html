@@ -1581,6 +1581,7 @@ function gpToast(msg){
 </div>
 <div class="quote-card"><div class="quote-text" id="gpQuote">Loading...</div></div>
 <button class="parent-open-btn" onclick="gpParent()">&#128104;&#8205;&#128105;&#8205;&#128103; PARENT DASHBOARD</button>
+<button class="parent-open-btn" onclick="gppcOpen()">&#128218; PARENTS CORNER</button>
 <button class="parent-open-btn" style="background:#F3E5F5;color:#6A1B9A;" onclick="gpOpenAnalytics()">&#128202; MY PROGRESS</button>
 <button class="parent-open-btn" style="background:#1A237E;color:#fff;" onclick="openAITutor()">🤖 ASK GYAAN BUDDY (AI TUTOR)</button>
 <button class="parent-open-btn" style="background:#00695C;color:#fff;" onclick="openWorksheetGen()">📝 AI WORKSHEET GENERATOR</button>
@@ -2332,13 +2333,14 @@ html+='<div class="p-stat"><div class="pv">'+longestStreak+'</div><div class="pl
 html+='<div class="p-stat"><div class="pv">'+lessonsCompleted+'</div><div class="pl">Lessons Completed</div></div>';
 html+='<div class="p-stat"><div class="pv">Lv.'+currentLevel+'</div><div class="pl">Current Level</div></div>';
 html+='</div>';
+html+='<div class="p-sec">'+gpwrHTML()+'</div>';
 html+=gpsmParentSection();
+html+='<div class="p-sec"><button class="gppc-link" style="margin-top:0" onclick="gppcOpen()">\uD83D\uDC68\u200D\uD83D\uDC69\u200D\uD83D\uDC67 Parents Corner kholein</button></div>';
 html+='<div class="p-sec">'+renderParentNotifications()+'</div>';
 if(!isPremium()){
 html+='<div class="pdp-lock-banner"><h4>&#11088; Unlock Parent Dashboard Pro</h4><p style="font-size:12px;margin-bottom:10px;">AI Insights, Study Plans, Test Trends, Brain Gym Analytics, Wellness Score, PDF Reports &amp; more.</p><button class="pbc-btn" onclick="gpOpenPremium()">View Premium Plans &#8594;</button></div>';
 }else{
 html+='<div class="p-sec"><h4>&#128994; CHILD WELLNESS</h4>'+renderWellnessCard()+'</div>';
- html+='<div class="p-sec"><h4>&#128994; CHILD WELLNESS</h4>'+renderWellnessCard()+'</div>';
  if(typeof stkDashboardCardHTML==='function'){html+=stkDashboardCardHTML();}
 html+='<div class="p-sec"><h4>&#127807; AI NUTRITION &amp; GROWTH ADVISOR<span class="pdp-pro-badge">PRO</span></h4><div style="font-size:12px;color:#666;margin-bottom:8px;">Meal plans, growth tracking, healthy habits &amp; more.</div><button class="pbc-btn" onclick="openNutritionHome()">Open Nutrition Advisor &#8594;</button></div>';
  if(typeof stDashboardCardHTML==='function'){html+=stDashboardCardHTML();}
@@ -13666,6 +13668,349 @@ if ('serviceWorker' in navigator) {
 })();
 </script>
 <!-- ================== END STUDY MODE ================== -->
+
+<!-- ==================== PARENTS CORNER + WEEKLY REPORT ==================== -->
+<style>
+  #gppcPage{display:none;position:fixed;inset:0;background:#FFF9F0;z-index:9100;overflow-y:auto;padding:16px;}
+  #gppcPage.on{display:block;}
+  .gppc-head{display:flex;align-items:center;gap:10px;margin-bottom:4px;}
+  .gppc-back{background:#eee;border:none;border-radius:12px;padding:8px 14px;font-weight:800;
+    font-size:13px;cursor:pointer;color:#1A237E;}
+  .gppc-title{font-family:Anton,sans-serif;font-size:20px;color:#1A237E;letter-spacing:.5px;}
+  .gppc-sub{font-size:12px;color:#6B7280;margin:0 0 14px 2px;}
+
+  .gppc-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-bottom:16px;}
+  .gppc-tile{background:#fff;border:2px solid #EFE9DC;border-radius:16px;padding:14px 12px;
+    text-align:center;cursor:pointer;transition:transform .15s ease;}
+  .gppc-tile:active{transform:scale(.97);}
+  .gppc-tile.on{border-color:#1A237E;background:#F3F4FB;}
+  .gppc-temo{font-size:26px;display:block;margin-bottom:6px;}
+  .gppc-tlabel{font-size:12px;font-weight:800;color:#16202F;line-height:1.35;}
+
+  .gppc-art{background:#fff;border-radius:16px;padding:16px;box-shadow:0 4px 14px rgba(0,0,0,.06);}
+  .gppc-art h4{font-family:Anton,sans-serif;font-size:17px;color:#1A237E;margin-bottom:4px;letter-spacing:.3px;}
+  .gppc-art .lead{font-size:12.5px;color:#6B7280;margin-bottom:13px;line-height:1.6;}
+  .gppc-art h5{font-size:13px;font-weight:800;color:#16202F;margin:14px 0 7px;}
+  .gppc-art ul{list-style:none;padding:0;margin:0 0 6px;}
+  .gppc-art li{font-size:13px;color:#4A5768;line-height:1.65;padding-left:18px;position:relative;margin-bottom:7px;}
+  .gppc-art li:before{content:"\2022";position:absolute;left:5px;color:#FF6F00;font-weight:800;}
+  .gppc-note{background:#FFF8E1;border-left:3px solid #FFB300;border-radius:0 10px 10px 0;
+    padding:10px 12px;font-size:12px;color:#5D4037;line-height:1.6;margin-top:14px;}
+  .gppc-link{display:block;width:100%;background:#1A237E;color:#fff;border:none;border-radius:12px;
+    padding:12px;font-weight:800;font-size:13px;font-family:inherit;cursor:pointer;margin-top:14px;}
+
+  /* weekly report */
+  .gpwr-box{background:linear-gradient(135deg,#283593,#5C6BC0);color:#fff;border-radius:16px;padding:16px;}
+  .gpwr-box h4{font-family:Anton,sans-serif;font-size:17px;margin-bottom:10px;letter-spacing:.3px;}
+  .gpwr-line{font-size:13px;line-height:1.75;margin-bottom:10px;opacity:.96;}
+  .gpwr-tag{display:inline-block;background:rgba(255,255,255,.16);border-radius:999px;
+    padding:3px 10px;font-size:11.5px;font-weight:700;margin:0 5px 5px 0;}
+  .gpwr-next{background:rgba(255,255,255,.13);border-radius:12px;padding:12px;margin-top:11px;
+    font-size:12.5px;line-height:1.65;}
+</style>
+
+<div id="gppcPage">
+  <div class="gppc-head">
+    <button class="gppc-back" onclick="gppcClose()">&#8592; Back</button>
+    <div class="gppc-title">&#128104;&#8205;&#128105;&#8205;&#128103; Parents Corner</div>
+  </div>
+  <p class="gppc-sub">Samajhiye &bull; Support kijiye &bull; Saath chaliye</p>
+  <div class="gppc-grid" id="gppcTiles"></div>
+  <div id="gppcBody"></div>
+</div>
+
+<script>
+(function(){
+
+  /* ============ WEEKLY REPORT ============
+     Built from the child's own stored numbers, not written by AI.
+     A parent should be able to trust that every figure here is real. */
+  window.gpwrBuild = function(){
+    var mins=0, days=0, week=[];
+    try{ week = (typeof gpsmWeek==='function') ? gpsmWeek() : []; }catch(e){}
+    week.forEach(function(d){ mins+=d.mins; if(d.mins>0) days++; });
+
+    var weak=[], strong=[], streak=0, acc=null, lessons=0;
+    try{ weak   = (typeof gpGetWeakTopics==='function')   ? gpGetWeakTopics(3).map(function(t){return t.name;})   : []; }catch(e){}
+    try{ strong = (typeof gpGetStrongTopics==='function') ? gpGetStrongTopics(2).map(function(t){return t.name;}) : []; }catch(e){}
+    try{ streak = parseInt(localStorage.getItem('gp_streak')||'0',10)||0; }catch(e){}
+    try{ var o=gpGetOverallStats(); acc = (o&&typeof o.accuracy==='number') ? o.accuracy : null; }catch(e){}
+    try{ var p=gpProg()||{}; for(var s0 in p){ for(var l in p[s0]) lessons++; } }catch(e){}
+
+    return { mins:mins, days:days, weak:weak, strong:strong, streak:streak, acc:acc, lessons:lessons, week:week };
+  };
+
+  window.gpwrHTML = function(){
+    var r=gpwrBuild();
+    var h='<div class="gpwr-box"><h4>&#128202; Is Hafte Ki Report</h4>';
+
+    if(r.mins===0){
+      h+='<div class="gpwr-line">Is hafte abhi tak padhai shuru nahi hui hai. '+
+         'Roz 10-15 minute se shuruat karwaiye - shuruat me itna hi kaafi hai.</div></div>';
+      return h;
+    }
+
+    h+='<div class="gpwr-line">Aapke bachche ne is hafte <b>'+r.mins+' minute</b> padhai ki, '+
+       '<b>'+r.days+' din</b> me.</div>';
+
+    h+='<div>';
+    if(r.acc!==null) h+='<span class="gpwr-tag">Sahi jawab: '+r.acc+'%</span>';
+    if(r.streak>0)   h+='<span class="gpwr-tag">Streak: '+r.streak+' din</span>';
+    if(r.lessons>0)  h+='<span class="gpwr-tag">Lessons: '+r.lessons+'</span>';
+    h+='</div>';
+
+    if(r.strong.length)
+      h+='<div class="gpwr-line" style="margin-top:8px;">Mazboot: '+r.strong.join(', ')+'</div>';
+    if(r.weak.length)
+      h+='<div class="gpwr-line">Thoda dhyan chahiye: '+r.weak.join(', ')+'</div>';
+
+    /* one concrete next step, based on what the numbers actually show */
+    var next;
+    if(r.days<=2)
+      next='Is hafte padhai ke din kam rahe. Roz ka ek fix samay tay kijiye - subah ya shaam, jo aasan lage. Niyamitta se hi aadat banti hai.';
+    else if(r.weak.length)
+      next='Agle hafte '+r.weak[0]+' par 10 minute, hafte me 3 din. Thoda thoda rozana, ek din bahut karne se behtar hai.';
+    else if(r.mins<60)
+      next='Padhai achhi chal rahi hai. Agar bachcha chahe to roz 5 minute aur badha sakte hain - zyada nahi.';
+    else
+      next='Sab achha chal raha hai. Ab dhyan rakhiye ki khel, neend aur bahar ka samay bhi poora mile.';
+    h+='<div class="gpwr-next"><b>Agla kadam:</b> '+next+'</div>';
+
+    h+='</div>';
+    return h;
+  };
+
+  /* ============ PARENTS CORNER ============ */
+  var ART = {
+    screen: { emoji:'\u23F3', label:'Screen Time Guidance',
+      h:'Screen time ko meaningful kaise banayein',
+      lead:'Sawaal ye nahi ki bachcha kitni der screen par hai. Sawaal ye hai ki us samay me ho kya raha hai.',
+      secs:[
+        ['Do tarah ka screen time',[
+          'Passive - bas dekhte rehna, bina kuch kiye. Isme dimaag kaam nahi karta.',
+          'Active - padhna, sochna, sawaal hal karna, banana. Isme dimaag lagta hai.',
+          '30 minute active seekhna, 30 minute scroll karne se bilkul alag cheez hai.']],
+        ['Roz ke liye aasan niyam',[
+          'Khane ki table par phone nahi - kisi ke liye bhi nahi, bado ke liye bhi.',
+          'Sone se ek ghanta pehle screen band. Isse neend gehri aati hai.',
+          'Padhai ka samay fix rakhiye - roz wahi samay, taaki aadat ban jaye.',
+          'Har 20 minute par 20 second door dekhna - aankhon ke liye.']],
+        ['Sabse zaroori baat',[
+          'Bachche wahi karte hain jo dekhte hain, wo nahi jo sunte hain.',
+          'Agar aap din bhar phone par hain to niyam kaam nahi karega.',
+          'Din me thoda samay poore ghar ke liye phone-free rakhiye.']]
+      ],
+      note:'GyaanPe jaanbujh kar aisa banaya gaya hai ki bachcha kaam poora karke bahar nikal jaye. Isi liye roz ka lakshya poora hone par app khud kehta hai - ab break lo.' },
+
+    routine: { emoji:'\uD83D\uDCDA', label:'Study Routine',
+      h:'Ghar par padhai ka routine',
+      lead:'Chhota aur roz chalne wala routine, lambe par kabhi-kabhi wale routine se bahut behtar hai.',
+      secs:[
+        ['Ek aasan 30 minute ka dhancha',[
+          '5 minute - kal ka dohrana, halke se',
+          '10 minute - naya lesson',
+          '10 minute - abhyas ke sawaal',
+          '5 minute - quiz ya khud se poochna',
+          'Phir break - ye hissa mat chhodiye']],
+        ['Umar ke hisab se samay',[
+          'Nursery se UKG - 10 se 15 minute ek baithak',
+          'Class 1 se 3 - 20 se 25 minute',
+          'Class 4 se 7 - 30 se 40 minute, beech me break ke saath',
+          'Isse zyada baithne par dhyan apne aap tootne lagta hai.']],
+        ['Jagah bhi maayne rakhti hai',[
+          'Ek hi jagah roz - dimaag ko aadat pad jaati hai.',
+          'Achhi roshni aur seedhi peeth.',
+          'TV band, phone door.',
+          'Bistar par padhai nahi - neend aa jaati hai.']]
+      ],
+      note:'Routine bahut kadak mat banaiye. Jo routine 2 din me toot jaye, wo kisi kaam ka nahi. Aisa banaiye jo bachcha khud chala sake.' },
+
+    exam: { emoji:'\uD83D\uDCDD', label:'Exam Preparation',
+      h:'Exam ki tayari me madad kaise karein',
+      lead:'Exam ke dinon me bachche ko sabse zyada shant mahol chahiye hota hai, aur pressure sabse kam.',
+      secs:[
+        ['Ek mahina pehle se',[
+          'Saare chapter ki list banwaiye.',
+          'Har chapter ko teen hisso me baantiye - aata hai, thoda aata hai, nahi aata.',
+          'Sabse zyada samay "nahi aata" wale hisse ko.',
+          'Purane question paper hal karwaiye - pattern samajh me aata hai.']],
+        ['Exam se ek din pehle',[
+          'Naya kuch mat padhwaiye - sirf dohrana.',
+          'Jaldi sula dijiye. Neend se yaad rakhne ki taakat badhti hai.',
+          'Raat bhar jag kar padhna sabse bada nuksan karta hai.']],
+        ['Result ke baad',[
+          'Pehla sawaal marks ka nahi, ehsaas ka - kaisa laga?',
+          'Galtiyan saath baith kar dekhiye, dant kar nahi.',
+          'Doosre bachchon se tulna kabhi mat kijiye - isse sirf dar badhta hai.']]
+      ],
+      note:'Marks se bachche ki keemat tay nahi hoti. Jo bachcha galti par darta nahi, wo aage jaake zyada seekhta hai.' },
+
+    homework: { emoji:'\u270F\uFE0F', label:'Homework Guidance',
+      h:'Homework me kitni madad sahi hai',
+      lead:'Madad ka matlab jawab batana nahi, raasta dikhana hai.',
+      secs:[
+        ['Kya karein',[
+          'Bachche ko pehle khud koshish karne dijiye.',
+          'Atak jaye to sawaal poochiye - "tumhe kya samajh aaya?"',
+          'Ek jaisa aasan sawaal karke dikhaiye, phir asli sawaal usse karne dijiye.',
+          'Poora hone par saath baith kar check kar lijiye.']],
+        ['Kya na karein',[
+          'Khud homework mat kar dijiye - teacher ko pata nahi chalega ki kahan kami hai.',
+          'Saath baith kar har second nigrani mat kijiye.',
+          'Galti par turant tok mat dijiye - poora karne dijiye, phir dekhiye.']],
+        ['Roz ka tareeka',[
+          'School se aakar thoda aaram, phir homework.',
+          'Aasan wala pehle - isse confidence aata hai.',
+          'Aakhri waqt par karne se galtiyan badhti hain.']]
+      ],
+      note:'Agar homework roz ladai ka karan ban raha hai, to samay ya jagah badal kar dekhiye. Aksar problem bachche me nahi, routine me hoti hai.' },
+
+    healthy: { emoji:'\u2764\uFE0F', label:'Healthy Kids',
+      h:'Sehat ki roz wali baatein',
+      lead:'Padhai tabhi achhi chalti hai jab sharir aur mann dono theek hon.',
+      secs:[
+        ['Neend',[
+          'Bachchon ko 9 se 11 ghante neend chahiye.',
+          'Roz ek hi samay sona aur uthna sabse achha.',
+          'Sone se ek ghanta pehle screen band.',
+          'Kam neend ka pehla asar dhyan aur mood par dikhta hai.']],
+        ['Khana aur paani',[
+          'Nashta chhodne se class me dhyan nahi lagta.',
+          'Thali me har rang - anaj, dal, sabzi, phal, doodh.',
+          'Din bhar thoda thoda paani.',
+          'Junk food kabhi-kabhi theek hai, roz nahi.']],
+        ['Khel aur aankhein',[
+          'Roz kam se kam ek ghanta bahar khelna.',
+          'Har 20 minute par 20 second door dekhna.',
+          'Padhte waqt achhi roshni aur seedhi peeth.',
+          'Bag dono kandhon par - ek par nahi.']]
+      ],
+      note:'Yahan di gayi baatein aam jaankari hain. Kisi bhi tabiyat ki chinta par doctor se hi salah lijiye - app se nahi.' },
+
+    food: { emoji:'\uD83C\uDF4E', label:'Khana Aur Tiffin',
+      h:'Roz ke liye aasan aur healthy ideas',
+      lead:'Mehnga ya alag khana zaroori nahi. Ghar ka saada khana sabse achha hai.',
+      secs:[
+        ['Nashta',[
+          'Poha ya upma ke saath thodi sabzi',
+          'Paratha aur dahi',
+          'Idli ya dosa sambhar ke saath',
+          'Doodh aur kela',
+          'Ande ke saath roti']],
+        ['School tiffin',[
+          'Roti-sabzi ka roll - haath se khane me aasan',
+          'Pulao ya khichdi aur dahi',
+          'Paneer ya aloo bharke paratha',
+          'Saath me ek phal ya thoda dry fruit',
+          'Paani ki bottle bhar kar zaroor dijiye']],
+        ['Shaam ka snack',[
+          'Bhune chane ya murmura',
+          'Ubla makka ya sprouts',
+          'Phal - kela, seb, santra',
+          'Doodh aur biscuit',
+          'Chips aur cold drink ki jagah ye chuniye']]
+      ],
+      note:'GyaanPe me Nutrition Advisor bhi hai jo aapke bachche ke liye poora meal plan bana sakta hai. Wahan alergy ki jaankari daal kar plan banwa sakte hain.' },
+
+    safety: { emoji:'\uD83D\uDD12', label:'Child Safety',
+      h:'Online aur app ki suraksha',
+      lead:'Bachche ko sirf mana karne se kaam nahi chalta - use samajhana padta hai.',
+      secs:[
+        ['GyaanPe me kya suraksha hai',[
+          'Koi account nahi - na email, na phone number.',
+          'Bachchon ke beech koi chat ya message nahi.',
+          'Koi vigyapan nahi - na koi ad network.',
+          'AI Tutor ke har jawab ke neeche report ka button hai.',
+          'AI se hui baat kahin store nahi hoti.']],
+        ['Bachche ko ye sikhaiye',[
+          'Apna asli naam, pata ya school online kisi ko mat batao.',
+          'Anjaan link par click mat karo.',
+          'Koi kuch chhupane ko kahe to turant bade ko batao.',
+          'Kuch ajeeb lage to screen band karke bata do - daant nahi padegi.']],
+        ['Aap kya kar sakte hain',[
+          'Phone par app store se kharidne ke liye password lagaiye.',
+          'Bachcha kya dekh raha hai, kabhi-kabhi saath baith kar dekhiye.',
+          'Dar dikhane ki jagah bharosa dijiye - taaki wo aake bata sake.']]
+      ],
+      note:'Agar aapko app me kuch bhi anuchit lage to gyaanpe.support@gmail.com par likhiye. Hum har report dekhte hain.' },
+
+    guide: { emoji:'\uD83E\uDDED', label:'GyaanPe Guide',
+      h:'App me kya kya hai',
+      lead:'Har feature ek hi maksad se bana hai - screen time ko seekhne ka samay banana.',
+      secs:[
+        ['Bachche ke liye',[
+          'Learning Flow - Learn, Practice, Quiz, Revision, Summary, Test',
+          'AI Tutor - Anika Ma\'am (Nursery se Class 3) aur Arjun Sir (Class 4 se 7)',
+          'Library - 36 kitaabein, kahaniyan aur activity',
+          'Learning Videos - chhoti aur maksad wali',
+          'Brain Gym - dimaag ki chhoti exercise',
+          'Premium Courses - 30 din ke focused course']],
+        ['Aapke liye',[
+          'Parent Dashboard - progress, weak topics, learning time',
+          'Learning Time limit - roz ka samay tay kijiye',
+          'Weekly Report - ek minute me poore hafte ka haal',
+          'Parents Corner - yahi jagah']],
+        ['Kaise sabse achha faayda milega',[
+          'Roz ka lakshya poora karwaiye - usse zyada nahi.',
+          'Hafte me ek baar dashboard dekh lijiye.',
+          'Weak topic par thoda thoda abhyas karwaiye.',
+          'Lakshya poora hone par bachche ki tareef zaroor kijiye.']]
+      ],
+      note:'GyaanPe ka vaada simple hai - hum bachche ko phone par zyada der rokne ki koshish nahi karte. Hum us samay ko seekhne ka samay banate hain.' }
+  };
+
+  var cur='screen';
+
+  window.gppcOpen = function(){
+    document.getElementById('gppcPage').classList.add('on');
+    gppcRender();
+    window.scrollTo(0,0);
+  };
+  window.gppcClose = function(){ document.getElementById('gppcPage').classList.remove('on'); };
+  window.gppcPick  = function(k){ cur=k; gppcRender(); window.scrollTo(0,0); };
+
+  function gppcRender(){
+    var t='';
+    for(var k in ART){
+      t+='<div class="gppc-tile'+(cur===k?' on':'')+'" onclick="gppcPick(\''+k+'\')">'+
+         '<span class="gppc-temo">'+ART[k].emoji+'</span>'+
+         '<span class="gppc-tlabel">'+ART[k].label+'</span></div>';
+    }
+    document.getElementById('gppcTiles').innerHTML=t;
+
+    var a=ART[cur];
+    var h='';
+    if(cur==='screen') h+=gpwrHTML()+'<div style="height:14px"></div>';
+
+    h+='<div class="gppc-art"><h4>'+a.h+'</h4><p class="lead">'+a.lead+'</p>';
+    a.secs.forEach(function(sec){
+      h+='<h5>'+sec[0]+'</h5><ul>';
+      sec[1].forEach(function(li){ h+='<li>'+li+'</li>'; });
+      h+='</ul>';
+    });
+    if(a.note) h+='<div class="gppc-note">'+a.note+'</div>';
+
+    if(cur==='food')
+      h+='<button class="gppc-link" onclick="gppcGoNutrition()">\uD83E\uDD57 Nutrition Advisor kholein</button>';
+    if(cur==='guide' || cur==='screen')
+      h+='<button class="gppc-link" onclick="gppcClose();gpParent();">\uD83D\uDCCA Parent Dashboard kholein</button>';
+
+    h+='</div>';
+    document.getElementById('gppcBody').innerHTML=h;
+  }
+
+  window.gppcGoNutrition = function(){
+    gppcClose();
+    try{
+      if(typeof openNutritionHome==='function') openNutritionHome();
+      else if(typeof nutriOpen==='function') nutriOpen();
+      else if(typeof gpOpenNutrition==='function') gpOpenNutrition();
+      else if(typeof openNutrition==='function') openNutrition();
+    }catch(e){}
+  };
+})();
+</script>
+<!-- ================== END PARENTS CORNER ================== -->
 
 </body>
 </html>

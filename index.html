@@ -1579,6 +1579,7 @@ function gpToast(msg){
 <div class="quote-card"><div class="quote-text" id="gpQuote">Loading...</div></div>
 <button class="parent-open-btn" onclick="gpParent()">&#128104;&#8205;&#128105;&#8205;&#128103; PARENT DASHBOARD</button>
 <button class="parent-open-btn" onclick="gppcOpen()">&#128218; PARENTS CORNER</button>
+<button class="parent-open-btn" onclick="gpfqOpen()">&#10067; HELP &amp; FAQ</button>
 <button class="parent-open-btn" style="background:#F3E5F5;color:#6A1B9A;" onclick="gpOpenAnalytics()">&#128202; MY PROGRESS</button>
 <button class="parent-open-btn" style="background:#1A237E;color:#fff;" onclick="openAITutor()">🤖 ASK GYAAN BUDDY (AI TUTOR)</button>
 <button class="parent-open-btn" style="background:#00695C;color:#fff;" onclick="openWorksheetGen()">📝 AI WORKSHEET GENERATOR</button>
@@ -13992,6 +13993,10 @@ if ('serviceWorker' in navigator) {
     if(cur==='guide' || cur==='screen')
       h+='<button class="gppc-link" onclick="gppcClose();gpParent();">\uD83D\uDCCA Parent Dashboard kholein</button>';
 
+    if(cur==='guide'){
+      try{ if(typeof gpShareCardHTML==='function') h+=gpShareCardHTML(); }catch(e){}
+    }
+
     h+='</div>';
     document.getElementById('gppcBody').innerHTML=h;
   }
@@ -14008,6 +14013,333 @@ if ('serviceWorker' in navigator) {
 })();
 </script>
 <!-- ================== END PARENTS CORNER ================== -->
+
+<!-- ==================== HELP & FAQ ==================== -->
+<style>
+  #gpfqPage{display:none;position:fixed;inset:0;background:#FFF9F0;z-index:9150;overflow-y:auto;padding:16px;}
+  #gpfqPage.on{display:block;}
+  .gpfq-head{display:flex;align-items:center;gap:10px;margin-bottom:4px;}
+  .gpfq-back{background:#eee;border:none;border-radius:12px;padding:8px 14px;font-weight:800;
+    font-size:13px;cursor:pointer;color:#1A237E;}
+  .gpfq-title{font-family:Anton,sans-serif;font-size:20px;color:#1A237E;letter-spacing:.5px;}
+  .gpfq-sub{font-size:12px;color:#6B7280;margin:0 0 13px 2px;}
+
+  .gpfq-search{width:100%;padding:11px 14px;border:2px solid #E5E0D5;border-radius:14px;
+    font-size:14px;font-family:inherit;margin-bottom:13px;background:#fff;box-sizing:border-box;}
+  .gpfq-search:focus{outline:none;border-color:#1A237E;}
+
+  .gpfq-chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:8px;margin-bottom:12px;
+    -webkit-overflow-scrolling:touch;}
+  .gpfq-chip{flex:0 0 auto;background:#fff;border:2px solid #E5E0D5;border-radius:999px;
+    padding:7px 13px;font-size:12px;font-weight:700;color:#4A5768;cursor:pointer;white-space:nowrap;}
+  .gpfq-chip.on{background:#1A237E;border-color:#1A237E;color:#fff;}
+
+  .gpfq-sec{font-family:Anton,sans-serif;font-size:14px;color:#1A237E;letter-spacing:.4px;
+    margin:16px 0 9px;}
+
+  .gpfq-item{background:#fff;border:2px solid #EFE9DC;border-radius:14px;margin-bottom:9px;overflow:hidden;}
+  .gpfq-q{display:flex;align-items:flex-start;gap:9px;padding:13px;cursor:pointer;
+    font-size:13.5px;font-weight:700;color:#16202F;line-height:1.45;}
+  .gpfq-q .arw{margin-left:auto;flex:0 0 auto;color:#9AA1AC;font-size:12px;transition:transform .2s ease;}
+  .gpfq-item.open .gpfq-q .arw{transform:rotate(180deg);}
+  .gpfq-a{display:none;padding:0 13px 14px;font-size:13px;color:#4A5768;line-height:1.7;}
+  .gpfq-item.open .gpfq-a{display:block;}
+  .gpfq-a b{color:#16202F;}
+  .gpfq-btn{display:inline-block;background:#1A237E;color:#fff;border:none;border-radius:11px;
+    padding:9px 14px;font-weight:800;font-size:12.5px;font-family:inherit;cursor:pointer;margin-top:10px;}
+
+  .gpfq-empty{text-align:center;color:#6B7280;font-size:13px;padding:24px 10px;}
+  .gpfq-support{background:linear-gradient(135deg,#283593,#5C6BC0);color:#fff;border-radius:16px;
+    padding:18px;text-align:center;margin-top:20px;}
+  .gpfq-support h4{font-family:Anton,sans-serif;font-size:17px;margin-bottom:5px;}
+  .gpfq-support p{font-size:12.5px;opacity:.92;margin-bottom:13px;}
+  .gpfq-support a{display:block;background:#FFC107;color:#3E2723;text-decoration:none;
+    border-radius:12px;padding:12px;font-weight:800;font-size:13.5px;}
+</style>
+
+<div id="gpfqPage">
+  <div class="gpfq-head">
+    <button class="gpfq-back" onclick="gpfqClose()">&#8592; Back</button>
+    <div class="gpfq-title">&#10067; Help &amp; FAQ</div>
+  </div>
+  <p class="gpfq-sub">Apne sawaal ka jawab yahan dhundhiye</p>
+  <input class="gpfq-search" id="gpfqSearch" type="search"
+         placeholder="&#128269; Sawaal dhundhiye... jaise AI Tutor" oninput="gpfqRender()">
+  <div class="gpfq-chips" id="gpfqChips"></div>
+  <div id="gpfqBody"></div>
+</div>
+
+<script>
+(function(){
+  function P(k,d){ try{ return (PREMIUM_CONFIG && PREMIUM_CONFIG[k]) || d; }catch(e){ return d; } }
+  function L(k,d){ try{ return (PREMIUM_CONFIG && PREMIUM_CONFIG.freeLimits && PREMIUM_CONFIG.freeLimits[k]) || d; }catch(e){ return d; } }
+
+  var SUPPORT_EMAIL = 'gyaanpe.support@gmail.com';
+
+  /* Referral is NOT built in this app. Per the brief, the FAQ must not
+     claim a reward that does not exist. Flip this to true only after a
+     real, server-verified referral system ships. */
+  var REFERRAL_LIVE = false;
+
+  var CATS = [
+    ['start',  '\uD83D\uDE80 Shuruat'],
+    ['use',    '\uD83D\uDCDA GyaanPe Use'],
+    ['ai',     '\uD83E\uDD16 AI Features'],
+    ['lib',    '\uD83D\uDCD6 Library'],
+    ['prem',   '\u2B50 Premium'],
+    ['refer',  '\uD83C\uDF81 Refer & Earn'],
+    ['pay',    '\uD83D\uDCB3 Payment'],
+    ['parent', '\uD83D\uDC68\u200D\uD83D\uDC69\u200D\uD83D\uDC67 Parent'],
+    ['tech',   '\uD83D\uDEE0\uFE0F Technical']
+  ];
+
+  function FAQS(){
+    var mp=P('monthlyPrice','\u20B9199'), yp=P('yearlyPrice','\u20B91499'), td=P('trialDays',7);
+    return [
+    /* ---- Shuruat ---- */
+    ['start','GyaanPe kya hai?',
+      'GyaanPe Nursery se Class 7 tak ke bachchon ke liye CBSE-aligned learning app hai. Ismein lessons, practice, quiz, AI Tutor, kitaabein, videos aur courses sab ek jagah hain. Sab kuch Hinglish me samjhaya gaya hai.',1],
+    ['start','Kaunsi classes ke liye hai?',
+      'Nursery, LKG, UKG aur Class 1 se Class 7 tak. Har class ke apne subjects hain.',0],
+    ['start','Account banana padta hai?',
+      'Nahi. GyaanPe me <b>koi account nahi banana padta</b> - na email, na phone number, na password. App kholiye aur seedhe padhai shuru kijiye.<br><br>Ye jaanbujh kar aisa rakha gaya hai. Bachchon ki app me jitni kam jaankari li jaye, utna surakshit rehta hai.',1],
+    ['start','Meri progress kahan save hoti hai?',
+      'Progress aapke phone me save hoti hai, aur cloud par ek random ID ke saath - jo kisi naam ya number se judi nahi hoti. App uninstall karne par phone wala data chala jata hai.',0],
+    ['start','Kya GyaanPe free hai?',
+      'Haan, bahut saara hissa bilkul free hai - lessons, quiz, kai kitaabein, videos aur roz thoda AI Tutor. Premium lene par saari limits hat jaati hain aur poora content khul jata hai.',1],
+    ['start','Free me kya kya milta hai?',
+      'Roz '+L('aiTutor',5)+' AI Tutor sawaal, '+L('aiDoubt',5)+' photo doubt, '+L('aiWorksheet',2)+' worksheet, '+L('olympiad',1)+' Olympiad set aur '+L('brainGym',4)+' Brain Gym game. Sath me nichli classes ke lessons, kai free kitaabein aur videos.',0],
+
+    /* ---- Use ---- */
+    ['use','Padhai kaise shuru karein?',
+      'Home screen par apni class chuniye, phir subject, phir chapter. Har chapter ka safar aisa hai: Learn, Practice, Quiz, Revision, Summary aur Test.',1],
+    ['use','Jahan chhoda tha wahan se kaise shuru karein?',
+      'Home screen par "Continue" wala card apne aap dikhta hai. Library me bhi "Continue Reading" section hai jo aapko usi page par le jata hai jahan kitab chhodi thi.',0],
+    ['use','XP, coins aur badges kaise milte hain?',
+      'Lesson poora karne, quiz sahi karne, roz aane aur course poora karne par. Ye sirf khel ke liye nahi hai - inse bachche ko apni tarakki dikhti hai.',0],
+    ['use','Certificate kaise milta hai?',
+      'Koi bhi 30-din ka course poora karne par certificate milta hai, jisme bachche ka naam hota hai. Use download karke print bhi kar sakte hain.',0],
+    ['use','Brain Gym kya hai?',
+      'Chhoti dimaagi exercises - memory, focus, logic, pattern aur mental maths. Ye jaanbujh kar chhoti rakhi gayi hain, endless game feed nahi hai.',0],
+
+    /* ---- AI ---- */
+    ['ai','AI Tutor kya hai aur kaise use karein?',
+      'AI Tutor bachche ke sawaalon ka jawab aasan bhaasha me deta hai. Do teachers hain - <b>Anika Ma\'am</b> (Nursery se Class 3) aur <b>Arjun Sir</b> (Class 4 se 7). Home se AI Tutor kholiye, apni class chuniye aur sawaal likhiye. Hindi, English aur Odia teenon me baat kar sakte hain.',1],
+    ['ai','Photo se doubt solve hota hai?',
+      'Haan. Camera icon dabakar kitab ya copy ke sawaal ki saaf photo bhejiye. AI use padhkar step-by-step samjhata hai.',1],
+    ['ai','AI Tutor jawab nahi de raha, kya karein?',
+      'Pehle internet check kijiye. Phir dekhiye kahin aaj ki free limit to poori nahi ho gayi - free me roz '+L('aiTutor',5)+' sawaal milte hain. Dono theek hain to thodi der baad try kijiye, kabhi-kabhi server vyast hota hai.',0],
+    ['ai','AI ka jawab galat ho to?',
+      'AI kabhi-kabhi galti karta hai - isliye har jawab ke neeche <b>report ka button</b> hai. Dabaiye, hum har report dekhte hain. Bachchon ko sikhaiye ki AI ka jawab kitab ya bade se confirm karna chahiye.',1],
+    ['ai','AI se hui baat kahin store hoti hai?',
+      'Nahi. Sawaal sirf jawab banane ke liye bheja jata hai, kahin save nahi hota. Hum paid AI service use karte hain, jiske niyam ke tehat ye baatein AI ko sikhane ke liye bhi istemal nahi hoti.',0],
+    ['ai','Worksheet Generator kaise kaam karta hai?',
+      'Class, subject, chapter, difficulty aur kitne sawaal chahiye - ye chuniye, aur AI worksheet bana dega, answer key ke saath. Use PDF me download aur print bhi kar sakte hain.',1],
+    ['ai','Weak topic par worksheet bana sakte hain?',
+      'Haan. App khud dekh leta hai ki bachche ke kaunse topic kamzor hain aur unhi par sawaal bana deta hai.',0],
+
+    /* ---- Library ---- */
+    ['lib','Library kya hai?',
+      'GyaanPe Library me hamari apni banayi kitaabein hain - kahaniyan, science, GK, activity aur brain gym. Sab Nursery se Class 7 tak ke hisab se bati hui hain.',1],
+    ['lib','Kitab kaise padhein?',
+      'Library kholiye, apni class ya category chuniye, aur kisi bhi kitab par tap kijiye. Page-by-page padhne ka option hai, aur akshar ka size bhi bada kar sakte hain.',0],
+    ['lib','Bookmark aur continue reading kaise kaam karta hai?',
+      'Kitab padhte waqt upar bookmark ka nishaan dabaiye. Aur agar beech me chhod dein, to Library me "Continue Reading" me wo kitab usi page se khulegi.',0],
+    ['lib','Kitab download kar sakte hain?',
+      'Abhi kitaabein <b>sirf app me padhne</b> ke liye hain, download nahi hoti. Ye jaanbujh kar hai - taaki content surakshit rahe. Kitaabein turant khulti hain aur ek baar khulne ke baad offline bhi padhi ja sakti hain.',0],
+    ['lib','Kaunsi kitaabein free hain?',
+      'Har category me kuch kitaabein free hain - khaas kar chhoti classes wali. Premium kitaabon par peela PREMIUM badge aur taala dikhta hai.',0],
+
+    /* ---- Premium ---- */
+    ['prem','GyaanPe Premium me kya milta hai?',
+      'Unlimited AI Tutor aur doubt solver, unlimited worksheets, Olympiad mode, Brain Gym Premium, saari premium kitaabein aur sabhi classes ka poora content.',1],
+    ['prem','Premium ke plan kya hain?',
+      'Do plan hain - <b>Monthly '+mp+'</b> aur <b>Yearly '+yp+'</b>. Yearly plan me kaafi bachat hoti hai. Naye users ko '+td+' din ka free trial bhi milta hai.',1],
+    ['prem','Premium kaise lein?',
+      'Home ya kisi bhi taale wale feature par "Go Premium" dabaiye, plan chuniye aur Google Play se payment poora kijiye. Premium turant chalu ho jata hai.',1],
+    ['prem','Premium Courses alag kyun hain?',
+      'Har 30-din ka course alag se ek baar kharida jata hai aur <b>hamesha ke liye</b> aapka ho jata hai - subscription khatam hone par bhi. Premium subscription in courses ko nahi kholti.',1],
+    ['prem','Premium khatam hone par progress chali jayegi?',
+      'Nahi. Aapki saari progress, XP, badges aur certificates suraksit rehte hain. Sirf premium features par dobara taala lag jata hai.',0],
+    ['prem','Doosre phone par Premium chalega?',
+      'Google Play purchase usi Google account se judi hoti hai. Naye phone par wahi account use kijiye aur "Restore Purchase" dabaiye.',0],
+
+    /* ---- Refer ---- */
+    ['refer','Refer & Earn kaise kaam karta hai?',
+      REFERRAL_LIVE
+        ? 'Apna referral link doston ko bhejiye. Jab 3 log GyaanPe install karke Premium lein, aapko 1 mahina Premium free milta hai.'
+        : '\uD83C\uDF81 <b>Refer & Earn abhi taiyar ho raha hai.</b><br><br>Filhal app me referral ka koi program nahi hai. Jab shuru hoga, yahan poori jaankari mil jayegi.<br><br>Tab tak agar GyaanPe pasand aaye to doston ko zaroor bataiye - aapki baat hamare liye sabse badi madad hai.',1],
+
+    /* ---- Payment ---- */
+    ['pay','Payment ke kaunse tarike chalte hain?',
+      'Payment poori tarah Google Play se hoti hai - UPI, card, net banking, wallet aur Play balance. Hum aapki payment ki jaankari na dekhte hain na rakhte hain.',0],
+    ['pay','Paisa kat gaya par Premium chalu nahi hua',
+      'Pehle app band karke dobara kholiye. Phir Premium screen par <b>"Restore Purchase"</b> dabaiye. Tab bhi na chale to '+SUPPORT_EMAIL+' par likhiye - Google Play ka order number saath bhejiye.',1],
+    ['pay','Subscription kaise band karein?',
+      'Play Store kholiye, profile par tap kijiye, phir Payments &amp; subscriptions me jaakar GyaanPe chuniye aur cancel kijiye. Cancel karne ke baad bhi jitne din ka paisa diya hai, utne din Premium chalta rahega.',1],
+    ['pay','Refund kaise milega?',
+      'Kyunki payment Google Play se hoti hai, refund bhi Google Play se hi hota hai. Play Store me order history se refund request kijiye. Koi dikkat ho to hamein likhiye, hum madad karenge.',0],
+
+    /* ---- Parent ---- */
+    ['parent','Parent Dashboard aur Parents Corner me kya antar hai?',
+      '<b>Parent Dashboard</b> me aapke bachche ki asli progress hai - lessons, quiz score, learning time, weak topics aur weekly report.<br><br><b>Parents Corner</b> me aapke liye guidance hai - screen time, study routine, exam tips, sehat aur safety ki jaankari.',1],
+    ['parent','Bachche ka roz ka samay set kar sakte hain?',
+      'Haan. Parent Dashboard me Learning Time section me 15, 20, 30 ya 45 minute ka limit laga sakte hain. Limit poori hone par ek break screen aata hai. Chahein to "padhai rok do" wala option bhi on kar sakte hain.',1],
+    ['parent','Weekly report kahan milti hai?',
+      'Parent Dashboard me sabse upar. Isme hafte ka learning time, active din, accuracy, weak topics aur agla kadam likha hota hai - ek minute me poora haal.',0],
+    ['parent','Ek se zyada bachche add kar sakte hain?',
+      'Abhi ek phone par ek hi profile chalti hai. Do bachchon ke liye alag-alag phone ya alag user profile use kijiye. Multi-child support aage aayega.',0],
+
+    /* ---- Technical ---- */
+    ['tech','App slow chal raha hai ya khul nahi raha',
+      'App band karke dobara kholiye. Phir internet check kijiye. Tab bhi na chale to Play Store se GyaanPe update kar lijiye - aksar isse theek ho jata hai.',0],
+    ['tech','Video nahi chal raha',
+      'Internet check kijiye. Video thoda bhaari hota hai, isliye dheeme net par ruk-ruk kar chalta hai. Wifi par try kijiye.',0],
+    ['tech','Internet ke bina app chalega?',
+      'Kuch hisse chalte hain - jo lessons aur kitaabein pehle khol chuke hain wo offline bhi khulte hain. Par AI Tutor, worksheets aur naye videos ke liye internet zaroori hai.',0],
+    ['tech','Progress update nahi ho rahi',
+      'App band karke dobara kholiye. Agar phir bhi na ho to internet check kijiye - progress cloud par save hoti hai. Baar-baar ho to hamein likhiye.',0],
+    ['tech','App kaise update karein?',
+      'Play Store me GyaanPe search kijiye aur Update dabaiye. Auto-update on rakhna sabse achha hai, taaki naye features aur fixes apne aap milte rahein.',0]
+    ];
+  }
+
+  var cat='all';
+  window.gpfqSetCat = function(c){ cat=c; gpfqRender(); };
+
+  window.gpfqToggle = function(i){
+    var el=document.getElementById('gpfqI'+i);
+    if(el) el.classList.toggle('open');
+  };
+
+  window.gpfqRender = function(){
+    var q=((document.getElementById('gpfqSearch')||{}).value||'').trim().toLowerCase();
+    var all=FAQS();
+
+    var ch='<div class="gpfq-chip'+(cat==='all'?' on':'')+'" onclick="gpfqSetCat(\'all\')">Sab</div>';
+    CATS.forEach(function(c){
+      ch+='<div class="gpfq-chip'+(cat===c[0]?' on':'')+'" onclick="gpfqSetCat(\''+c[0]+'\')">'+c[1]+'</div>';
+    });
+    document.getElementById('gpfqChips').innerHTML=ch;
+
+    var list=all.filter(function(f){
+      if(q) return (f[1]+' '+f[2]+' '+f[0]).toLowerCase().indexOf(q)>-1;
+      if(cat!=='all') return f[0]===cat;
+      return true;
+    });
+
+    var h='';
+    if(!q && cat==='all'){
+      var pop=all.filter(function(f){ return f[3]===1; });
+      h+='<div class="gpfq-sec">\uD83D\uDD25 Aksar Poochhe Jaane Wale</div>';
+      pop.forEach(function(f){ h+=item(f, all.indexOf(f)); });
+      h+='<div class="gpfq-sec">\uD83D\uDCD6 Saare Sawaal</div>';
+      all.forEach(function(f){ if(f[3]!==1) h+=item(f, all.indexOf(f)); });
+    } else if(list.length){
+      list.forEach(function(f){ h+=item(f, all.indexOf(f)); });
+    } else {
+      h+='<div class="gpfq-empty">Is sawaal ka jawab nahi mila.<br>Neeche se hamein seedhe likh sakte hain.</div>';
+    }
+
+    h+='<div class="gpfq-support"><h4>\uD83D\uDCDE Aur madad chahiye?</h4>'+
+       '<p>Hamein likhiye, hum jaldi jawab denge.</p>'+
+       '<a href="mailto:'+SUPPORT_EMAIL+'?subject=GyaanPe%20Help">\u2709\uFE0F '+SUPPORT_EMAIL+'</a></div>';
+
+    document.getElementById('gpfqBody').innerHTML=h;
+  };
+
+  function esc(s){ return (s+'').replace(/&(?![a-z#])/g,'&amp;'); }
+
+  function item(f,i){
+    var btn='';
+    if(f[0]==='prem'||f[0]==='pay') btn='<button class="gpfq-btn" onclick="gpfqGo(\'premium\')">\u2B50 Premium dekhein</button>';
+    else if(f[0]==='ai')     btn='<button class="gpfq-btn" onclick="gpfqGo(\'tutor\')">\uD83E\uDD16 AI Tutor kholein</button>';
+    else if(f[0]==='lib')    btn='<button class="gpfq-btn" onclick="gpfqGo(\'library\')">\uD83D\uDCD6 Library kholein</button>';
+    else if(f[0]==='parent') btn='<button class="gpfq-btn" onclick="gpfqGo(\'parent\')">\uD83D\uDCCA Dashboard kholein</button>';
+
+    return '<div class="gpfq-item" id="gpfqI'+i+'">'+
+      '<div class="gpfq-q" onclick="gpfqToggle('+i+')">'+esc(f[1])+'<span class="arw">\u25BC</span></div>'+
+      '<div class="gpfq-a">'+f[2]+btn+'</div></div>';
+  }
+
+  window.gpfqGo = function(where){
+    gpfqClose();
+    try{
+      if(where==='library' && typeof gplOpenPage==='function') gplOpenPage();
+      else if(where==='parent' && typeof gpParent==='function') gpParent();
+      else if(where==='premium'){
+        if(window.GyaanPePremium && typeof window.GyaanPePremium.showPaywall==='function') window.GyaanPePremium.showPaywall();
+        else if(typeof gpOpenPremium==='function') gpOpenPremium();
+      }
+      else if(where==='tutor'){
+        if(typeof openTutor==='function') openTutor();
+        else if(typeof gpOpenTutor==='function') gpOpenTutor();
+      }
+    }catch(e){}
+  };
+
+  window.gpfqOpen = function(){
+    document.getElementById('gpfqPage').classList.add('on');
+    gpfqRender();
+    window.scrollTo(0,0);
+  };
+  window.gpfqClose = function(){ document.getElementById('gpfqPage').classList.remove('on'); };
+})();
+</script>
+<!-- ================== END HELP & FAQ ================== -->
+
+
+<!-- ==================== SHARE GYAANPE ==================== -->
+<style>
+  .gpsh-card{background:linear-gradient(135deg,#00695C,#26A69A);color:#fff;border-radius:18px;
+    padding:18px;margin:18px 0;text-align:center;}
+  .gpsh-card h4{font-family:Anton,sans-serif;font-size:18px;margin-bottom:6px;letter-spacing:.4px;}
+  .gpsh-card p{font-size:12.5px;opacity:.93;line-height:1.6;margin-bottom:14px;}
+  .gpsh-btn{display:block;width:100%;background:#25D366;color:#fff;border:none;border-radius:13px;
+    padding:13px;font-weight:800;font-size:14px;font-family:inherit;cursor:pointer;margin-bottom:9px;}
+  .gpsh-btn2{display:block;width:100%;background:rgba(255,255,255,.18);color:#fff;border:none;
+    border-radius:13px;padding:11px;font-weight:800;font-size:13px;font-family:inherit;cursor:pointer;}
+</style>
+<script>
+(function(){
+  var PKG  = 'com.gyaanpe.kidslearning';
+  var LINK = 'https://play.google.com/store/apps/details?id=' + PKG;
+
+  function msg(){
+    return 'Mere bachche ke liye GyaanPe use kar raha hoon - Nursery se Class 7 tak CBSE learning app.\n\n'
+         + '\u2705 AI Tutor jo doubt solve karta hai\n'
+         + '\u2705 Lessons, quiz aur practice\n'
+         + '\u2705 Kahaniyan aur kitaabein\n'
+         + '\u2705 Parent dashboard aur screen time control\n\n'
+         + 'Aap bhi try kijiye:\n' + LINK;
+  }
+
+  window.gpShareWhatsApp = function(){
+    try{ window.open('https://wa.me/?text=' + encodeURIComponent(msg()), '_blank'); }
+    catch(e){ gpShareOther(); }
+  };
+
+  window.gpShareOther = function(){
+    var t = msg();
+    if(navigator.share){
+      navigator.share({ title:'GyaanPe', text:t }).catch(function(){});
+      return;
+    }
+    try{
+      navigator.clipboard.writeText(t);
+      if(typeof gpToast==='function') gpToast('Link copy ho gaya! \uD83D\uDD17');
+    }catch(e){}
+  };
+
+  window.gpShareCardHTML = function(){
+    return '<div class="gpsh-card"><h4>\uD83D\uDC9A GyaanPe pasand aaya?</h4>'+
+      '<p>Doosre parents ko bhi bataiye. Aapki ek baat kisi bachche ki padhai aasan bana sakti hai.</p>'+
+      '<button class="gpsh-btn" onclick="gpShareWhatsApp()">\uD83D\uDCF2 WhatsApp par share karein</button>'+
+      '<button class="gpsh-btn2" onclick="gpShareOther()">\uD83D\uDD17 Doosre tarike se share karein</button></div>';
+  };
+})();
+</script>
+<!-- ================== END SHARE ================== -->
 
 </body>
 </html>

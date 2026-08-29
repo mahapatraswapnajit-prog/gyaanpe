@@ -1476,7 +1476,6 @@ function gpToast(msg){
 <div class="dot" style="width:90px;height:90px;background:#E91E63;left:15%;top:65%;animation-delay:2s"></div>
 <div class="dot" style="width:60px;height:60px;background:#4CAF50;left:70%;top:55%;animation-delay:0.5s"></div>
 </div>
-<div class="sound-btn" id="soundBtn" onclick="toggleSound()">ON</div>
 <div class="badge-toast" id="badgeToast"></div>
 <div class="gp-modal" id="gpRewardModal"><div class="gp-box">
 <div class="gp-reward-emoji">&#127873;</div>
@@ -2149,14 +2148,15 @@ function gpToast(msg){
 </div>
 </div>
 <script>
-var soundOn=true;
+var soundOn=(function(){ try{ return localStorage.getItem('gp_sound')!=='0'; }catch(e){ return true; } })();
 var AudioCtx=window.AudioContext||window.webkitAudioContext;
 var audioCtx=null;
 function getCtx(){if(!audioCtx){try{audioCtx=new AudioCtx();}catch(e){}}return audioCtx;}
 function playCorrect(){if(!soundOn)return;try{var c=getCtx();if(!c)return;var o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.type='sine';o.frequency.setValueAtTime(523,c.currentTime);o.frequency.setValueAtTime(659,c.currentTime+0.1);o.frequency.setValueAtTime(784,c.currentTime+0.2);g.gain.setValueAtTime(0.3,c.currentTime);g.gain.exponentialRampToValueAtTime(0.01,c.currentTime+0.4);o.start(c.currentTime);o.stop(c.currentTime+0.4);}catch(e){}}
 function playWrong(){if(!soundOn)return;try{var c=getCtx();if(!c)return;var o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.type='sawtooth';o.frequency.setValueAtTime(200,c.currentTime);o.frequency.setValueAtTime(150,c.currentTime+0.1);g.gain.setValueAtTime(0.2,c.currentTime);g.gain.exponentialRampToValueAtTime(0.01,c.currentTime+0.3);o.start(c.currentTime);o.stop(c.currentTime+0.3);}catch(e){}}
 function playLevelUp(){if(!soundOn)return;try{var c=getCtx();if(!c)return;[523,659,784,1047].forEach(function(f,i){var o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.type='sine';o.frequency.value=f;g.gain.setValueAtTime(0.3,c.currentTime+i*0.12);g.gain.exponentialRampToValueAtTime(0.01,c.currentTime+i*0.12+0.2);o.start(c.currentTime+i*0.12);o.stop(c.currentTime+i*0.12+0.2);});}catch(e){}}
-function toggleSound(){soundOn=!soundOn;document.getElementById('soundBtn').textContent=soundOn?'ON':'OFF';}
+function toggleSound(){soundOn=!soundOn;try{localStorage.setItem('gp_sound',soundOn?'1':'0');}catch(e){}var b=document.getElementById('soundBtn');if(b)b.textContent=soundOn?'ON':'OFF';}
+function gpSetSound(on){soundOn=!!on;try{localStorage.setItem('gp_sound',soundOn?'1':'0');}catch(e){}}
 function emoImg(code,size){return '<img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/'+code+'.png" style="width:'+size+'px;height:'+size+'px;vertical-align:middle;" alt="">';}
 var TOPIC=[['peacock','1f99a'],['elephant','1f418'],['butterfly','1f98b'],['moon','1f319'],['rainbow','1f308'],['banana','1f34c'],['apple','1f34e'],['tomato','1f345'],['carrot','1f955'],['grapes','1f347'],['mango','1f96d'],['frog','1f438'],['lemon','1f34b'],['dog','1f436'],['cat','1f431'],['fish','1f41f'],['bird','1f426'],['tiger','1f405'],['lion','1f981'],['cow','1f404'],['hen','1f414'],['sheep','1f411'],['horse','1f434'],['spider','1f577'],['bee','1f41d'],['eyes','1f440'],['sun','2600'],['sky','2601'],['egg','1f95a'],['book','1f4d6'],['house','1f3e0'],['train','1f686'],['aeroplane','2708'],['ship','1f6a2'],['cycle','1f6b2'],['umbrella','2602'],['ice cream','1f366'],['star','2b50'],['flower','1f338'],['tree','1f333'],['milk','1f95b'],['teeth','1f9b7'],['doctor','1fa7a'],['teacher','1f9d1'],['farmer','1f33e'],['police','1f46e'],['helmet','26d1'],['sheep','1f411'],['week','1f4c5'],['rain','1f327']];
 function showTopic(qt){var box=document.getElementById('visualBox');var t=qt.toLowerCase();for(var i=0;i<TOPIC.length;i++){if(t.indexOf(TOPIC[i][0])>-1){box.style.display='block';box.innerHTML='<div class="visual-box">'+emoImg(TOPIC[i][1],48)+'</div>';return;}}box.innerHTML='';box.style.display='none';}
@@ -13651,7 +13651,18 @@ if ('serviceWorker' in navigator) {
        ' onchange="gpsmSetStrict(this.checked)"> Samay poora hone par padhai rok do</label>';
     h+='<p class="gpsm-limnote">Limit off rakhein to sirf ek pyaara break reminder aayega. '+
        'Rok dene par bachcha home screen par wapas chala jayega.</p>';
-    h+='</div></div>';
+    h+='</div>';
+
+    var sndOn = true;
+    try{ sndOn = localStorage.getItem('gp_sound')!=='0'; }catch(e){}
+    h+='<div class="gpsm-limbox" style="margin-top:11px;">'+
+       '<div class="gpsm-limhead">App ki aawaz</div>'+
+       '<label class="gpsm-strict"><input type="checkbox" id="gpSoundBox"'+(sndOn?' checked':'')+
+       ' onchange="gpSetSound(this.checked)"> Sahi-galat jawab par aawaz chalu rakho</label>'+
+       '<p class="gpsm-limnote">Class, bus ya raat me padhte waqt band kar sakte hain.</p>'+
+       '</div>';
+
+    h+='</div>';
     return h;
   };
 

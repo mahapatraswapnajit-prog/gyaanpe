@@ -1238,6 +1238,7 @@ function gpsOpen(){
     .then(function(d){
       if(!d){ document.getElementById('gpsBody').innerHTML = '<div class="gpc-load">Courses abhi available nahi hain.</div>'; return; }
       gpsIndex = d;
+      try{ window.GPS_INDEX = d; }catch(e){}
       gpsRender();
     })
     .catch(function(){
@@ -1603,7 +1604,13 @@ function gpToast(msg){
 <div id="heroImageWrap" style="display:none;margin:0 0 14px 0;border-radius:18px;overflow:hidden;box-shadow:0 6px 18px rgba(0,0,0,0.12);"><img src="gyaanpe-hero.jpg" alt="GyaanPe - Loved by Kids, Trusted by Parents" style="width:100%;display:block;" loading="lazy"></div>
 <div class="home-screen" id="homeScreen">
  <div id="gpvHomeMount"></div>
- <div id="gpsmMount"></div>
+ <div class="gpgs-wrap">
+  <input class="gpgs-input" id="gpgsInput" type="search" placeholder="&#128269; Dhundho... subject, kitab, course"
+         oninput="gpgsRun()">
+  <button class="gpgs-x" id="gpgsX" onclick="gpgsClear()">&#10005;</button>
+  <div class="gpgs-res" id="gpgsRes"></div>
+</div>
+<div id="gpsmMount"></div>
  <div id="gplHomeMount"></div>
 <div class="home-top anim-card">
 <div class="gp-teachers-banner" id="gpTeachersBanner" style="margin:0 0 14px;border-radius:16px;overflow:hidden;box-shadow:0 6px 18px rgba(0,0,0,0.12);">
@@ -13485,6 +13492,8 @@ if ('serviceWorker' in navigator) {
   };
 
   /* ---- home strip ---- */
+  window.gplAllBooks = function(){ return GPL.books || []; };
+
   window.gplRenderHomePreview = function(){
     var mount=document.getElementById('gplHomeMount');
     if(!mount) return;
@@ -14578,6 +14587,169 @@ if ('serviceWorker' in navigator) {
 })();
 </script>
 <!-- ================== END SAMJHAO ================== -->
+
+
+<!-- ==================== GLOBAL SEARCH ==================== -->
+<style>
+  .gpgs-wrap{margin:14px 0 4px;position:relative;}
+  .gpgs-input{width:100%;padding:12px 40px 12px 15px;border:2px solid #E5E0D5;border-radius:15px;
+    font-size:14px;font-family:inherit;background:#fff;box-sizing:border-box;}
+  .gpgs-input:focus{outline:none;border-color:#1A237E;}
+  .gpgs-x{position:absolute;right:12px;top:50%;transform:translateY(-50%);border:none;background:none;
+    font-size:17px;color:#9AA1AC;cursor:pointer;display:none;padding:2px 4px;}
+  .gpgs-x.on{display:block;}
+  .gpgs-res{margin-top:10px;background:#fff;border-radius:16px;box-shadow:0 4px 16px rgba(0,0,0,.08);
+    overflow:hidden;display:none;}
+  .gpgs-res.on{display:block;}
+  .gpgs-grp{font-size:10.5px;font-weight:800;letter-spacing:1px;color:#9AA1AC;
+    padding:11px 14px 5px;text-transform:uppercase;}
+  .gpgs-row{display:flex;align-items:center;gap:11px;padding:11px 14px;cursor:pointer;
+    border-top:1px solid #F4F1EA;}
+  .gpgs-row:active{background:#F7F5F0;}
+  .gpgs-emo{font-size:20px;flex:0 0 auto;}
+  .gpgs-txt{flex:1;min-width:0;}
+  .gpgs-t{font-size:13.5px;font-weight:700;color:#16202F;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .gpgs-s{font-size:11px;color:#6B7280;margin-top:1px;}
+  .gpgs-none{padding:20px 14px;text-align:center;color:#6B7280;font-size:13px;}
+  .gpgs-none b{color:#16202F;}
+</style>
+<script>
+(function(){
+  /* One search box over everything the child can reach: subjects, library
+     books, videos, courses and help. Built from data already loaded in the
+     page — no extra fetches, no backend change. */
+
+  function norm(x){
+    return (x||'').toString().toLowerCase()
+      .replace(/\s+/g,' ').trim()
+      .replace(/[^a-z0-9\u0900-\u097F ]/g,'');
+  }
+
+  /* forgiving matcher: every word the user typed must appear somewhere */
+  function hit(hay, words){
+    for(var i=0;i<words.length;i++){ if(hay.indexOf(words[i])===-1) return false; }
+    return true;
+  }
+
+  function subjects(words){
+    var out=[];
+    try{
+      for(var k in SUBLABEL){
+        if(!allData[k]) continue;
+        var label = SUBLABEL[k];
+        if(hit(norm(label)+' '+norm(k), words)){
+          out.push({emo:'\uD83D\uDCDA', t:label, s:'Subject \u2022 '+(allData[k].length)+' levels',
+                    go:"gpJourney('"+k+"')"});
+        }
+      }
+    }catch(e){}
+    return out;
+  }
+
+  function books(words){
+    var out=[];
+    try{
+      if(typeof gplAllBooks!=='function') return out;
+      gplAllBooks().forEach(function(b){
+        var hay = norm(b.title)+' '+norm(b.desc)+' '+norm(b.classLabel)+' '+norm(b.category);
+        if(hit(hay, words)){
+          out.push({emo:b.emoji||'\uD83D\uDCD8', t:b.title,
+                    s:'Kitab \u2022 '+(b.classLabel||'')+(b.access==='PREMIUM'?' \u2022 \u2B50':''),
+                    go:"gplOpenBook('"+b.id+"')"});
+        }
+      });
+    }catch(e){}
+    return out;
+  }
+
+  function courses(words){
+    var out=[];
+    try{
+      if(!window.GPS_INDEX) return out;
+      Object.keys(GPS_INDEX).map(function(k){ return GPS_INDEX[k]; }).forEach(function(c){
+        var hay = norm(c.title)+' '+norm(c.tagline)+' '+norm(c.category);
+        if(hit(hay, words)){
+          out.push({emo:c.emoji||'\uD83C\uDF93', t:c.title,
+                    s:'Course \u2022 '+(c.duration||'30 Din'), go:"gpcOpen('"+c.id+"')"});
+        }
+      });
+    }catch(e){}
+    return out;
+  }
+
+  function statics(words){
+    var list=[
+      ['\uD83E\uDD16','AI Tutor','Doubt poochho, samjho','openAITutor()'],
+      ['\uD83D\uDCDD','AI Worksheets','Apni worksheet banao','openWorksheetGen()'],
+      ['\uD83E\uDDE0','Brain Gym','Dimaag ki exercise','openBrainGymHub()'],
+      ['\uD83C\uDFAC','Learning Videos','Rhymes, stories, science','gpvOpenPage()'],
+      ['\uD83D\uDCD6','Library','36 kitaabein','gplOpenPage()'],
+      ['\uD83D\uDC68\u200D\uD83D\uDC69\u200D\uD83D\uDC67','Parents Corner','Parents ke liye guidance','gppcOpen()'],
+      ['\uD83D\uDCCA','Parent Dashboard','Progress aur report','gpParent()'],
+      ['\u2753','Help & FAQ','Sawaalon ke jawab','gpfqOpen()'],
+      ['\uD83C\uDFC6','Olympiad','Olympiad practice','openOlympiadMode()']
+    ];
+    var out=[];
+    list.forEach(function(x){
+      if(hit(norm(x[1])+' '+norm(x[2]), words))
+        out.push({emo:x[0], t:x[1], s:x[2], go:x[3]});
+    });
+    return out;
+  }
+
+  window.gpgsGo = function(code){
+    gpgsClear();
+    try{ eval(code); }catch(e){ console.log('search nav failed', e); }
+  };
+
+  window.gpgsClear = function(){
+    var i=document.getElementById('gpgsInput');
+    if(i) i.value='';
+    var r=document.getElementById('gpgsRes'); if(r){ r.classList.remove('on'); r.innerHTML=''; }
+    var x=document.getElementById('gpgsX'); if(x) x.classList.remove('on');
+  };
+
+  window.gpgsRun = function(){
+    var i=document.getElementById('gpgsInput'), r=document.getElementById('gpgsRes'),
+        x=document.getElementById('gpgsX');
+    if(!i||!r) return;
+    var raw=i.value.trim();
+    if(x) x.classList.toggle('on', raw.length>0);
+
+    if(raw.length<2){ r.classList.remove('on'); r.innerHTML=''; return; }
+
+    var words = norm(raw).split(' ').filter(Boolean);
+    if(!words.length){ r.classList.remove('on'); return; }
+
+    var groups=[
+      ['Padhai', subjects(words).slice(0,5)],
+      ['Kitaabein', books(words).slice(0,5)],
+      ['Courses', courses(words).slice(0,4)],
+      ['App me', statics(words).slice(0,4)]
+    ];
+
+    var total=groups.reduce(function(a,g){ return a+g[1].length; },0);
+    var h='';
+    if(!total){
+      h='<div class="gpgs-none">"<b>'+raw.replace(/</g,'&lt;')+'</b>" ka kuch nahi mila.<br>'+
+        'Doosre shabd se try karo, jaise subject ka naam.</div>';
+    } else {
+      groups.forEach(function(g){
+        if(!g[1].length) return;
+        h+='<div class="gpgs-grp">'+g[0]+'</div>';
+        g[1].forEach(function(it){
+          h+='<div class="gpgs-row" onclick="gpgsGo(\''+it.go.replace(/'/g,"\\'")+'\')">'+
+             '<span class="gpgs-emo">'+it.emo+'</span><div class="gpgs-txt">'+
+             '<div class="gpgs-t">'+(it.t+'').replace(/</g,'&lt;')+'</div>'+
+             '<div class="gpgs-s">'+(it.s+'').replace(/</g,'&lt;')+'</div></div></div>';
+        });
+      });
+    }
+    r.innerHTML=h; r.classList.add('on');
+  };
+})();
+</script>
+<!-- ================== END GLOBAL SEARCH ================== -->
 
 </body>
 </html>

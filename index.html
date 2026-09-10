@@ -12626,18 +12626,21 @@ if ('serviceWorker' in navigator) {
   }
 
   /* ---------------- FIREBASE SYNC ---------------- */
+  /* The premiumUsers record is written by the gyaanpe-verify Worker AFTER
+     Google Play has confirmed the purchase — never from here. A client-written
+     record could be forged by anyone, which would make the data worthless as
+     a business record, and the raw purchase token must not sit in a readable
+     database. All this does is ask the verifier to run now, which produces
+     the record as a side effect. The Firebase JS SDK is not loaded in this
+     app at all, which is why the previous SDK-based sync never ran. */
   function syncFirebase(planKey, sku, token) {
     try {
-      if (!(window.firebase && firebase.database)) { log('firebase.database not found — skipping sync'); return; }
-      firebase.database().ref('premiumUsers/' + getUid()).set({
-        active: true,
-        plan: planKey,
-        product: sku,
-        purchaseToken: token,
-        device: navigator.userAgent.slice(0, 80),
-        updatedAt: firebase.database.ServerValue ? firebase.database.ServerValue.TIMESTAMP : Date.now()
-      });
-    } catch (e) { log('firebase sync failed', e); }
+      if (window.gpVerify && typeof gpVerify.refreshPremium === 'function') {
+        gpVerify.refreshPremium(true);
+      } else {
+        log('verifier not ready — record will be written on next refresh');
+      }
+    } catch (e) { log('sync trigger failed', e); }
   }
 
   /* ---------------- ACCESS CHECKS ---------------- */
@@ -15071,11 +15074,23 @@ if ('serviceWorker' in navigator) {
   function log(){ try{ console.log.apply(console, ['[GP-Verify]'].concat([].slice.call(arguments))); }catch(e){} }
 
   /* ---------- talk to the Worker ---------- */
-  function ask(kind, productId, token){
+  function gpvUid(){
+    try{ if (window.GyaanPePremium && GyaanPePremium.uid) return GyaanPePremium.uid(); }catch(e){}
+    try{
+      var u = localStorage.getItem('gp_uid');
+      if (!u) { u = 'gp_' + Date.now().toString(36) + Math.random().toString(36).slice(2,10); localStorage.setItem('gp_uid', u); }
+      return u;
+    }catch(e){}
+    return null;
+  }
+
+  function ask(kind, productId, token, extra){
+    var payload = { kind: kind, productId: productId, token: token, uid: gpvUid() };
+    if (extra) { for (var k in extra) if (extra.hasOwnProperty(k)) payload[k] = extra[k]; }
     return fetch(WORKER, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ kind: kind, productId: productId, token: token })
+      body: JSON.stringify(payload)
     }).then(function(r){ return r.json(); });
   }
 
@@ -15128,7 +15143,10 @@ if ('serviceWorker' in navigator) {
     var v = rd('gp_verify');
     if (!force && v && v.tok === tok && (now() - v.at) < TTL) return Promise.resolve(v.v);
 
-    return ask('sub', SUB_PRODUCT, tok).then(function(d){
+    var plan = null;
+    try{ var gpp = rd('gp_premium'); if (gpp && gpp.plan) plan = gpp.plan; }catch(e){}
+
+    return ask('sub', SUB_PRODUCT, tok, { plan: plan }).then(function(d){
       var out = verdict(d);
       if (out === null) { log('inconclusive, keeping current state', d); return null; }
       wr('gp_verify', { v: out, at: now(), tok: tok, exp: d.expiry || null });

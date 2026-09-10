@@ -15113,11 +15113,45 @@ if ('serviceWorker' in navigator) {
   /* ---------- COURSES (one-time products) ---------- */
   function cKey(id){ return 'gpcv_' + id; }
 
-  function courseProductId(id, s){
+  /* Known live course SKUs - last-resort fallback so an older purchase
+     (saved before productId was stored) can still be verified. */
+  var COURSE_SKU = { english30: 'course_english_30' };
+  var idxPromise = null;
+
+  function courseProductIdSync(id, s){
     if (s && s.productId) return s.productId;
     try{ if (window.gpsIndex && gpsIndex[id] && gpsIndex[id].productId) return gpsIndex[id].productId; }catch(e){}
+    try{ if (window.GPS_INDEX && GPS_INDEX[id] && GPS_INDEX[id].productId) return GPS_INDEX[id].productId; }catch(e){}
     try{ if (window.gpcCourse && gpcCourse.id === id && gpcCourse.productId) return gpcCourse.productId; }catch(e){}
+    if (COURSE_SKU[id]) return COURSE_SKU[id];
     return null;
+  }
+
+  /* Async resolve: pulls the course index from Firebase once if needed,
+     then remembers the SKU on the local course record. */
+  function courseProductId(id, s){
+    var pid = courseProductIdSync(id, s);
+    if (pid) return Promise.resolve(pid);
+
+    if (!idxPromise) {
+      var base = (typeof GPC_FB !== 'undefined') ? GPC_FB : null;
+      if (!base) return Promise.resolve(null);
+      idxPromise = fetch(base + '/gyaanpeCoursesIndex.json')
+        .then(function(r){ return r.json(); })
+        .then(function(d){ if (d) { try{ window.GPS_INDEX = window.GPS_INDEX || d; }catch(e){} } return d; })
+        .catch(function(){ return null; });
+    }
+
+    return idxPromise.then(function(d){
+      var found = (d && d[id] && d[id].productId) || COURSE_SKU[id] || null;
+      if (found) {
+        try{
+          var raw = JSON.parse(localStorage.getItem('gpc_' + id) || 'null');
+          if (raw && !raw.productId) { raw.productId = found; localStorage.setItem('gpc_' + id, JSON.stringify(raw)); }
+        }catch(e){}
+      }
+      return found;
+    });
   }
 
   function courseOk(id, s){
@@ -15138,12 +15172,11 @@ if ('serviceWorker' in navigator) {
     var s = null;
     try{ s = JSON.parse(localStorage.getItem('gpc_' + id) || 'null'); }catch(e){}
     if (!s || !s.owned || !s.token) return Promise.resolve(null);
-    var pid = courseProductId(id, s);
-    if (!pid) { log('no productId known for course', id); return Promise.resolve(null); }
-
     var v = rd(cKey(id));
     if (!force && v && v.tok === s.token && (now() - v.at) < TTL) return Promise.resolve(v.v);
 
+    return courseProductId(id, s).then(function(pid){
+    if (!pid) { log('no productId known for course', id); return null; }
     return ask('product', pid, s.token).then(function(d){
       var out = verdict(d);
       if (out === null) { log('course check inconclusive', id, d); return null; }
@@ -15157,6 +15190,7 @@ if ('serviceWorker' in navigator) {
         try{ if (window.gpcId === id && typeof gpcRender === 'function') gpcRender(); }catch(e){}
       }
       return out;
+    });
     }).catch(function(e){ log('course check failed', id, e); return null; });
   }
 

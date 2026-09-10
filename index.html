@@ -1187,6 +1187,8 @@ async function gpcBuy(){
     );
     var response = await request.show();
     var token = response.details && response.details.purchaseToken;
+    /* TEMP DEBUG - server-side verification testing, remove later */
+    try{ console.log('[GP-DEBUG] COURSE_TOKEN:', token, 'productId:', c.productId); localStorage.setItem('gpc_debug_token', token); }catch(e){}
     await response.complete('success');
     gpcUnlock(token);
   }catch(e){ console.log('course purchase cancelled/failed:', e); }
@@ -12485,6 +12487,8 @@ if ('serviceWorker' in navigator) {
       var request = new PaymentRequest([{ supportedMethods: PLAY_BILLING, data: { sku: sku } }]);
       var response = await request.show();               // Google Play payment sheet
       var purchaseToken = response.details.purchaseToken;
+      /* TEMP DEBUG - server-side verification testing, remove later */
+      try { console.log('[GP-DEBUG] SUB_TOKEN:', purchaseToken, 'sku:', sku); localStorage.setItem('gp_debug_sub_token', purchaseToken); } catch (e) {}
       await response.complete('success');                // acknowledges the purchase
       await onPurchased(planKey, sku, purchaseToken, false);
       return true;
@@ -14988,5 +14992,56 @@ if ('serviceWorker' in navigator) {
 </script>
 <!-- ================== END QUESTION BOOKMARKS ================== -->
 
+<!-- ============ TEMP DEBUG: purchase-token inspector (remove after verification is live) ============ -->
+<script>
+/* Reads purchase tokens ALREADY stored by the app. Run gpDebugTokens() in console. */
+function gpDebugTokens(){
+  var out = { sub: null, subPlan: null, courses: [], debugSub: null, debugCourse: null };
+  try{
+    var p = JSON.parse(localStorage.getItem('gp_premium') || 'null');
+    if(p && p.token){ out.sub = p.token; out.subPlan = p.plan; }
+  }catch(e){}
+  try{ out.debugSub = localStorage.getItem('gp_debug_sub_token'); }catch(e){}
+  try{ out.debugCourse = localStorage.getItem('gpc_debug_token'); }catch(e){}
+  for(var i=0;i<localStorage.length;i++){
+    var k = localStorage.key(i);
+    if(k && k.indexOf('gpc_') === 0 && k !== 'gpc_debug_token' && k !== 'gpc_uid'){
+      try{
+        var s = JSON.parse(localStorage.getItem(k) || 'null');
+        if(s && s.token) out.courses.push({ key: k, courseId: k.slice(4), token: s.token, owned: !!s.owned });
+      }catch(e){}
+    }
+  }
+  console.log('%c[GP-DEBUG] stored purchase tokens', 'font-weight:bold;color:#1A237E', out);
+  return out;
+}
+
+/* Sends a stored token to the verify Worker. gpDebugVerify() = subscription, gpDebugVerify('english30') = course */
+function gpDebugVerify(courseId){
+  var WORKER = 'https://gyaanpe-verify.mahapatraswapnajit.workers.dev';
+  var t = gpDebugTokens(), kind, productId, token;
+  if(courseId){
+    var hit = t.courses.filter(function(c){ return c.courseId === courseId; })[0];
+    if(!hit){ console.warn('[GP-DEBUG] no stored token for course', courseId); return; }
+    kind = 'product'; token = hit.token;
+    try{ productId = (gpsIndex && gpsIndex[courseId] && gpsIndex[courseId].productId) || 'course_english_30'; }
+    catch(e){ productId = 'course_english_30'; }
+  } else {
+    token = t.sub || t.debugSub;
+    if(!token){ console.warn('[GP-DEBUG] no stored subscription token'); return; }
+    kind = 'sub'; productId = 'gyaanpe_premium';
+  }
+  console.log('[GP-DEBUG] verifying', kind, productId);
+  return fetch(WORKER, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ kind: kind, productId: productId, token: token })
+  }).then(function(r){ return r.json(); }).then(function(d){
+    console.log('%c[GP-DEBUG] worker says', 'font-weight:bold;color:' + (d.valid ? '#0a7' : '#c00'), d);
+    return d;
+  }).catch(function(e){ console.error('[GP-DEBUG] worker call failed', e); });
+}
+</script>
+<!-- ============ END TEMP DEBUG ============ -->
 </body>
 </html>

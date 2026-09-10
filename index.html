@@ -12369,7 +12369,38 @@ gpInit();
 
 </script><script>
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/gyaanpe/sw.js', {scope: '/gyaanpe/'});
+  navigator.serviceWorker.register('/gyaanpe/sw.js', {scope: '/gyaanpe/'})
+    .then(function(reg){
+      /* A waiting worker means a new version is already downloaded. */
+      function offerUpdate(sw){
+        if (!sw) return;
+        try{
+          if (typeof gpToast === 'function') gpToast('Naya update aa gaya \u2014 lag raha hai...');
+        }catch(e){}
+        try{ sw.postMessage('gp-skip-waiting'); }catch(e){}
+      }
+      if (reg.waiting) offerUpdate(reg.waiting);
+      reg.addEventListener('updatefound', function(){
+        var sw = reg.installing;
+        if (!sw) return;
+        sw.addEventListener('statechange', function(){
+          if (sw.state === 'installed' && navigator.serviceWorker.controller) offerUpdate(sw);
+        });
+      });
+      /* Check for a new build when the app comes back to the foreground. */
+      document.addEventListener('visibilitychange', function(){
+        if (!document.hidden) { try{ reg.update(); }catch(e){} }
+      });
+    })
+    .catch(function(e){ try{ console.log('SW register failed', e); }catch(_){} });
+
+  /* When the new worker takes control, reload once so the fresh HTML runs. */
+  var gpSwReloaded = false;
+  navigator.serviceWorker.addEventListener('controllerchange', function(){
+    if (gpSwReloaded) return;
+    gpSwReloaded = true;
+    location.reload();
+  });
 }
 </script>
  <script>

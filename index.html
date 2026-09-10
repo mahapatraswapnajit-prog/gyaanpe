@@ -1611,6 +1611,7 @@ function gpToast(msg){
   <div class="gpgs-res" id="gpgsRes"></div>
 </div>
 <div id="gpsmMount"></div>
+ <div class="gppr-card" id="gpprCard"></div>
  <div id="gplHomeMount"></div>
 <div class="home-top anim-card">
 <div class="gp-teachers-banner" id="gpTeachersBanner" style="margin:0 0 14px;border-radius:16px;overflow:hidden;box-shadow:0 6px 18px rgba(0,0,0,0.12);">
@@ -14544,6 +14545,16 @@ if ('serviceWorker' in navigator) {
       }
     }catch(e){}
 
+    /* Most questions already carry a written explanation. Use it — instant,
+       free, works offline. The AI is only a fallback for the ones without. */
+    if(q.explain){
+      box.classList.add('show');
+      box.innerHTML = '<b>Kyun?</b> ' + (q.explain+'').replace(/&/g,'&amp;').replace(/</g,'&lt;');
+      b.textContent='\u2705 Samajh aa gaya';
+      b.disabled=true;
+      return;
+    }
+
     busy=true; b.disabled=true;
     box.classList.add('show');
     box.innerHTML='<span class="gpex-load">Soch raha hoon...</span>';
@@ -14750,6 +14761,103 @@ if ('serviceWorker' in navigator) {
 })();
 </script>
 <!-- ================== END GLOBAL SEARCH ================== -->
+
+
+<!-- ==================== MERI PROGRESS (home card) ==================== -->
+<style>
+  .gppr-card{background:#fff;border-radius:18px;padding:16px;margin:18px 0;
+    box-shadow:0 4px 16px rgba(0,0,0,.07);border:2px solid #EFE9DC;display:none;}
+  .gppr-card.on{display:block;}
+  .gppr-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:13px;}
+  .gppr-title{font-family:Anton,sans-serif;font-size:16px;color:#1A237E;letter-spacing:.4px;}
+  .gppr-all{font-size:12px;font-weight:800;color:#FF6F00;cursor:pointer;}
+  .gppr-stats{display:flex;gap:9px;margin-bottom:14px;}
+  .gppr-st{flex:1;background:#FAF8F3;border-radius:12px;padding:10px 6px;text-align:center;}
+  .gppr-sv{font-family:Anton,sans-serif;font-size:19px;color:#1A237E;line-height:1.1;}
+  .gppr-sl{font-size:9.5px;color:#6B7280;margin-top:3px;font-weight:700;}
+  .gppr-sub{margin-bottom:10px;}
+  .gppr-srow{display:flex;align-items:center;gap:9px;margin-bottom:7px;font-size:12px;}
+  .gppr-sname{flex:0 0 96px;color:#4A5768;font-weight:700;overflow:hidden;
+    text-overflow:ellipsis;white-space:nowrap;}
+  .gppr-bar{flex:1;height:8px;background:#EFE9DC;border-radius:999px;overflow:hidden;}
+  .gppr-bar i{display:block;height:100%;border-radius:999px;
+    background:linear-gradient(90deg,#FF6F00,#FFB300);}
+  .gppr-pct{flex:0 0 34px;text-align:right;font-weight:800;color:#1A237E;font-size:11.5px;}
+  .gppr-rec{background:#F3F4FB;border-radius:13px;padding:11px 12px;display:flex;
+    align-items:flex-start;gap:9px;cursor:pointer;}
+  .gppr-remo{font-size:17px;flex:0 0 auto;}
+  .gppr-retx{font-size:12.5px;color:#16202F;line-height:1.55;}
+</style>
+<script>
+(function(){
+  /* Surfaces progress and recommendations that already existed but were
+     buried in the parent dashboard. Reuses gpGetOverallStats,
+     gpGetSubjectStats and gpGetRecommendations — nothing new is computed. */
+
+  window.gpprRender = function(){
+    var el = document.getElementById('gpprCard');
+    if(!el) return;
+
+    var o = null;
+    try{ o = gpGetOverallStats(); }catch(e){}
+    if(!o || !o.attempted){ el.classList.remove('on'); return; }   // nothing to show yet
+
+    var streak = 0;
+    try{ streak = parseInt(localStorage.getItem('gp_streak')||'0',10)||0; }catch(e){}
+
+    var h = '<div class="gppr-head"><div class="gppr-title">\uD83D\uDCC8 Meri Progress</div>'+
+            '<span class="gppr-all" onclick="gpParent()">Poora dekho \u2192</span></div>';
+
+    h += '<div class="gppr-stats">'+
+      '<div class="gppr-st"><div class="gppr-sv">'+o.attempted+'</div><div class="gppr-sl">SAWAAL</div></div>'+
+      '<div class="gppr-st"><div class="gppr-sv">'+o.accuracy+'%</div><div class="gppr-sl">SAHI</div></div>'+
+      '<div class="gppr-st"><div class="gppr-sv">'+streak+'</div><div class="gppr-sl">DIN STREAK</div></div>'+
+      '</div>';
+
+    /* top 3 subjects by attempts */
+    var subs = [];
+    try{ subs = gpGetSubjectStats().filter(function(x){ return x.attempted>0; }).slice(0,3); }catch(e){}
+    if(subs.length){
+      h += '<div class="gppr-sub">';
+      subs.forEach(function(x){
+        var name = x.sec;
+        try{ name = SUBLABEL[x.sec] || x.sec; }catch(e){}
+        var pct = x.totalChapters ? Math.round(x.completedChapters/x.totalChapters*100) : x.accuracy;
+        h += '<div class="gppr-srow"><span class="gppr-sname">'+name+'</span>'+
+             '<span class="gppr-bar"><i style="width:'+Math.max(3,pct)+'%"></i></span>'+
+             '<span class="gppr-pct">'+pct+'%</span></div>';
+      });
+      h += '</div>';
+    }
+
+    /* one recommendation, the first one the existing engine returns */
+    try{
+      var recs = gpGetRecommendations();
+      if(recs && recs.length){
+        var r = recs[0];
+        var go = (r.action && typeof r.action.sec!=='undefined')
+          ? ' onclick="gpprGo(\''+r.action.sec+'\','+r.action.idx+')"' : '';
+        h += '<div class="gppr-rec"'+go+'><span class="gppr-remo">'+(r.icon||'\uD83D\uDCA1')+'</span>'+
+             '<span class="gppr-retx">'+(r.text||'').replace(/</g,'&lt;')+'</span></div>';
+      }
+    }catch(e){}
+
+    el.innerHTML = h;
+    el.classList.add('on');
+  };
+
+  window.gpprGo = function(sec, idx){
+    try{
+      if(typeof openChapterHub==='function') openChapterHub(sec, idx);
+      else if(typeof gpJourney==='function') gpJourney(sec);
+    }catch(e){}
+  };
+
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', gpprRender);
+  else gpprRender();
+})();
+</script>
+<!-- ================== END MERI PROGRESS ================== -->
 
 </body>
 </html>

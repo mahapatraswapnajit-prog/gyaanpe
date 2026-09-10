@@ -1056,8 +1056,13 @@ function gpcBack(){
   if(gpcView==='lesson'||gpcView==='cert'||gpcView==='quiz'||gpcView==='result'){ gpcView='days'; gpcRender(); return; }
   document.getElementById('screenCourse').classList.remove('gp-show');
 }
+function gpcOwned(id, s){
+  if(!s || !s.owned) return false;
+  try{ if(window.gpVerify && typeof window.gpVerify.courseOk === 'function') return window.gpVerify.courseOk(id, s); }catch(e){}
+  return true;
+}
 function gpcUnlocked(s){
-  if(!s.owned) return 0;
+  if(!gpcOwned(gpcId, s)) return 0;
   if(GPC_UNLOCK_MODE === 'daily'){
     var days = Math.floor((new Date() - new Date(s.purchaseDate)) / 86400000);
     return Math.min(gpcCourse.totalDays, days + 1);
@@ -1068,7 +1073,7 @@ function gpcEsc(t){ return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').
 function gpcRender(){
   if(!gpcCourse) return;
   var s = gpcState(gpcId);
-  if(!s.owned){ gpcRenderDetail(s); return; }
+  if(!gpcOwned(gpcId, s)){ gpcRenderDetail(s); return; }
   if(gpcView === 'lesson'){ gpcRenderLesson(s); return; }
   if(gpcView === 'quiz'){ gpcRenderQuiz(s); return; }
   if(gpcView === 'cert'){ gpcRenderCert(s); return; }
@@ -1198,8 +1203,11 @@ function gpcUnlock(token){
   s.owned = true;
   s.purchaseDate = s.purchaseDate || new Date().toISOString();
   if(token) s.token = token;
+  try{ if(gpcCourse && gpcCourse.productId) s.productId = gpcCourse.productId; }catch(e){}
+  s.ts = Date.now();
   gpcSave(gpcId, s);
   gpcAcknowledge(token);
+  try{ if(window.gpVerify) window.gpVerify.refreshCourse(gpcId); }catch(e){}
   gpcView = 'days'; gpcRender();
 }
 async function gpcAcknowledge(token){
@@ -1291,7 +1299,7 @@ function gpsRenderGrid(){
     shown.forEach(function(c){
       var live = GPS_LIVE.indexOf(c.id) > -1;
       var s = gpcState(c.id);
-      var tag = s.owned ? 'MERA' : (live ? c.price : 'COMING SOON');
+      var tag = gpcOwned(c.id, s) ? 'MERA' : (live ? c.price : 'COMING SOON');
       var click = live ? 'gpcOpen(\'' + c.id + '\')' : 'gpToast(\'' + gpcEsc(c.title).replace(/'/g,"\\'") + ' jaldi aa raha hai!\')';
       h += '<div class="gps-card' + (live ? '' : ' soon') + '" style="background:' + c.color + '" onclick="' + click + '">' +
            '<span class="gps-tag">' + tag + '</span>' +
@@ -7108,7 +7116,16 @@ function gpDevSetPremium(on, secret) {
 }
 
 function isPremium() {
-  try { if (typeof GyaanPePremium !== 'undefined' && GyaanPePremium.isPremium && GyaanPePremium.isPremium()) return true; } catch(e){} try { var _gp = JSON.parse(localStorage.getItem('gp_premium')||'null'); if (_gp && _gp.active) return true; } catch(e){} return localStorage.getItem("gp_dev_premium") === "1";
+  /* Developer preview toggle (local only, never a real purchase) */
+  try { if (localStorage.getItem("gp_dev_premium") === "1") return true; } catch(e){}
+  /* Server-verified gate. Falls back to the old check only if the
+     verification module has not loaded yet (very early in startup). */
+  try {
+    if (window.gpVerify && typeof window.gpVerify.premiumOk === 'function') return window.gpVerify.premiumOk();
+  } catch(e){}
+  try { if (typeof GyaanPePremium !== 'undefined' && GyaanPePremium.isPremium && GyaanPePremium.isPremium()) return true; } catch(e){}
+  try { var _gp = JSON.parse(localStorage.getItem('gp_premium')||'null'); if (_gp && _gp.active) return true; } catch(e){}
+  return false;
 }
 
 var PREMIUM_COMPARE_ROWS = [
@@ -14992,56 +15009,219 @@ if ('serviceWorker' in navigator) {
 </script>
 <!-- ================== END QUESTION BOOKMARKS ================== -->
 
-<!-- ============ TEMP DEBUG: purchase-token inspector (remove after verification is live) ============ -->
+<!-- ============ SERVER-SIDE PURCHASE VERIFICATION ============ -->
 <script>
-/* Reads purchase tokens ALREADY stored by the app. Run gpDebugTokens() in console. */
-function gpDebugTokens(){
-  var out = { sub: null, subPlan: null, courses: [], debugSub: null, debugCourse: null };
-  try{
-    var p = JSON.parse(localStorage.getItem('gp_premium') || 'null');
-    if(p && p.token){ out.sub = p.token; out.subPlan = p.plan; }
-  }catch(e){}
-  try{ out.debugSub = localStorage.getItem('gp_debug_sub_token'); }catch(e){}
-  try{ out.debugCourse = localStorage.getItem('gpc_debug_token'); }catch(e){}
-  for(var i=0;i<localStorage.length;i++){
-    var k = localStorage.key(i);
-    if(k && k.indexOf('gpc_') === 0 && k !== 'gpc_debug_token' && k !== 'gpc_uid'){
-      try{
-        var s = JSON.parse(localStorage.getItem(k) || 'null');
-        if(s && s.token) out.courses.push({ key: k, courseId: k.slice(4), token: s.token, owned: !!s.owned });
-      }catch(e){}
-    }
-  }
-  console.log('%c[GP-DEBUG] stored purchase tokens', 'font-weight:bold;color:#1A237E', out);
-  return out;
-}
+(function(){
+  'use strict';
 
-/* Sends a stored token to the verify Worker. gpDebugVerify() = subscription, gpDebugVerify('english30') = course */
-function gpDebugVerify(courseId){
   var WORKER = 'https://gyaanpe-verify.mahapatraswapnajit.workers.dev';
-  var t = gpDebugTokens(), kind, productId, token;
-  if(courseId){
-    var hit = t.courses.filter(function(c){ return c.courseId === courseId; })[0];
-    if(!hit){ console.warn('[GP-DEBUG] no stored token for course', courseId); return; }
-    kind = 'product'; token = hit.token;
-    try{ productId = (gpsIndex && gpsIndex[courseId] && gpsIndex[courseId].productId) || 'course_english_30'; }
-    catch(e){ productId = 'course_english_30'; }
-  } else {
-    token = t.sub || t.debugSub;
-    if(!token){ console.warn('[GP-DEBUG] no stored subscription token'); return; }
-    kind = 'sub'; productId = 'gyaanpe_premium';
+  var SUB_PRODUCT = 'gyaanpe_premium';
+
+  var HOUR = 3600000, DAY = 86400000;
+  var TTL         = 12 * HOUR;  /* re-verify in background after this */
+  var GRACE       = 7  * DAY;   /* a past success keeps working this long offline */
+  var NEW_GRACE   = 48 * HOUR;  /* fresh purchase, not yet verified once */
+
+  function now(){ return Date.now(); }
+  function rd(k){ try{ return JSON.parse(localStorage.getItem(k) || 'null'); }catch(e){ return null; } }
+  function wr(k,v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+  function log(){ try{ console.log.apply(console, ['[GP-Verify]'].concat([].slice.call(arguments))); }catch(e){} }
+
+  /* ---------- talk to the Worker ---------- */
+  function ask(kind, productId, token){
+    return fetch(WORKER, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ kind: kind, productId: productId, token: token })
+    }).then(function(r){ return r.json(); });
   }
-  console.log('[GP-DEBUG] verifying', kind, productId);
-  return fetch(WORKER, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ kind: kind, productId: productId, token: token })
-  }).then(function(r){ return r.json(); }).then(function(d){
-    console.log('%c[GP-DEBUG] worker says', 'font-weight:bold;color:' + (d.valid ? '#0a7' : '#c00'), d);
-    return d;
-  }).catch(function(e){ console.error('[GP-DEBUG] worker call failed', e); });
-}
+
+  /* A response only counts as a real verdict if Play actually answered.
+     Network failures and worker errors must NOT revoke anything. */
+  function verdict(d){
+    if (!d || typeof d.valid !== 'boolean') return null;
+    if (d.valid === true) return true;
+    /* valid:false with a play 4xx body = Play spoke. Anything else = our side broke. */
+    if (d.error && /^play (400|404|410)/.test(String(d.error))) return false;
+    if (!d.error) return false;
+    return null;
+  }
+
+  /* ---------- PREMIUM (subscription) ---------- */
+  function subToken(){
+    var gp = rd('gp_premium');
+    if (gp && gp.token) return gp.token;
+    try{
+      if (window.GyaanPePremium && GyaanPePremium._state && GyaanPePremium._state.token)
+        return GyaanPePremium._state.token;
+    }catch(e){}
+    return null;
+  }
+
+  function premiumOk(){
+    var gp = rd('gp_premium');
+    var live = false;
+    try{ live = !!(window.GyaanPePremium && GyaanPePremium._state && GyaanPePremium._state.premium); }catch(e){}
+    if (!(gp && gp.active) && !live) return false;
+
+    var tok = subToken();
+    if (!tok) return false;               /* active flag with no token = tampering */
+
+    var v = rd('gp_verify');
+    if (v && v.tok === tok) {
+      if (v.v === false) return false;    /* Play said no */
+      if (v.v === true && (now() - v.at) < GRACE) return true;
+      return false;                       /* last success too old to trust */
+    }
+    /* never verified this token yet - allow briefly so a fresh purchase
+       and offline first launch both work, while the check runs in background */
+    var ts = (gp && gp.ts) || now();
+    return (now() - ts) < NEW_GRACE;
+  }
+
+  function refreshPremium(force){
+    var tok = subToken();
+    if (!tok) return Promise.resolve(null);
+    var v = rd('gp_verify');
+    if (!force && v && v.tok === tok && (now() - v.at) < TTL) return Promise.resolve(v.v);
+
+    return ask('sub', SUB_PRODUCT, tok).then(function(d){
+      var out = verdict(d);
+      if (out === null) { log('inconclusive, keeping current state', d); return null; }
+      wr('gp_verify', { v: out, at: now(), tok: tok, exp: d.expiry || null });
+      log('premium verified:', out);
+      if (out === false) revokePremium();
+      else if (window.gpAds && gpAds.applyPremiumState) { try{ gpAds.applyPremiumState(); }catch(e){} }
+      return out;
+    }).catch(function(e){ log('check failed, keeping current state', e); return null; });
+  }
+
+  function revokePremium(){
+    log('revoking premium - Play rejected the token');
+    try{ localStorage.removeItem('gp_premium'); }catch(e){}
+    try{
+      if (window.GyaanPePremium && GyaanPePremium._state) {
+        GyaanPePremium._state.premium = false;
+        GyaanPePremium._state.plan = null;
+        GyaanPePremium._state.token = null;
+      }
+    }catch(e){}
+    try{ document.documentElement.classList.remove('gp-premium'); }catch(e){}
+    try{ if (window.gpAds && gpAds.applyPremiumState) gpAds.applyPremiumState(); }catch(e){}
+  }
+
+  /* ---------- COURSES (one-time products) ---------- */
+  function cKey(id){ return 'gpcv_' + id; }
+
+  function courseProductId(id, s){
+    if (s && s.productId) return s.productId;
+    try{ if (window.gpsIndex && gpsIndex[id] && gpsIndex[id].productId) return gpsIndex[id].productId; }catch(e){}
+    try{ if (window.gpcCourse && gpcCourse.id === id && gpcCourse.productId) return gpcCourse.productId; }catch(e){}
+    return null;
+  }
+
+  function courseOk(id, s){
+    if (!s || !s.owned) return false;
+    if (!s.token) return false;           /* owned with no token = tampering */
+    var v = rd(cKey(id));
+    if (v && v.tok === s.token) {
+      if (v.v === false) return false;
+      if (v.v === true && (now() - v.at) < GRACE) return true;
+      return false;
+    }
+    var ts = s.ts || (s.purchaseDate ? Date.parse(s.purchaseDate) : now());
+    if (isNaN(ts)) ts = now();
+    return (now() - ts) < NEW_GRACE;
+  }
+
+  function refreshCourse(id, force){
+    var s = null;
+    try{ s = JSON.parse(localStorage.getItem('gpc_' + id) || 'null'); }catch(e){}
+    if (!s || !s.owned || !s.token) return Promise.resolve(null);
+    var pid = courseProductId(id, s);
+    if (!pid) { log('no productId known for course', id); return Promise.resolve(null); }
+
+    var v = rd(cKey(id));
+    if (!force && v && v.tok === s.token && (now() - v.at) < TTL) return Promise.resolve(v.v);
+
+    return ask('product', pid, s.token).then(function(d){
+      var out = verdict(d);
+      if (out === null) { log('course check inconclusive', id, d); return null; }
+      wr(cKey(id), { v: out, at: now(), tok: s.token });
+      log('course', id, 'verified:', out);
+      if (out === false) {
+        try{
+          var raw = JSON.parse(localStorage.getItem('gpc_' + id) || 'null');
+          if (raw) { raw.owned = false; localStorage.setItem('gpc_' + id, JSON.stringify(raw)); }
+        }catch(e){}
+        try{ if (window.gpcId === id && typeof gpcRender === 'function') gpcRender(); }catch(e){}
+      }
+      return out;
+    }).catch(function(e){ log('course check failed', id, e); return null; });
+  }
+
+  function refreshAllCourses(force){
+    var ids = [];
+    try{
+      for (var i=0; i<localStorage.length; i++){
+        var k = localStorage.key(i);
+        if (k && k.indexOf('gpc_') === 0 && k.indexOf('gpcv_') !== 0){
+          var id = k.slice(4);
+          if (id && id !== 'debug_token' && id !== 'uid') ids.push(id);
+        }
+      }
+    }catch(e){}
+    return Promise.all(ids.map(function(id){ return refreshCourse(id, force); }));
+  }
+
+  /* ---------- run on startup, and when the app comes back to foreground ---------- */
+  function refreshAll(force){
+    return Promise.all([ refreshPremium(force), refreshAllCourses(force) ]);
+  }
+
+  function kick(){ setTimeout(function(){ refreshAll(false); }, 1500); }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', kick);
+  else kick();
+
+  document.addEventListener('visibilitychange', function(){
+    if (!document.hidden) refreshAll(false);
+  });
+
+  window.gpVerify = {
+    premiumOk: premiumOk,
+    courseOk: courseOk,
+    refreshPremium: refreshPremium,
+    refreshCourse: refreshCourse,
+    refreshAll: refreshAll,
+    /* debug helpers */
+    tokens: function(){
+      var out = { sub: subToken(), subVerify: rd('gp_verify'), courses: [] };
+      try{
+        for (var i=0; i<localStorage.length; i++){
+          var k = localStorage.key(i);
+          if (k && k.indexOf('gpc_') === 0 && k.indexOf('gpcv_') !== 0){
+            var id = k.slice(4);
+            var s = rd(k);
+            if (s && s.token) out.courses.push({ id: id, token: s.token, owned: !!s.owned, verify: rd(cKey(id)) });
+          }
+        }
+      }catch(e){}
+      console.log('%c[GP-Verify] state', 'font-weight:bold;color:#1A237E', out);
+      return out;
+    },
+    clear: function(){
+      try{
+        localStorage.removeItem('gp_verify');
+        for (var i=localStorage.length-1; i>=0; i--){
+          var k = localStorage.key(i);
+          if (k && k.indexOf('gpcv_') === 0) localStorage.removeItem(k);
+        }
+      }catch(e){}
+      console.log('[GP-Verify] cached verdicts cleared');
+    }
+  };
+})();
 </script>
-<!-- ============ END TEMP DEBUG ============ -->
+<!-- ============ END VERIFICATION ============ -->
 </body>
 </html>

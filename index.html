@@ -2284,8 +2284,8 @@ function startSection(s,startLvl){if(!allData[s])return;startLvl=startLvl||0;var
 function goHome(){gpHideAllScreens();document.getElementById('homeScreen').style.display='block';document.getElementById('quizArea').classList.remove('show');document.getElementById('levelComplete').classList.remove('show');document.getElementById('resultScreen').classList.remove('show');document.getElementById('gameoverScreen').classList.remove('show');var _js=document.getElementById('journeyScreen');if(_js)_js.style.display='none';var _ps=document.getElementById('parentScreen');if(_ps)_ps.style.display='none';var _pm=document.getElementById('premiumScreen');if(_pm)_pm.style.display='none';var _n1=document.getElementById('nurseryHome');if(_n1)_n1.style.display='none';var _n2=document.getElementById('nurseryLevels');if(_n2)_n2.style.display='none';var _n3=document.getElementById('nurseryPlay');if(_n3)_n3.style.display='none';var _c1=document.getElementById('class1Home');if(_c1)_c1.style.display='none';var _c2=document.getElementById('class2Home');if(_c2)_c2.style.display='none';var _c3=document.getElementById('class3Home');if(_c3)_c3.style.display='none';var _c4=document.getElementById('class4Home');if(_c4)_c4.style.display='none';var _c4wh=document.getElementById('c4writeHome');if(_c4wh)_c4wh.style.display='none';var _c4wm=document.getElementById('c4writeMaths');if(_c4wm)_c4wm.style.display='none';var _c4we=document.getElementById('c4writeEng');if(_c4we)_c4we.style.display='none';var _c4wh=document.getElementById('c4writeHin');if(_c4wh)_c4wh.style.display='none';var _c4wv=document.getElementById('c4writeEvs');if(_c4wv)_c4wv.style.display='none';var _c4wg=document.getElementById('c4writeGk');if(_c4wg)_c4wg.style.display='none';var _c4wcp=document.getElementById('c4writeComp');if(_c4wcp)_c4wcp.style.display='none';var _c4wa=document.getElementById('c4writeArt');if(_c4wa)_c4wa.style.display='none';var _cwg=document.getElementById('c3writeGk');if(_cwg)_cwg.style.display='none';var _cwc=document.getElementById('c3writeComp');if(_cwc)_cwc.style.display='none';var _cwa=document.getElementById('c3writeArt');if(_cwa)_cwa.style.display='none';var _cwh=document.getElementById('c3writeHome');if(_cwh)_cwh.style.display='none';var _cwe=document.getElementById('c3writeEng');if(_cwe)_cwe.style.display='none';var _cwh2=document.getElementById('c3writeHin');if(_cwh2)_cwh2.style.display='none';var _cwv=document.getElementById('c3writeEvs');if(_cwv)_cwv.style.display='none';var _cwm=document.getElementById('c3writeMaths');if(_cwm)_cwm.style.display='none';var _c5=document.getElementById('class5Home');if(_c5)_c5.style.display='none';var _c6=document.getElementById('class6Home');if(_c6)_c6.style.display='none';var _c7=document.getElementById('class7Home');if(_c7)_c7.style.display='none';var _c7wh=document.getElementById('c7writeHome');if(_c7wh)_c7wh.style.display='none';var _c7wm=document.getElementById('c7writeMaths');if(_c7wm)_c7wm.style.display='none';var _c7we=document.getElementById('c7writeEng');if(_c7we)_c7we.style.display='none';var _c7wh=document.getElementById('c7writeHin');if(_c7wh)_c7wh.style.display='none';var _c7wv=document.getElementById('c7writeEvs');if(_c7wv)_c7wv.style.display='none';var _hub=document.getElementById('chapterHubScreen');if(_hub)_hub.style.display='none';var _sl=document.getElementById('stageLearnScreen');if(_sl)_sl.style.display='none';var _sp=document.getElementById('stagePracticeScreen');if(_sp)_sp.style.display='none';var _sr=document.getElementById('stageRevisionScreen');if(_sr)_sr.style.display='none';var _ss=document.getElementById('stageSummaryScreen');if(_ss)_ss.style.display='none';var _st=document.getElementById('stageTestScreen');if(_st)_st.style.display='none';var _c7wg=document.getElementById('c7writeGk');if(_c7wg)_c7wg.style.display='none';var _c7wcp=document.getElementById('c7writeComp');if(_c7wcp)_c7wcp.style.display='none';var _c6wh=document.getElementById('c6writeHome');if(_c6wh)_c6wh.style.display='none';var _c6wm=document.getElementById('c6writeMaths');if(_c6wm)_c6wm.style.display='none';var _c6we=document.getElementById('c6writeEng');if(_c6we)_c6we.style.display='none';var _c6wh=document.getElementById('c6writeHin');if(_c6wh)_c6wh.style.display='none';var _c6wv=document.getElementById('c6writeEvs');if(_c6wv)_c6wv.style.display='none';var _c6wg=document.getElementById('c6writeGk');if(_c6wg)_c6wg.style.display='none';var _c6wcp=document.getElementById('c6writeComp');if(_c6wcp)_c6wcp.style.display='none';var _c6wa=document.getElementById('c6writeArt');if(_c6wa)_c6wa.style.display='none';var _c5wh=document.getElementById('c5writeHome');if(_c5wh)_c5wh.style.display='none';var _c5wm=document.getElementById('c5writeMaths');if(_c5wm)_c5wm.style.display='none';var _c5we=document.getElementById('c5writeEng');if(_c5we)_c5we.style.display='none';var _c5wh=document.getElementById('c5writeHin');if(_c5wh)_c5wh.style.display='none';var _c5wv=document.getElementById('c5writeEvs');if(_c5wv)_c5wv.style.display='none';var _c5wg=document.getElementById('c5writeGk');if(_c5wg)_c5wg.style.display='none';var _c5wcp=document.getElementById('c5writeComp');if(_c5wcp)_c5wcp.style.display='none';var _c5wa=document.getElementById('c5writeArt');if(_c5wa)_c5wa.style.display='none';renderBadges();gpRenderHome();}
 function updateLives(){for(var i=1;i<=3;i++){var el=document.getElementById('life'+i);if(el)el.className='life'+(i>lives?' lost':'');}}
 function loadLevel(lvl){currentLevel=lvl;currentQ=0;answered=false;var cfg=LC[lvl];document.getElementById('levelBadge').textContent=cfg.n;document.getElementById('levelBadge').className='level-badge '+cfg.lc;document.getElementById('progressFill').className='progress-fill '+cfg.p;document.getElementById('questionCard').className='question-card '+cfg.br;document.getElementById('correctCount').textContent=levelCorrect[lvl];loadQ();}
-function loadQ(){answered=false;var data=allData[currentSection];var q=data[currentLevel][currentQ];document.getElementById('questionIcon').textContent=LC[currentLevel].icon;document.getElementById('questionNumText').textContent='Question '+(currentQ+1);document.getElementById('questionText').textContent=q.q;document.getElementById('questionNum').textContent=(currentQ+1)+'/10';document.getElementById('progressFill').style.width=(((currentQ+1)/10)*100)+'%';document.getElementById('scoreDisplay').textContent=totalScore;if(q.vis){renderVisual(q.vis);}else{showTopic(q.q);}var md=document.getElementById('mathDisplay');if(q.math&&q.math!==''){md.style.display='block';md.textContent=q.math;}else{md.style.display='none';}var g=document.getElementById('optionsGrid');g.innerHTML='';var lb=["A","B","C","D"];q.o.forEach(function(op,i){var b=document.createElement('button');b.className='option-btn';var sp=document.createElement('span');sp.className='opt-label';sp.textContent=lb[i];b.appendChild(sp);b.appendChild(document.createTextNode(op));b.onclick=function(){selAns(i,b);};g.appendChild(b);});document.getElementById('feedback').className='feedback';document.getElementById('fbMain').textContent='';document.getElementById('fbSub').textContent='';document.getElementById('nextBtn').className='next-btn';}
-function selAns(i,btn){if(answered)return;answered=true;localStorage.setItem('gp_attempts',(parseInt(localStorage.getItem('gp_attempts')||'0')+1));var data=allData[currentSection];var q=data[currentLevel][currentQ];var ab=document.querySelectorAll('#optionsGrid .option-btn');gpLogAttempt(currentSection,currentLevel,'mcq',i===q.a,0);if(i===q.a){btn.classList.add('correct');totalScore+=10;levelCorrect[currentLevel]++;document.getElementById('scoreDisplay').textContent=totalScore;document.getElementById('correctCount').textContent=levelCorrect[currentLevel];playCorrect();awardBadge('first');gpCorrect();showFB('CORRECT!','Well done! Keep going!','correct');}else{btn.classList.add('wrong');ab[q.a].classList.add('correct');lives--;updateLives();playWrong();showFB('WRONG!','No worries! Try next one!','wrong');if(lives<=0){setTimeout(function(){document.getElementById('quizArea').classList.remove('show');document.getElementById('gameoverScreen').classList.add('show');document.getElementById('goScore').textContent=totalScore;},1200);return;}}document.getElementById('nextBtn').classList.add('show');}
+function loadQ(){answered=false;try{gpExplainReset();}catch(e){}var data=allData[currentSection];var q=data[currentLevel][currentQ];document.getElementById('questionIcon').textContent=LC[currentLevel].icon;document.getElementById('questionNumText').textContent='Question '+(currentQ+1);document.getElementById('questionText').textContent=q.q;document.getElementById('questionNum').textContent=(currentQ+1)+'/10';document.getElementById('progressFill').style.width=(((currentQ+1)/10)*100)+'%';document.getElementById('scoreDisplay').textContent=totalScore;if(q.vis){renderVisual(q.vis);}else{showTopic(q.q);}var md=document.getElementById('mathDisplay');if(q.math&&q.math!==''){md.style.display='block';md.textContent=q.math;}else{md.style.display='none';}var g=document.getElementById('optionsGrid');g.innerHTML='';var lb=["A","B","C","D"];q.o.forEach(function(op,i){var b=document.createElement('button');b.className='option-btn';var sp=document.createElement('span');sp.className='opt-label';sp.textContent=lb[i];b.appendChild(sp);b.appendChild(document.createTextNode(op));b.onclick=function(){selAns(i,b);};g.appendChild(b);});document.getElementById('feedback').className='feedback';document.getElementById('fbMain').textContent='';document.getElementById('fbSub').textContent='';document.getElementById('nextBtn').className='next-btn';}
+function selAns(i,btn){if(answered)return;answered=true;localStorage.setItem('gp_attempts',(parseInt(localStorage.getItem('gp_attempts')||'0')+1));var data=allData[currentSection];var q=data[currentLevel][currentQ];var ab=document.querySelectorAll('#optionsGrid .option-btn');gpLogAttempt(currentSection,currentLevel,'mcq',i===q.a,0);if(i===q.a){btn.classList.add('correct');totalScore+=10;levelCorrect[currentLevel]++;document.getElementById('scoreDisplay').textContent=totalScore;document.getElementById('correctCount').textContent=levelCorrect[currentLevel];playCorrect();awardBadge('first');gpCorrect();showFB('CORRECT!','Well done! Keep going!','correct');}else{btn.classList.add('wrong');ab[q.a].classList.add('correct');lives--;updateLives();playWrong();showFB('WRONG!','No worries! Try next one!','wrong');if(lives<=0){setTimeout(function(){document.getElementById('quizArea').classList.remove('show');document.getElementById('gameoverScreen').classList.add('show');document.getElementById('goScore').textContent=totalScore;},1200);return;}}document.getElementById('nextBtn').classList.add('show');try{gpExplainShow();}catch(e){}}
 function showFB(m,s,t){document.getElementById('fbMain').textContent=m;document.getElementById('fbSub').textContent=s;document.getElementById('feedback').className='feedback show '+t;}
 function nextQuestion(){currentQ++;if(currentQ>=10){showLevelComplete();}else{loadQ();}}
 function showLevelComplete(){document.getElementById('quizArea').classList.remove('show');if(currentLevel>=maxLv()-1){awardBadge(currentSection);gpSubjectDone();showFinalResult();return;}playLevelUp();var c=levelCorrect[currentLevel];gpLevelDone(c);gpConfetti();var stars=c>=9?'\u2605\u2605\u2605':c>=7?'\u2605\u2605':c>=5?'\u2605':'\u2606';var starMsg=c>=9?'Perfect! 3 Stars!':c>=7?'Great! 2 Stars!':c>=5?'Good! 1 Star!':'Practice more!';document.getElementById('lcIcon').textContent='L'+(currentLevel+1);document.getElementById('lcTitle').textContent='LEVEL '+(currentLevel+1)+' COMPLETE!';document.getElementById('lcScore').textContent=c;document.getElementById('lcStars').textContent=stars;var chd=JSON.parse(localStorage.getItem('gp_ch')||'null');if(chd&&chd.sec===currentSection&&chd.lvl===currentLevel){starMsg=(c>chd.s?'YOU BEAT '+chd.n+'! ('+c+' vs '+chd.s+')':c===chd.s?'TIE with '+chd.n+'! ('+c+'-'+chd.s+')':chd.n+' WINS! ('+chd.s+' vs '+c+')');localStorage.removeItem('gp_ch');}document.getElementById('lcMsg').textContent=starMsg;document.getElementById('nlTitle').textContent='LEVEL '+(currentLevel+2)+' UNLOCKED!';document.getElementById('nlDesc').textContent=['Easy questions ahead!','Easy+ level!','Medium difficulty!','Medium+ level!','Hard questions ahead!','Hard+ level!','Very hard! Think!','Expert level! Ready?','FINAL LEVEL! Can you beat it?'][currentLevel]||'Ready?';document.getElementById('levelComplete').classList.add('show');}
@@ -14457,6 +14457,127 @@ if ('serviceWorker' in navigator) {
 })();
 </script>
 <!-- ================== END SHARE ================== -->
+
+
+<!-- ==================== SAMJHAO — WHY IS THIS THE ANSWER ==================== -->
+<style>
+  .gpex-btn{display:none;width:100%;margin-top:10px;background:#fff;border:2px solid #1A237E;
+    color:#1A237E;border-radius:14px;padding:11px;font-weight:800;font-size:13.5px;
+    font-family:inherit;cursor:pointer;}
+  .gpex-btn.show{display:block;}
+  .gpex-btn:disabled{opacity:.6;}
+  .gpex-box{display:none;margin-top:10px;background:#F3F4FB;border:2px solid #E5E0D5;
+    border-radius:14px;padding:13px;text-align:left;font-size:13.5px;line-height:1.7;color:#16202F;}
+  .gpex-box.show{display:block;}
+  .gpex-box b{color:#1A237E;}
+  .gpex-load{font-size:13px;color:#6B7280;}
+</style>
+<script>
+(function(){
+  /* One tap after answering: the AI tutor explains WHY that answer is right,
+     in the child's own class level. Reuses the existing tutor worker and the
+     existing free-tier counter — no second AI system, no new question data. */
+
+  var busy = false;
+
+  window.gpExplainMount = function(){
+    var nb = document.getElementById('nextBtn');
+    if(!nb || document.getElementById('gpExBtn')) return;
+
+    var b = document.createElement('button');
+    b.className = 'gpex-btn'; b.id = 'gpExBtn';
+    b.textContent = '\uD83E\uDD14 Ye jawab kyun sahi hai?';
+    b.onclick = gpExplainAsk;
+
+    var box = document.createElement('div');
+    box.className = 'gpex-box'; box.id = 'gpExBox';
+
+    nb.parentNode.insertBefore(b, nb.nextSibling);
+    b.parentNode.insertBefore(box, b.nextSibling);
+  };
+
+  window.gpExplainReset = function(){
+    var b=document.getElementById('gpExBtn'), x=document.getElementById('gpExBox');
+    if(b){ b.classList.remove('show'); b.disabled=false; b.textContent='\uD83E\uDD14 Ye jawab kyun sahi hai?'; }
+    if(x){ x.classList.remove('show'); x.innerHTML=''; }
+  };
+
+  window.gpExplainShow = function(){
+    gpExplainMount();
+    var b=document.getElementById('gpExBtn');
+    if(b) b.classList.add('show');
+  };
+
+  window.gpExplainAsk = function(){
+    if(busy) return;
+    var b=document.getElementById('gpExBtn'), box=document.getElementById('gpExBox');
+    if(!b||!box) return;
+
+    var q=null;
+    try{
+      var data = allData[currentSection];
+      q = data[currentLevel][currentQ];
+    }catch(e){}
+    if(!q){ return; }
+
+    /* Respect the same free limit the tutor uses, so this can't become a
+       back door around it. */
+    try{
+      var lim = 5;
+      try{ lim = PREMIUM_CONFIG.freeLimits.aiTutor || 5; }catch(e){}
+      if(typeof isPremium==='function' && !isPremium() &&
+         typeof tutorTodayCount==='function' && tutorTodayCount(false) >= lim){
+        box.classList.add('show');
+        box.innerHTML='Aaj ke free sawaal poore ho gaye. Kal phir milega, '+
+                      'ya Premium lekar unlimited samjhaiye.';
+        b.disabled=true;
+        return;
+      }
+    }catch(e){}
+
+    busy=true; b.disabled=true;
+    box.classList.add('show');
+    box.innerHTML='<span class="gpex-load">Soch raha hoon...</span>';
+
+    var correct = (q.o && typeof q.a==='number') ? q.o[q.a] : '';
+    var cls='';
+    try{ cls = (gpProfile()||{}).cls || ''; }catch(e){}
+
+    var msg = 'Sawaal: "'+q.q+'"\nSahi jawab: "'+correct+'"\n\n'+
+      'Is bachche ko 2-3 chhoti lines me samjhao ki ye jawab kyun sahi hai. '+
+      'Aakhir me ek line me ye likho ki isse kya yaad rakhna hai. '+
+      'Aasan bhaasha, koi bhi mushkil shabd nahi.'+
+      (cls ? ' Bachcha '+cls+' me hai.' : '');
+
+    var payload = { message: msg, history: [] };
+    try{ payload.userId  = gpTutorUserId(); }catch(e){}
+    try{ payload.persona = tutorGetPersonaKey(); }catch(e){}
+    try{ payload.lang    = tutorGetLang(); }catch(e){}
+
+    fetch(AI_TUTOR_WORKER_URL, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify(payload)
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      busy=false;
+      var t = d && d.reply;
+      if(!t){ box.innerHTML='Abhi samjha nahi paya. Thodi der baad try karo.'; b.disabled=false; return; }
+      box.innerHTML = t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/\n/g,'<br>');
+      try{
+        if(!d.error && typeof isPremium==='function' && !isPremium() &&
+           typeof tutorIncrementCount==='function') tutorIncrementCount(false);
+      }catch(e){}
+      b.textContent='\u2705 Samajh aa gaya';
+    })
+    .catch(function(){
+      busy=false; b.disabled=false;
+      box.innerHTML='Internet check karo aur dobara try karo.';
+    });
+  };
+})();
+</script>
+<!-- ================== END SAMJHAO ================== -->
 
 </body>
 </html>

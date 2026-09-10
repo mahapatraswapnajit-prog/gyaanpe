@@ -5236,6 +5236,14 @@ return html;
 
 
 var AI_TUTOR_WORKER_URL = "https://gyaanpe-tutorr.mahapatraswapnajit.workers.dev";
+
+/* Play subscription token, sent with every worker call so the Worker can
+   verify premium status itself instead of trusting the client. */
+function gpSubToken(){
+  try{ var p = JSON.parse(localStorage.getItem('gp_premium') || 'null'); if (p && p.token) return p.token; }catch(e){}
+  try{ if (window.GyaanPePremium && GyaanPePremium._state && GyaanPePremium._state.token) return GyaanPePremium._state.token; }catch(e){}
+  return null;
+}
 var TUTOR_DAILY_LIMIT = 25;
 
 var _tutorState = {messages: [], loading: false, pendingImage: null};
@@ -5508,6 +5516,7 @@ function tutorSend() {
     persona: pKey,
     lang: tutorGetLang(),
     context: tutorBuildContext(),
+    subToken: gpSubToken(),
   };
   if (img) {
     var parts = img.split(",");
@@ -5910,6 +5919,7 @@ function wsGenerate() {
       userId: gpTutorUserId(),
       lang: tutorGetLang(),
       context: context,
+      subToken: gpSubToken(),
     }),
   })
     .then(function (r) { return r.json(); })
@@ -6255,6 +6265,7 @@ function olyGenerate() {
       userId: gpTutorUserId(),
       lang: tutorGetLang(),
       context: tutorBuildContext(),
+      subToken: gpSubToken(),
     }),
   })
     .then(function (r) { return r.json(); })
@@ -8446,7 +8457,7 @@ function nutriGenerateMealPlan(kind) {
   fetch(AI_TUTOR_WORKER_URL, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ mode: "nutrition", message: nutriBuildPrompt(kind), userId: gpTutorUserId(), lang: "en", context: null }),
+    body: JSON.stringify({ mode: "nutrition", message: nutriBuildPrompt(kind), userId: gpTutorUserId(), lang: "en", context: null, subToken: gpSubToken() }),
   })
     .then(function (r) { return r.json(); })
     .then(function (data) {
@@ -14626,6 +14637,7 @@ if ('serviceWorker' in navigator) {
     try{ payload.userId  = gpTutorUserId(); }catch(e){}
     try{ payload.persona = tutorGetPersonaKey(); }catch(e){}
     try{ payload.lang    = tutorGetLang(); }catch(e){}
+    try{ payload.subToken = gpSubToken(); }catch(e){}
 
     fetch(AI_TUTOR_WORKER_URL, {
       method:'POST', headers:{'Content-Type':'application/json'},

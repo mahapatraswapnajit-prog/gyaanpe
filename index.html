@@ -1192,8 +1192,6 @@ async function gpcBuy(){
     );
     var response = await request.show();
     var token = response.details && response.details.purchaseToken;
-    /* TEMP DEBUG - server-side verification testing, remove later */
-    try{ console.log('[GP-DEBUG] COURSE_TOKEN:', token, 'productId:', c.productId); localStorage.setItem('gpc_debug_token', token); }catch(e){}
     await response.complete('success');
     gpcUnlock(token);
   }catch(e){ console.log('course purchase cancelled/failed:', e); }
@@ -12546,8 +12544,6 @@ if ('serviceWorker' in navigator) {
       var request = new PaymentRequest([{ supportedMethods: PLAY_BILLING, data: { sku: sku } }]);
       var response = await request.show();               // Google Play payment sheet
       var purchaseToken = response.details.purchaseToken;
-      /* TEMP DEBUG - server-side verification testing, remove later */
-      try { console.log('[GP-DEBUG] SUB_TOKEN:', purchaseToken, 'sku:', sku); localStorage.setItem('gp_debug_sub_token', purchaseToken); } catch (e) {}
       await response.complete('success');                // acknowledges the purchase
       await onPurchased(planKey, sku, purchaseToken, false);
       return true;
@@ -15274,7 +15270,15 @@ if ('serviceWorker' in navigator) {
     return Promise.all([ refreshPremium(force), refreshAllCourses(force) ]);
   }
 
-  function kick(){ setTimeout(function(){ refreshAll(false); }, 1500); }
+  /* One-time cleanup of the temporary debug keys used while building this. */
+  function sweepDebugKeys(){
+    try{
+      localStorage.removeItem('gp_debug_sub_token');
+      localStorage.removeItem('gpc_debug_token');
+    }catch(e){}
+  }
+
+  function kick(){ sweepDebugKeys(); setTimeout(function(){ refreshAll(false); }, 1500); }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', kick);
   else kick();
 

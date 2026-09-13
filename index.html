@@ -2429,7 +2429,7 @@ loadDailyQuiz();
 
 // ============ CHALLENGE A FRIEND ============
 var CH_URL='https://zapzone-98727-default-rtdb.firebaseio.com/gyaanpeChallenge';
-function sendChallenge(){var nm=prompt('Apna naam likho:')||'A friend';var sc=levelCorrect[currentLevel];fetch(CH_URL+'.json',{method:'POST',body:JSON.stringify({n:nm,s:sc,sec:currentSection,lvl:currentLevel})}).then(function(r){return r.json();}).then(function(d){var link='https://mahapatraswapnajit-prog.github.io/gyaanpe/?ch='+d.name;var msg='\uD83C\uDFC6 '+nm+' ne GyaanPe pe '+sc+'/10 score kiya! Kya aap hara sakte ho? Khelo: '+link;window.open('https://wa.me/?text='+encodeURIComponent(msg));}).catch(function(e){gpToast('Internet check karo!');});}
+function sendChallenge(){var nm=prompt('Apna naam likho:')||'A friend';var sc=levelCorrect[currentLevel];fetch(CH_URL+'.json',{method:'POST',body:JSON.stringify({n:nm,s:sc,sec:currentSection,lvl:currentLevel})}).then(function(r){return r.json();}).then(function(d){var link='https://mahapatraswapnajit-prog.github.io/gyaanpe/?ch='+d.name;var msg='\uD83C\uDFC6 '+nm+' ne GyaanPe pe '+sc+'/10 score kiya! Kya aap hara sakte ho? Khelo: '+link;if(typeof gpShareToWhatsApp==='function'){gpShareToWhatsApp(msg);}else{window.open('https://wa.me/?text='+encodeURIComponent(msg));}}).catch(function(e){gpToast('Internet check karo!');});}
 function checkChallenge(){var m=location.search.match(/ch=([^&]+)/);if(!m)return;fetch(CH_URL+'/'+m[1]+'.json').then(function(r){return r.json();}).then(function(d){if(!d||!d.n)return;if(!allData[d.sec])return;localStorage.setItem('gp_ch',JSON.stringify(d));var b=document.getElementById('chBanner');b.style.display='block';document.getElementById('chText').textContent=d.n+' ne '+d.s+'/10 score kiya hai! Hara ke dikhao!';}).catch(function(e){});}
 function acceptChallenge(){var d=JSON.parse(localStorage.getItem('gp_ch')||'null');if(!d)return;if(!allData[d.sec])return;startSection(d.sec);loadLevel(d.lvl);}
 checkChallenge();
@@ -14504,8 +14504,25 @@ if ('serviceWorker' in navigator) {
          + 'Aap bhi try kijiye:\n' + LINK;
   }
 
+  /* wa.me in a TWA opens a Custom Tab showing WhatsApp's web page, which
+     offers a download instead of handing off to the installed app. An Android
+     intent URL launches the app directly, and carries its own browser
+     fallback for the rare case where WhatsApp is not installed. */
+  window.gpShareToWhatsApp = function(text){
+    var enc = encodeURIComponent(text);
+    if (/Android/i.test(navigator.userAgent)) {
+      var fb = encodeURIComponent('https://wa.me/?text=' + enc);
+      try{
+        window.location.href = 'intent://send?text=' + enc +
+          '#Intent;scheme=whatsapp;package=com.whatsapp;S.browser_fallback_url=' + fb + ';end';
+        return;
+      }catch(e){}
+    }
+    try{ window.open('https://wa.me/?text=' + enc, '_blank'); }catch(e){}
+  };
+
   window.gpShareWhatsApp = function(){
-    try{ window.open('https://wa.me/?text=' + encodeURIComponent(msg()), '_blank'); }
+    try{ gpShareToWhatsApp(msg()); }
     catch(e){ gpShareOther(); }
   };
 

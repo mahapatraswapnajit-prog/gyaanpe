@@ -13790,7 +13790,40 @@ if ('serviceWorker' in navigator) {
       : '<div class="gpsm-note">Thoda thoda roz — yahi sabse achha tarika hai.</div>';
     h+='</div>';
 
+    /* Weekly report nudge. The report already exists in the parent dashboard,
+       but nothing brought a parent to it, so it was rarely read. This surfaces
+       it on Sunday and Monday only, and can be dismissed for the week. */
+    try{
+      var dow = new Date().getDay();               /* 0 = Sunday */
+      if((dow===0 || dow===1) && g('gpwr_nudge_off','') !== gpwrWeekKey()){
+        var mn = 0;
+        try{ mn = gpwrBuild().mins; }catch(e){}
+        if(mn > 0){
+          h += '<div class="gpwr-nudge">'+
+               '<button class="gpwr-nudge-x" onclick="gpwrNudgeOff()" aria-label="Band karein">&times;</button>'+
+               '<div class="gpwr-nudge-t">\uD83D\uDCCA Is hafte ki report taiyar hai</div>'+
+               '<div class="gpwr-nudge-s">'+mn+' minute padhai hui. Dekhiye kahan mazboot hai aur kahan dhyan chahiye.</div>'+
+               '<button class="gpwr-nudge-b" onclick="gpParent()">Report kholein \u2192</button>'+
+               '</div>';
+        }
+      }
+    }catch(e){}
+
     mount.innerHTML=h;
+  };
+
+  /* Id for the Sun+Mon pair the nudge shows on, anchored to that Sunday.
+     Both days must share one id, or dismissing on Sunday would let the
+     nudge reappear on Monday. */
+  window.gpwrWeekKey = function(){
+    var d = new Date();
+    var back = (d.getDay() === 1) ? 1 : 0;         /* Monday looks back to Sunday */
+    var anchor = new Date(d.getTime() - back*86400000);
+    return anchor.toISOString().slice(0,10);
+  };
+  window.gpwrNudgeOff = function(){
+    s('gpwr_nudge_off', gpwrWeekKey());
+    try{ gpsmRenderCard(); }catch(e){}
   };
 
   /* ---- parent dashboard section ---- */
@@ -13895,6 +13928,21 @@ if ('serviceWorker' in navigator) {
     padding:3px 10px;font-size:11.5px;font-weight:700;margin:0 5px 5px 0;}
   .gpwr-next{background:rgba(255,255,255,.13);border-radius:12px;padding:12px;margin-top:11px;
     font-size:12.5px;line-height:1.65;}
+  .gpwr-share{display:block;width:100%;background:#25D366;color:#fff;border:none;border-radius:12px;
+    padding:12px;font-weight:800;font-size:13px;font-family:inherit;cursor:pointer;margin-top:12px;}
+  .gpwr-share:active{opacity:.85;}
+
+  /* Sunday nudge on the home screen */
+  .gpwr-nudge{position:relative;background:linear-gradient(135deg,#283593,#5C6BC0);color:#fff;
+    border-radius:16px;padding:14px 14px 13px;margin-top:12px;}
+  .gpwr-nudge-t{font-family:Anton,sans-serif;font-size:15px;letter-spacing:.3px;margin-bottom:5px;
+    padding-right:22px;}
+  .gpwr-nudge-s{font-size:12.5px;line-height:1.6;opacity:.94;margin-bottom:11px;}
+  .gpwr-nudge-b{background:#fff;color:#283593;border:none;border-radius:10px;padding:9px 14px;
+    font-weight:800;font-size:12.5px;font-family:inherit;cursor:pointer;}
+  .gpwr-nudge-x{position:absolute;top:8px;right:9px;background:rgba(255,255,255,.18);color:#fff;
+    border:none;border-radius:50%;width:24px;height:24px;font-size:16px;line-height:1;
+    cursor:pointer;font-family:inherit;}
 </style>
 
 <div id="gppcPage">
@@ -13928,6 +13976,62 @@ if ('serviceWorker' in navigator) {
     return { mins:mins, days:days, weak:weak, strong:strong, streak:streak, acc:acc, lessons:lessons, week:week };
   };
 
+  /* The child's own name if the profile has one, so the report reads like it
+     is about a person rather than about "your child". */
+  window.gpwrWho = function(){
+    try{
+      var n = (gpProfile() && gpProfile().name || '').trim();
+      if(n) return n;
+    }catch(e){}
+    return 'Aapke bachche';
+  };
+
+  /* Plain-text version of the same numbers, formatted for WhatsApp.
+     Every figure comes from gpwrBuild(), so the message and the on-screen
+     card can never disagree. */
+  window.gpwrText = function(){
+    var r = gpwrBuild(), who = gpwrWho();
+    var L = [];
+    L.push('\uD83D\uDCCA *GyaanPe \u2014 ' + who + ' ki is hafte ki report*');
+    L.push('');
+
+    if(r.mins === 0){
+      L.push('Is hafte abhi padhai shuru nahi hui.');
+      L.push('Roz 10-15 minute se shuruat kaafi hai.');
+      return L.join('\n');
+    }
+
+    L.push('\u23F1\uFE0F ' + r.mins + ' minute padhai, ' + r.days + ' din');
+    if(r.acc !== null) L.push('\u2705 Sahi jawab: ' + r.acc + '%');
+    if(r.streak > 0)   L.push('\uD83D\uDD25 Streak: ' + r.streak + ' din');
+    if(r.lessons > 0)  L.push('\uD83D\uDCD6 Lessons: ' + r.lessons);
+    L.push('');
+
+    if(r.strong.length) L.push('\uD83D\uDCAA Mazboot: ' + r.strong.join(', '));
+    if(r.weak.length)   L.push('\uD83D\uDCCC Dhyan chahiye: ' + r.weak.join(', '));
+    if(r.strong.length || r.weak.length) L.push('');
+
+    var next;
+    if(r.days <= 2)
+      next = 'Padhai ke din kam rahe. Roz ka ek fix samay tay kijiye.';
+    else if(r.weak.length)
+      next = 'Agle hafte ' + r.weak[0] + ' par 10 minute, hafte me 3 din.';
+    else if(r.mins < 60)
+      next = 'Achha chal raha hai. Roz 5 minute aur badha sakte hain.';
+    else
+      next = 'Sab achha chal raha hai. Khel aur neend ka samay bhi poora rakhiye.';
+    L.push('\uD83D\uDC49 *Agla kadam:* ' + next);
+
+    return L.join('\n');
+  };
+
+  window.gpwrShare = function(){
+    try{
+      if(typeof gpShareToWhatsApp === 'function') gpShareToWhatsApp(gpwrText());
+      else window.open('https://wa.me/?text=' + encodeURIComponent(gpwrText()), '_blank');
+    }catch(e){}
+  };
+
   window.gpwrHTML = function(){
     var r=gpwrBuild();
     var h='<div class="gpwr-box"><h4>&#128202; Is Hafte Ki Report</h4>';
@@ -13938,7 +14042,7 @@ if ('serviceWorker' in navigator) {
       return h;
     }
 
-    h+='<div class="gpwr-line">Aapke bachche ne is hafte <b>'+r.mins+' minute</b> padhai ki, '+
+    h+='<div class="gpwr-line">'+gpwrWho()+' ne is hafte <b>'+r.mins+' minute</b> padhai ki, '+
        '<b>'+r.days+' din</b> me.</div>';
 
     h+='<div>';
@@ -13963,6 +14067,9 @@ if ('serviceWorker' in navigator) {
     else
       next='Sab achha chal raha hai. Ab dhyan rakhiye ki khel, neend aur bahar ka samay bhi poora mile.';
     h+='<div class="gpwr-next"><b>Agla kadam:</b> '+next+'</div>';
+
+    h+='<button class="gpwr-share" onclick="gpwrShare()">'+
+       '\uD83D\uDCF2 Report WhatsApp par bhejein</button>';
 
     h+='</div>';
     return h;

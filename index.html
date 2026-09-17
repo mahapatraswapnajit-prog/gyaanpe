@@ -13928,6 +13928,7 @@ if ('serviceWorker' in navigator) {
     padding:3px 10px;font-size:11.5px;font-weight:700;margin:0 5px 5px 0;}
   .gpwr-next{background:rgba(255,255,255,.13);border-radius:12px;padding:12px;margin-top:11px;
     font-size:12.5px;line-height:1.65;}
+  .gpwr-namelink{color:#fff;font-weight:800;text-decoration:underline;cursor:pointer;}
   .gpwr-share{display:block;width:100%;background:#25D366;color:#fff;border:none;border-radius:12px;
     padding:12px;font-weight:800;font-size:13px;font-family:inherit;cursor:pointer;margin-top:12px;}
   .gpwr-share:active{opacity:.85;}
@@ -13978,12 +13979,31 @@ if ('serviceWorker' in navigator) {
 
   /* The child's own name if the profile has one, so the report reads like it
      is about a person rather than about "your child". */
-  window.gpwrWho = function(){
+  /* "Champ" is the app's placeholder, not a name a parent chose, so a report
+     should not address the child by it. */
+  window.gpwrRealName = function(){
     try{
       var n = (gpProfile() && gpProfile().name || '').trim();
-      if(n) return n;
+      if(n && n.toLowerCase() !== 'champ') return n;
     }catch(e){}
-    return 'Aapke bachche';
+    return '';
+  };
+  window.gpwrWho = function(){
+    return gpwrRealName() || 'Aapke bachche';
+  };
+  window.gpwrSetName = function(){
+    var cur = gpwrRealName();
+    var nm = prompt('Bachche ka naam likhein:', cur);
+    if(nm && nm.trim().length >= 2){
+      try{
+        var pr = gpProfile() || {};
+        pr.name = nm.trim().substring(0,16);
+        localStorage.setItem('gp_profile', JSON.stringify(pr));
+      }catch(e){}
+      try{ if(typeof gpRenderHome==='function') gpRenderHome(); }catch(e){}
+      try{ if(typeof gpParent==='function' && document.getElementById('parentScreen') &&
+             document.getElementById('parentScreen').style.display==='block') gpParent(); }catch(e){}
+    }
   };
 
   /* Plain-text version of the same numbers, formatted for WhatsApp.
@@ -14067,6 +14087,11 @@ if ('serviceWorker' in navigator) {
     else
       next='Sab achha chal raha hai. Ab dhyan rakhiye ki khel, neend aur bahar ka samay bhi poora mile.';
     h+='<div class="gpwr-next"><b>Agla kadam:</b> '+next+'</div>';
+
+    if(!gpwrRealName())
+      h+='<div class="gpwr-line" style="margin-top:10px;opacity:.85;">'+
+         'Bachche ka naam jodein to report me naam aayega. '+
+         '<a class="gpwr-namelink" onclick="gpwrSetName()">Naam jodein</a></div>';
 
     h+='<button class="gpwr-share" onclick="gpwrShare()">'+
        '\uD83D\uDCF2 Report WhatsApp par bhejein</button>';

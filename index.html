@@ -1231,7 +1231,11 @@ function gpcAwardGlobal(xp, coins){
   try{ if(typeof gpDailyReward === 'function') gpDailyReward(); }catch(e){}
 }
 function openEnglish30(){ gpcOpen('english30'); }
- var GPS_LIVE = ['english30'];
+ /* Courses that can actually be bought. A course only belongs here once its
+    Play one-time product exists AND is Active with a Backwards compatible
+    purchase option - otherwise the buy sheet never opens and the parent is
+    left with a dead button. Content existing in Firebase is not enough. */
+ var GPS_LIVE = ['english30','maths30'];
 
 var gpsIndex = null;
 var gpsCat = 'All';

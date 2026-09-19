@@ -1073,6 +1073,7 @@ function gpcBack(){
   }
 }
 function gpcOwned(id, s){
+  try{ if(window.gpCodes && gpCodes.courseOk(id)) return true; }catch(e){}
   if(!s || !s.owned) return false;
   try{ if(window.gpVerify && typeof window.gpVerify.courseOk === 'function') return window.gpVerify.courseOk(id, s); }catch(e){}
   return true;
@@ -1106,6 +1107,7 @@ function gpcRenderDetail(s){
   h += '<div class="gpc-card gpc-chal"><h4>Rewards</h4><ul style="margin:0;padding-left:18px"><li>Har din XP aur coins</li><li>Badge: ' + gpcEsc(c.badge) + '</li><li>Course poora hone par certificate</li><li>Lifetime access</li></ul></div>';
   h += '<button class="gpc-buy" onclick="gpcBuy()">Buy Now &middot; ' + gpcEsc(c.price) + '</button>';
   h += '<button class="gpc-buy sec" onclick="gpcRestore()">Pehle kharida hai? Restore karo</button>';
+  h += '<button class="gpc-buy sec" onclick="gpCodeOpen()">Code hai? Code se unlock karein</button>';
   document.getElementById('gpcBody').innerHTML = h;
 }
 function gpcRenderDays(s){
@@ -2241,6 +2243,7 @@ function gpToast(msg){
 </div></div>
 
 <button class="parent-open-btn" onclick="gpBuy('restore')" style="margin-top:14px;">&#128260; Restore Purchases</button>
+<button class="parent-open-btn" onclick="gpCodeOpen()" style="margin-top:10px;">&#128273; Code se unlock karein</button>
 </div>
 <div class="quiz-area" id="quizArea">
 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
@@ -5265,6 +5268,10 @@ function gpSubToken(){
   try{ if (window.GyaanPePremium && GyaanPePremium._state && GyaanPePremium._state.token) return GyaanPePremium._state.token; }catch(e){}
   return null;
 }
+/* Access code + device, so the tutor Worker can check code Premium with gyaanpe-pay */
+function gpCodeAuth(){
+  try{ return (window.gpCodes && gpCodes.auth()) || null; }catch(e){ return null; }
+}
 var TUTOR_DAILY_LIMIT = 25;
 
 var _tutorState = {messages: [], loading: false, pendingImage: null};
@@ -5537,7 +5544,7 @@ function tutorSend() {
     persona: pKey,
     lang: tutorGetLang(),
     context: tutorBuildContext(),
-    subToken: gpSubToken(),
+    subToken: gpSubToken(), gpCode: gpCodeAuth(),
   };
   if (img) {
     var parts = img.split(",");
@@ -5940,7 +5947,7 @@ function wsGenerate() {
       userId: gpTutorUserId(),
       lang: tutorGetLang(),
       context: context,
-      subToken: gpSubToken(),
+      subToken: gpSubToken(), gpCode: gpCodeAuth(),
     }),
   })
     .then(function (r) { return r.json(); })
@@ -6286,7 +6293,7 @@ function olyGenerate() {
       userId: gpTutorUserId(),
       lang: tutorGetLang(),
       context: tutorBuildContext(),
-      subToken: gpSubToken(),
+      subToken: gpSubToken(), gpCode: gpCodeAuth(),
     }),
   })
     .then(function (r) { return r.json(); })
@@ -7150,6 +7157,8 @@ function gpDevSetPremium(on, secret) {
 function isPremium() {
   /* Developer preview toggle (local only, never a real purchase) */
   try { if (localStorage.getItem("gp_dev_premium") === "1") return true; } catch(e){}
+  /* Access-code Premium (web / school codes), checked by gyaanpe-pay */
+  try { if (window.gpCodes && gpCodes.premiumOk()) return true; } catch(e){}
   /* Server-verified gate. Falls back to the old check only if the
      verification module has not loaded yet (very early in startup). */
   try {
@@ -8478,7 +8487,7 @@ function nutriGenerateMealPlan(kind) {
   fetch(AI_TUTOR_WORKER_URL, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ mode: "nutrition", message: nutriBuildPrompt(kind), userId: gpTutorUserId(), lang: "en", context: null, subToken: gpSubToken() }),
+    body: JSON.stringify({ mode: "nutrition", message: nutriBuildPrompt(kind), userId: gpTutorUserId(), lang: "en", context: null, subToken: gpSubToken(), gpCode: gpCodeAuth() }),
   })
     .then(function (r) { return r.json(); })
     .then(function (data) {
@@ -12623,18 +12632,21 @@ if ('serviceWorker' in navigator) {
     refreshUI();
   }
 
+  function gpCodePrem(){ try{ return !!(window.gpCodes && gpCodes.premiumOk()); }catch(e){ return false; } }
   function refreshUI() {
+    var prem = state.premium || gpCodePrem();
+    document.documentElement.classList.toggle('gp-premium', prem);
     // Elements only for premium users: <div data-premium-only>
     document.querySelectorAll('[data-premium-only]').forEach(function (el) {
-      el.style.display = state.premium ? '' : 'none';
+      el.style.display = prem ? '' : 'none';
     });
     // Elements only for free users (e.g. Upgrade buttons): <div data-free-only>
     document.querySelectorAll('[data-free-only]').forEach(function (el) {
-      el.style.display = state.premium ? 'none' : '';
+      el.style.display = prem ? 'none' : '';
     });
     // Lock badges: <span data-premium-lock> shown when NOT premium
     document.querySelectorAll('[data-premium-lock]').forEach(function (el) {
-      el.style.display = state.premium ? 'none' : '';
+      el.style.display = prem ? 'none' : '';
     });
     // Live price labels: <span data-gp-price="monthly"></span>
     document.querySelectorAll('[data-gp-price]').forEach(function (el) {
@@ -12728,13 +12740,13 @@ if ('serviceWorker' in navigator) {
       return interstitialCounter % 3 === 0;
     },
     canShowInterstitial: function (context) {
-      if (state.premium) return false;
+      if (state.premium || gpCodePrem()) return false;
       // Never during learning/quiz/AI — only at explicit safe checkpoints
       return context === 'session-complete';
     },
-    canShowRewarded: function () { return !state.premium; },
+    canShowRewarded: function () { return !(state.premium || gpCodePrem()); },
     applyPremiumState: function () {
-      if (!state.premium) return;
+      if (!(state.premium || gpCodePrem())) return;
       // Hide any ad containers. Add class="gp-ad" on your ad divs.
       document.querySelectorAll('.gp-ad, [data-ad], #ad-banner, #adBanner, .adsbygoogle')
         .forEach(function (el) { el.style.display = 'none'; });
@@ -12776,6 +12788,8 @@ if ('serviceWorker' in navigator) {
       'background:#fff;color:#1A237E;font-size:15px;font-weight:700;">Monthly — ' + m + '</button>' +
       '<p style="text-align:center;margin:14px 0 0;">' +
       '<a href="#" id="gp-restore" style="color:#1A237E;">Pehle kharida tha? Restore Purchase</a></p>' +
+      '<p style="text-align:center;margin:10px 0 0;">' +
+      '<a href="#" id="gp-code" style="color:#1A237E;">Code hai? Code se unlock karein</a></p>' +
       '<p style="text-align:center;color:#999;font-size:11px;margin:10px 0 0;">' +
       'Subscription Google Play se manage hoti hai. Kabhi bhi cancel karo.</p>' +
       '</div>';
@@ -12785,6 +12799,7 @@ if ('serviceWorker' in navigator) {
     document.getElementById('gp-buy-monthly').onclick = function () { buy('monthly'); };
     document.getElementById('gp-buy-yearly').onclick = function () { buy('yearly'); };
     document.getElementById('gp-restore').onclick = function (e) { e.preventDefault(); restore(false); };
+    document.getElementById('gp-code').onclick = function (e) { e.preventDefault(); closePaywall(); if (window.gpCodeOpen) gpCodeOpen(); };
   }
 
   function closePaywall() {
@@ -14808,7 +14823,7 @@ if ('serviceWorker' in navigator) {
     try{ payload.userId  = gpTutorUserId(); }catch(e){}
     try{ payload.persona = tutorGetPersonaKey(); }catch(e){}
     try{ payload.lang    = tutorGetLang(); }catch(e){}
-    try{ payload.subToken = gpSubToken(); }catch(e){}
+    try{ payload.subToken = gpSubToken(); payload.gpCode = gpCodeAuth(); }catch(e){}
 
     fetch(AI_TUTOR_WORKER_URL, {
       method:'POST', headers:{'Content-Type':'application/json'},
@@ -15494,5 +15509,219 @@ if ('serviceWorker' in navigator) {
 })();
 </script>
 <!-- ============ END VERIFICATION ============ -->
+<!-- ============ ACCESS CODE UNLOCK (gyaanpe-pay) ============ -->
+<style>
+#gpCodeModal{position:fixed;inset:0;background:rgba(13,17,45,.72);z-index:100000;display:none;align-items:flex-end;justify-content:center;}
+#gpCodeModal.on{display:flex;}
+.gpcm-card{background:#FFF9F0;border-radius:22px 22px 0 0;max-width:520px;width:100%;max-height:88vh;overflow:auto;padding:18px 20px calc(24px + env(safe-area-inset-bottom,0px));font-family:'Nunito',sans-serif;box-sizing:border-box;}
+.gpcm-x{display:block;margin-left:auto;border:0;background:none;font-size:22px;color:#666;cursor:pointer;padding:4px 8px;}
+.gpcm-h{font-family:'Anton',sans-serif;font-size:24px;color:#1A237E;letter-spacing:.5px;margin:0 0 4px;}
+.gpcm-p{margin:0 0 16px;color:#555;font-size:14.5px;font-weight:600;}
+.gpcm-in{width:100%;box-sizing:border-box;padding:15px 14px;border:2px solid #EEE2CF;border-radius:14px;background:#fff;font-family:'Anton',sans-serif;font-size:24px;letter-spacing:3px;color:#1A237E;text-align:center;text-transform:uppercase;outline:none;}
+.gpcm-in:focus{border-color:#FF6F00;}
+.gpcm-go{display:block;width:100%;margin-top:14px;padding:15px;border:0;border-radius:14px;background:linear-gradient(135deg,#FF6F00,#FFA000);color:#fff;font-family:'Anton',sans-serif;font-size:18px;letter-spacing:.6px;cursor:pointer;}
+.gpcm-go:disabled{opacity:.5;cursor:wait;}
+.gpcm-msg{min-height:22px;margin-top:12px;font-weight:800;font-size:14px;color:#C62828;text-align:center;}
+.gpcm-list{margin-top:18px;border-top:1px dashed #EEE2CF;padding-top:12px;}
+.gpcm-list h4{margin:0 0 8px;font-size:14px;color:#1A237E;}
+.gpcm-row{display:flex;justify-content:space-between;gap:10px;font-size:13.5px;padding:6px 0;color:#333;}
+.gpcm-row b{font-family:'Anton',sans-serif;font-weight:400;letter-spacing:1px;color:#1A237E;}
+.gpcm-row .bad{color:#C62828;font-weight:800;}
+</style>
+<div id="gpCodeModal" role="dialog" aria-modal="true" aria-labelledby="gpcmTitle">
+  <div class="gpcm-card">
+    <button class="gpcm-x" type="button" aria-label="Band karein" onclick="gpCodeClose()">&#10005;</button>
+    <h2 class="gpcm-h" id="gpcmTitle">Code se unlock karein</h2>
+    <p class="gpcm-p">Apna GyaanPe code neeche daaliye.</p>
+    <input id="gpcmIn" class="gpcm-in" type="text" inputmode="text" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="12" placeholder="GP-XXXX-XXXX" aria-label="Unlock code">
+    <button id="gpcmGo" class="gpcm-go" type="button">Unlock karein</button>
+    <div id="gpcmMsg" class="gpcm-msg" role="status" aria-live="polite"></div>
+    <div id="gpcmList" class="gpcm-list" hidden></div>
+  </div>
+</div>
+<script>
+(function(){
+  'use strict';
+  var PAY = 'https://gyaanpe-pay.mahapatraswapnajit.workers.dev';
+  var KEY = 'gp_codes';
+  var HOUR = 3600000, DAY = 86400000;
+  var TTL = 12 * HOUR;   /* background re-check after this */
+  var GRACE = 7 * DAY;   /* offline, a past success keeps working this long */
+
+  function now(){ return Date.now(); }
+  function all(){ try{ return JSON.parse(localStorage.getItem(KEY) || '[]') || []; }catch(e){ return []; } }
+  function save(a){ try{ localStorage.setItem(KEY, JSON.stringify(a)); }catch(e){} }
+  function log(){ try{ console.log.apply(console, ['[GP-Code]'].concat([].slice.call(arguments))); }catch(e){} }
+
+  function deviceId(){
+    try{ if (typeof gpcUid === 'function') return gpcUid(); }catch(e){}
+    try{
+      var u = localStorage.getItem('gp_uid');
+      if (!u) { u = 'u' + now() + Math.random().toString(36).slice(2,7); localStorage.setItem('gp_uid', u); }
+      return u;
+    }catch(e){ return null; }
+  }
+
+  function post(path, body){
+    return fetch(PAY + path, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) })
+      .then(function(r){ return r.json(); });
+  }
+
+  function live(x){
+    if (!x || x.bad) return false;
+    if (x.expiresAt && x.expiresAt < now()) return false;
+    return (now() - (x.at || 0)) < GRACE;
+  }
+
+  function premiumOk(){ return all().some(function(x){ return x.kind === 'premium' && live(x); }); }
+  function courseOk(id){ return all().some(function(x){ return x.kind === 'course' && x.courseId === id && live(x); }); }
+  function auth(){
+    var p = all().filter(function(x){ return x.kind === 'premium' && live(x); })[0];
+    return p ? { code: p.code, deviceId: deviceId() } : null;
+  }
+
+  function norm(t){
+    var s = String(t || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+    if (s.indexOf('GP') === 0 && s.length > 8) s = s.slice(2);
+    return s;
+  }
+  function pretty(t){
+    var s = norm(t).slice(0, 8);
+    if (!s) return '';
+    return 'GP-' + s.slice(0,4) + (s.length > 4 ? '-' + s.slice(4) : '');
+  }
+
+  function upsert(entry){
+    var a = all().filter(function(x){ return x.code !== entry.code; });
+    a.unshift(entry);
+    save(a.slice(0, 30));
+  }
+
+  /* Re-render whatever depends on premium / course state */
+  function apply(){
+    try{ if (window.gpAds && gpAds.applyPremiumState) gpAds.applyPremiumState(); }catch(e){}
+    try{ document.documentElement.classList.toggle('gp-premium', typeof isPremium === 'function' ? isPremium() : premiumOk()); }catch(e){}
+    try{
+      var cs = document.getElementById('screenCourse');
+      if (cs && cs.classList.contains('gp-show') && typeof gpcRender === 'function') gpcRender();
+    }catch(e){}
+    try{
+      var st = document.getElementById('screenStore');
+      if (st && st.classList.contains('gp-show') && typeof gpsRender === 'function') gpsRender();
+    }catch(e){}
+  }
+
+  var ERR = {
+    invalid_code: 'Ye code sahi nahi hai. Ek-ek akshar dhyan se check karein.',
+    device_limit: 'Ye code pehle hi 3 phone/tablet pe chal raha hai.',
+    expired: 'Is code ki validity khatam ho chuki hai.',
+    revoked: 'Ye code ab chalu nahi hai.',
+    too_many_attempts: 'Bahut baar galat code daala gaya. 1 ghante baad try karein.'
+  };
+
+  function courseTitle(id){
+    try{ if (window.gpcCourse && gpcCourse.id === id && gpcCourse.title) return gpcCourse.title; }catch(e){}
+    try{ if (window.GPS_INDEX && GPS_INDEX[id] && GPS_INDEX[id].title) return GPS_INDEX[id].title; }catch(e){}
+    return id;
+  }
+  function fmtDate(t){ try{ return new Date(t).toLocaleDateString('en-IN', { day:'numeric', month:'short' }); }catch(e){ return ''; } }
+  function describe(x){
+    if (x.kind === 'premium') return 'Premium' + (x.expiresAt ? ', ' + fmtDate(x.expiresAt) + ' tak' : '');
+    return 'Course: ' + courseTitle(x.courseId);
+  }
+
+  function redeem(raw){
+    var code = pretty(raw);
+    if (norm(raw).length !== 8) return Promise.resolve({ ok:false, msg:'Code poora daaliye, jaise GP-AB12-CD34.' });
+    return post('/redeem', { code: code, deviceId: deviceId() }).then(function(r){
+      if (!r || !r.ok) return { ok:false, msg: ERR[r && r.error] || 'Code unlock nahi ho paaya. Dobara try karein.' };
+      var entry = { code:r.code, kind:r.kind, product:r.product, courseId:r.courseId || null, expiresAt:r.expiresAt || null, at:now() };
+      upsert(entry);
+      apply();
+      return { ok:true, entry:entry };
+    }).catch(function(){ return { ok:false, msg:'Internet check karke dobara try karein.' }; });
+  }
+
+  function refresh(force){
+    var a = all();
+    var due = a.filter(function(x){ return !x.bad && (force || (now() - (x.at || 0)) > TTL); });
+    if (!due.length) return Promise.resolve();
+    var dev = deviceId();
+    return Promise.all(due.map(function(x){
+      return post('/check', { code:x.code, deviceId:dev }).then(function(r){
+        if (!r || !r.ok) return;                 /* server error: keep current state */
+        var b = all();
+        b.forEach(function(y){
+          if (y.code !== x.code) return;
+          if (r.valid) { y.at = now(); y.expiresAt = r.expiresAt || null; delete y.bad; }
+          else { y.bad = r.reason || 'invalid'; }
+        });
+        save(b);
+        log(x.code, r.valid ? 'ok' : ('not valid: ' + r.reason));
+      }).catch(function(){ /* offline: keep current state */ });
+    })).then(apply);
+  }
+
+  /* ---------- UI ---------- */
+  function renderList(){
+    var box = document.getElementById('gpcmList');
+    var a = all();
+    if (!a.length) { box.hidden = true; return; }
+    var h = '<h4>Is phone pe lage codes</h4>';
+    a.forEach(function(x){
+      var bad = !live(x);
+      h += '<div class="gpcm-row"><b>' + x.code + '</b><span' + (bad ? ' class="bad"' : '') + '>' +
+           describe(x) + (bad ? ' (band)' : '') + '</span></div>';
+    });
+    box.innerHTML = h; box.hidden = false;
+  }
+
+  function msg(t, good){
+    var m = document.getElementById('gpcmMsg');
+    m.textContent = t || '';
+    m.style.color = good ? '#1E8E5A' : '#C62828';
+  }
+
+  window.gpCodeOpen = function(){
+    var m = document.getElementById('gpCodeModal');
+    document.getElementById('gpcmIn').value = '';
+    msg('');
+    renderList();
+    m.classList.add('on');
+    setTimeout(function(){ try{ document.getElementById('gpcmIn').focus(); }catch(e){} }, 50);
+  };
+  window.gpCodeClose = function(){ document.getElementById('gpCodeModal').classList.remove('on'); };
+
+  function wire(){
+    var inp = document.getElementById('gpcmIn'), go = document.getElementById('gpcmGo');
+    var modal = document.getElementById('gpCodeModal');
+    inp.addEventListener('input', function(){ var v = inp.value.toUpperCase().replace(/[^A-Z0-9-]/g, ''); if (v !== inp.value) inp.value = v; });
+    inp.addEventListener('keydown', function(e){ if (e.key === 'Enter') go.click(); });
+    modal.addEventListener('click', function(e){ if (e.target === modal) gpCodeClose(); });
+    go.addEventListener('click', function(){
+      go.disabled = true; msg('Code check ho raha hai...', true);
+      redeem(inp.value).then(function(r){
+        go.disabled = false;
+        if (!r.ok) { msg(r.msg); return; }
+        var e = r.entry;
+        var t = e.kind === 'premium'
+          ? '\uD83C\uDF89 Premium unlock ho gaya!' + (e.expiresAt ? ' ' + fmtDate(e.expiresAt) + ' tak chalega.' : '')
+          : '\uD83C\uDF89 ' + courseTitle(e.courseId) + ' course unlock ho gaya!';
+        gpCodeClose();
+        try{ if (typeof gpToast === 'function') gpToast(t); }catch(err){}
+      });
+    });
+  }
+
+  function kick(){ wire(); setTimeout(function(){ refresh(false); }, 2000); }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', kick);
+  else kick();
+  document.addEventListener('visibilitychange', function(){ if (!document.hidden) refresh(false); });
+
+  window.gpCodes = { premiumOk:premiumOk, courseOk:courseOk, auth:auth, redeem:redeem, refresh:refresh, list:all };
+})();
+</script>
+<!-- ============ END ACCESS CODE UNLOCK ============ -->
+
 </body>
 </html>

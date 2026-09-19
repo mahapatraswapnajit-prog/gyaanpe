@@ -15543,13 +15543,13 @@ if ('serviceWorker' in navigator) {
 (function(){
   'use strict';
   var PAY = 'https://gyaanpe-pay.mahapatraswapnajit.workers.dev';
-  var KEY = 'gp_codes';
+  var KEY = 'gp_access_codes';   /* NOT 'gp_codes' - buy.html uses that name on the same origin */
   var HOUR = 3600000, DAY = 86400000;
   var TTL = 12 * HOUR;   /* background re-check after this */
   var GRACE = 7 * DAY;   /* offline, a past success keeps working this long */
 
   function now(){ return Date.now(); }
-  function all(){ try{ return JSON.parse(localStorage.getItem(KEY) || '[]') || []; }catch(e){ return []; } }
+  function all(){ try{ var a = JSON.parse(localStorage.getItem(KEY) || '[]') || []; return a.filter(function(x){ return x && x.code && x.kind; }); }catch(e){ return []; } }
   function save(a){ try{ localStorage.setItem(KEY, JSON.stringify(a)); }catch(e){} }
   function log(){ try{ console.log.apply(console, ['[GP-Code]'].concat([].slice.call(arguments))); }catch(e){} }
 

@@ -1036,8 +1036,20 @@ function gpcSyncDown(id, cb){
       cb && cb();
     }).catch(function(){ cb && cb(); });
 }
+/* Remembers whether the store was the screen we came from, so Back can
+   return there instead of dropping the user on the home screen. */
+var gpcFromStore = false;
+
 function gpcOpen(id){
   gpcId = id; gpcView = 'detail';
+  /* #screenStore and #screenCourse share z-index 99998 and the store sits
+     later in the DOM, so it paints on top. Without hiding it, tapping a
+     course card looked like nothing happened at all. */
+  try{
+    var st = document.getElementById('screenStore');
+    gpcFromStore = !!(st && st.classList.contains('gp-show'));
+    if(gpcFromStore) st.classList.remove('gp-show');
+  }catch(e){ gpcFromStore = false; }
   document.getElementById('screenCourse').classList.add('gp-show');
   document.getElementById('gpcBody').innerHTML = '<div class="gpc-load">Course load ho raha hai...</div>';
   if(gpcCourse && gpcCourse.id === id){ gpcSyncDown(id, gpcRender); return; }
@@ -1055,6 +1067,10 @@ function gpcOpen(id){
 function gpcBack(){
   if(gpcView==='lesson'||gpcView==='cert'||gpcView==='quiz'||gpcView==='result'){ gpcView='days'; gpcRender(); return; }
   document.getElementById('screenCourse').classList.remove('gp-show');
+  if(gpcFromStore){
+    try{ document.getElementById('screenStore').classList.add('gp-show'); }catch(e){}
+    gpcFromStore = false;
+  }
 }
 function gpcOwned(id, s){
   if(!s || !s.owned) return false;

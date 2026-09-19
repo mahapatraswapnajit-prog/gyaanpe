@@ -211,17 +211,18 @@
     busy(true); say('Payment khul raha hai…');
     post('/order', { product:p }).then(function(o){
       if (!o.ok) throw new Error(o.error || 'order');
+      var lastFail = '';
       var rz = new Razorpay({
         key:o.keyId, amount:o.amount, currency:'INR', order_id:o.orderId,
         name:'GyaanPe', description:label(p), theme:{ color:'#FF6F00' },
         handler:function(r){
           confirmPay({ orderId:r.razorpay_order_id, paymentId:r.razorpay_payment_id, signature:r.razorpay_signature });
         },
-        modal:{ ondismiss:function(){ busy(false); say('Payment band kar diya gaya. Jab chahein dobara try karein.'); } }
+        modal:{ ondismiss:function(){ busy(false); say(lastFail ? 'Payment nahi hua' + lastFail + '. Paisa kata ho to 5-7 din mein wapas aa jata hai.' : 'Payment band kar diya gaya. Jab chahein dobara try karein.', !!lastFail); } }
       });
+      // Window khuli rehti hai aur user dobara try kar sakta hai — message sirf band hone pe
       rz.on('payment.failed', function(e){
-        busy(false);
-        say('Payment fail hua' + (e && e.error && e.error.description ? ': ' + e.error.description : '') + '. Paisa kata ho to 5-7 din mein wapas aa jata hai.', true);
+        lastFail = (e && e.error && e.error.description) ? ': ' + e.error.description : ' ';
       });
       rz.open();
     }).catch(function(){

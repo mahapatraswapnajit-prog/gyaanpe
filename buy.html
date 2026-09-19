@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>GyaanPe — Premium aur Courses kharidein</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<style>
+  :root{
+    --navy:#1A237E; --orange:#FF6F00; --cream:#FFF9F0; --paper:#FFFFFF;
+    --ink:#23233A; --muted:#6B6A7B; --line:#EADFCF; --green:#1E8E5A; --red:#C62828;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{
+    background:var(--cream); color:var(--ink);
+    font-family:'Nunito',system-ui,-apple-system,'Segoe UI',sans-serif;
+    font-size:17px; line-height:1.5;
+    padding:env(safe-area-inset-top,0) 0 env(safe-area-inset-bottom,0);
+  }
+  main{max-width:480px; margin:0 auto; padding:32px 20px 48px}
+  .brand{font-family:'Anton',Impact,'Arial Narrow',sans-serif; font-size:44px; line-height:1; margin:0; letter-spacing:.5px; text-align:center}
+  .brand .g{color:var(--navy)} .brand .p{color:var(--orange)}
+  .intro{text-align:center; color:var(--muted); margin:10px 0 28px}
+
+  fieldset{border:0; margin:0; padding:0}
+  legend{font-weight:800; font-size:19px; margin-bottom:12px; padding:0}
+  .plan{
+    display:grid; grid-template-columns:auto 1fr auto; gap:4px 14px; align-items:center;
+    background:var(--paper); border:2px solid var(--line); border-radius:14px;
+    padding:14px 16px; margin-bottom:10px; cursor:pointer;
+  }
+  .plan input{width:20px; height:20px; accent-color:var(--orange); margin:0; grid-row:span 2}
+  .plan .name{font-weight:800}
+  .plan .price{font-weight:800; font-size:20px; color:var(--navy); grid-row:span 2}
+  .plan .sub{color:var(--muted); font-size:14px; grid-column:2}
+  .plan:has(input:checked){border-color:var(--orange); background:#FFF1DF}
+  .plan:has(input:focus-visible){outline:3px solid var(--navy); outline-offset:2px}
+  select{
+    grid-column:2 / 4; margin-top:10px; width:100%; font:inherit; font-size:16px;
+    padding:10px 12px; border:2px solid var(--line); border-radius:10px; background:var(--paper); color:var(--ink);
+  }
+  select:disabled{opacity:.5}
+
+  .pay{
+    display:block; width:100%; margin-top:18px; padding:16px; border:0; border-radius:14px;
+    background:var(--orange); color:#fff; font:inherit; font-weight:800; font-size:19px; cursor:pointer;
+  }
+  .pay:disabled{opacity:.6; cursor:wait}
+  .pay:focus-visible,.btn:focus-visible{outline:3px solid var(--navy); outline-offset:3px}
+  .fine{color:var(--muted); font-size:14px; margin:14px 0 0}
+  .msg{margin-top:14px; font-weight:700; min-height:1.5em}
+  .msg.err{color:var(--red)}
+
+  .result{margin-top:8px; text-align:center}
+  .result h2{font-size:22px; margin:0 0 6px; color:var(--green)}
+  .ticket{
+    margin:18px 0; padding:22px 12px; background:var(--paper);
+    border:3px dashed var(--orange); border-radius:16px;
+  }
+  .code{
+    font-family:'Anton',Impact,'Arial Narrow',sans-serif; font-size:40px; letter-spacing:3px;
+    color:var(--navy); user-select:all; word-break:break-all;
+  }
+  .what{color:var(--muted); margin-top:6px; font-size:15px}
+  .row{display:flex; gap:10px; flex-wrap:wrap}
+  .btn{
+    flex:1 1 140px; padding:13px; border-radius:12px; font:inherit; font-weight:800; font-size:16px;
+    cursor:pointer; text-decoration:none; text-align:center; border:2px solid var(--navy); color:var(--navy); background:var(--paper);
+  }
+  .btn.wa{background:#1FA855; border-color:#1FA855; color:#fff}
+  .how{text-align:left; background:var(--paper); border-radius:14px; padding:14px 18px; margin-top:18px; border:1px solid var(--line)}
+  .how ol{margin:6px 0 0; padding-left:20px}
+  .history{margin-top:34px}
+  .history h3{font-size:16px; margin:0 0 8px}
+  .history li{font-size:15px; margin-bottom:4px}
+  .history code{font-weight:800; color:var(--navy); font-family:inherit; letter-spacing:1px}
+  [hidden]{display:none !important}
+  @media (prefers-reduced-motion:no-preference){
+    .ticket{animation:pop .35s ease-out}
+    @keyframes pop{from{transform:scale(.94);opacity:0}to{transform:none;opacity:1}}
+  }
+</style>
+</head>
+<body>
+<main>
+  <h1 class="brand"><span class="g">Gyaan</span><span class="p">Pe</span></h1>
+  <p class="intro">Payment ke baad ek unlock code milega. Use GyaanPe app mein daalte hi content khul jayega.</p>
+
+  <section id="buy">
+    <fieldset>
+      <legend>Kya kharidna hai?</legend>
+
+      <label class="plan">
+        <input type="radio" name="plan" value="premium_30" checked>
+        <span class="name">Premium, 30 din</span>
+        <span class="price">₹199</span>
+        <span class="sub">Saare features aur zyada AI tutor</span>
+      </label>
+
+      <label class="plan">
+        <input type="radio" name="plan" value="premium_365">
+        <span class="name">Premium, 1 saal</span>
+        <span class="price">₹1,499</span>
+        <span class="sub">Poore saal ka Premium</span>
+      </label>
+
+      <label class="plan">
+        <input type="radio" name="plan" value="course">
+        <span class="name">Ek 30-din ka course</span>
+        <span class="price">₹99</span>
+        <span class="sub">Hamesha ke liye khula rahega</span>
+        <select id="course" aria-label="Course chuniye" disabled></select>
+      </label>
+    </fieldset>
+
+    <button class="pay" id="payBtn" type="button">₹199 pay karein</button>
+    <p class="fine">Ek code 3 phone/tablet pe chalta hai. Premium ke din code pehli baar daalne se ginne shuru hote hain.</p>
+    <p class="msg" id="msg" role="status" aria-live="polite"></p>
+  </section>
+
+  <section class="result" id="result" hidden>
+    <h2>Payment ho gaya</h2>
+    <p>Aapka unlock code:</p>
+    <div class="ticket">
+      <div class="code" id="codeText"></div>
+      <div class="what" id="codeWhat"></div>
+    </div>
+    <div class="row">
+      <button class="btn" id="copyBtn" type="button">Code copy karein</button>
+      <a class="btn wa" id="waBtn" target="_blank" rel="noopener">WhatsApp pe bhejein</a>
+    </div>
+    <div class="how">
+      <strong>Code kaise use karein</strong>
+      <ol>
+        <li>GyaanPe app kholiye.</li>
+        <li>"Code se unlock karein" mein ye code daaliye.</li>
+      </ol>
+    </div>
+    <p class="fine">Code sambhaal ke rakhiye. Ise WhatsApp pe khud ko bhej dena sabse aasaan hai.</p>
+    <button class="pay" id="againBtn" type="button">Kuch aur kharidein</button>
+  </section>
+
+  <section class="history" id="history" hidden>
+    <h3>Is phone se kharide gaye codes</h3>
+    <ul id="historyList"></ul>
+  </section>
+</main>
+
+<script>
+(function(){
+  var W = 'https://gyaanpe-pay.mahapatraswapnajit.workers.dev';
+
+  var COURSES = [
+    ['maths30','Maths'],['english30','English'],['hindi30','Hindi'],['science30','Science'],
+    ['gk30','General Knowledge'],['vedic30','Vedic Maths'],['logic30','Logic'],['coding30','Coding'],
+    ['computer30','Computer'],['ailab30','AI Lab'],['speaking30','Speaking'],['money30','Money'],
+    ['space30','Space'],['body30','Human Body'],['dino30','Dinosaurs'],['ocean30','Ocean'],
+    ['nature30','Nature'],['env30','Environment'],['geo30','Geography'],['ancient30','Ancient History'],
+    ['freedom30','Freedom Struggle'],['chess30','Chess'],['art30','Art'],['creative30','Creative Writing'],
+    ['music30','Music'],['health30','Health'],['manners30','Manners'],['study30','Study Skills']
+  ];
+  var PRICES = { premium_30:199, premium_365:1499, course:99 };
+
+  var $ = function(id){ return document.getElementById(id); };
+  var sel = $('course'), payBtn = $('payBtn'), msg = $('msg');
+
+  COURSES.forEach(function(c){
+    var o = document.createElement('option'); o.value = c[0]; o.textContent = c[1]; sel.appendChild(o);
+  });
+
+  function plan(){ return document.querySelector('input[name=plan]:checked').value; }
+  function productKey(){ return plan() === 'course' ? 'course_' + sel.value : plan(); }
+  function courseName(id){ for (var i=0;i<COURSES.length;i++) if (COURSES[i][0]===id) return COURSES[i][1]; return id; }
+  function label(p){
+    if (p === 'premium_30') return 'GyaanPe Premium, 30 din';
+    if (p === 'premium_365') return 'GyaanPe Premium, 1 saal';
+    if (p && p.indexOf('course_') === 0) return 'Course: ' + courseName(p.slice(7));
+    return p;
+  }
+
+  function refresh(){
+    sel.disabled = plan() !== 'course';
+    payBtn.textContent = '₹' + PRICES[plan()].toLocaleString('en-IN') + ' pay karein';
+  }
+  document.querySelectorAll('input[name=plan]').forEach(function(r){ r.addEventListener('change', refresh); });
+  refresh();
+
+  function say(t, isErr){ msg.textContent = t || ''; msg.className = 'msg' + (isErr ? ' err' : ''); }
+  function busy(b){ payBtn.disabled = b; }
+
+  // ---- storage (safe) ----
+  function load(k, d){ try { var v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch(e){ return d; } }
+  function save(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){} }
+  function drop(k){ try { localStorage.removeItem(k); } catch(e){} }
+
+  function post(path, body){
+    return fetch(W + path, {
+      method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body)
+    }).then(function(r){ return r.json(); });
+  }
+
+  // ---- pay ----
+  payBtn.addEventListener('click', function(){
+    if (typeof Razorpay === 'undefined') { say('Payment system load nahi hua. Internet check karke page refresh karein.', true); return; }
+    var p = productKey();
+    busy(true); say('Payment khul raha hai…');
+    post('/order', { product:p }).then(function(o){
+      if (!o.ok) throw new Error(o.error || 'order');
+      var rz = new Razorpay({
+        key:o.keyId, amount:o.amount, currency:'INR', order_id:o.orderId,
+        name:'GyaanPe', description:label(p), theme:{ color:'#FF6F00' },
+        handler:function(r){
+          confirmPay({ orderId:r.razorpay_order_id, paymentId:r.razorpay_payment_id, signature:r.razorpay_signature });
+        },
+        modal:{ ondismiss:function(){ busy(false); say('Payment band kar diya gaya. Jab chahein dobara try karein.'); } }
+      });
+      rz.on('payment.failed', function(e){
+        busy(false);
+        say('Payment fail hua' + (e && e.error && e.error.description ? ': ' + e.error.description : '') + '. Paisa kata ho to 5-7 din mein wapas aa jata hai.', true);
+      });
+      rz.open();
+    }).catch(function(){
+      busy(false); say('Abhi payment shuru nahi ho paaya. Thodi der mein dobara try karein.', true);
+    });
+  });
+
+  // ---- confirm (retries; worker is idempotent) ----
+  function confirmPay(p, tries){
+    tries = tries || 0;
+    save('gp_pending', p);
+    busy(true); say('Payment check ho raha hai, code ban raha hai…');
+    post('/confirm', p).then(function(res){
+      if (res.ok) { drop('gp_pending'); showCode(res); return; }
+      busy(false);
+      say('Code nahi ban paaya (' + res.error + '). Payment ID ' + p.paymentId + ' ke saath humein WhatsApp karein.', true);
+    }).catch(function(){
+      if (tries < 3) { setTimeout(function(){ confirmPay(p, tries + 1); }, 2000); return; }
+      busy(false);
+      say('Payment ho gaya hai, par internet ki wajah se code nahi aaya. Page refresh karein, code apne aap aa jayega.', true);
+    });
+  }
+
+  function showCode(res){
+    var what = label(res.product);
+    what += res.kind === 'premium' ? ' (din pehli baar use karne se ginenge)' : ' (hamesha ke liye)';
+    $('codeText').textContent = res.code;
+    $('codeWhat').textContent = what;
+    var text = 'Mera GyaanPe unlock code: ' + res.code + '\n' + label(res.product) + '\nGyaanPe app mein "Code se unlock karein" mein daalein.';
+    $('waBtn').href = 'https://wa.me/?text=' + encodeURIComponent(text);
+
+    var h = load('gp_codes', []);
+    if (!h.some(function(x){ return x.code === res.code; })) {
+      h.unshift({ code:res.code, product:res.product, ts:Date.now() });
+      save('gp_codes', h.slice(0, 20));
+    }
+    renderHistory();
+    $('buy').hidden = true; $('result').hidden = false; say('');
+    window.scrollTo(0, 0);
+  }
+
+  $('copyBtn').addEventListener('click', function(){
+    var c = $('codeText').textContent, b = this;
+    function done(){ b.textContent = 'Copy ho gaya'; setTimeout(function(){ b.textContent = 'Code copy karein'; }, 2000); }
+    if (navigator.clipboard) navigator.clipboard.writeText(c).then(done, function(){ b.textContent = 'Code ko dabake copy karein'; });
+    else b.textContent = 'Code ko dabake copy karein';
+  });
+
+  $('againBtn').addEventListener('click', function(){
+    $('result').hidden = true; $('buy').hidden = false; busy(false); say('');
+  });
+
+  function renderHistory(){
+    var h = load('gp_codes', []), ul = $('historyList');
+    ul.innerHTML = '';
+    h.forEach(function(x){
+      var li = document.createElement('li'), c = document.createElement('code');
+      c.textContent = x.code;
+      li.appendChild(c);
+      li.appendChild(document.createTextNode(' ' + label(x.product) + ', ' + new Date(x.ts).toLocaleDateString('en-IN')));
+      ul.appendChild(li);
+    });
+    $('history').hidden = h.length === 0;
+  }
+  renderHistory();
+
+  // Payment ho gaya tha par code nahi aaya — refresh pe dobara try
+  var pending = load('gp_pending', null);
+  if (pending && pending.paymentId) confirmPay(pending);
+})();
+</script>
+</body>
+</html>

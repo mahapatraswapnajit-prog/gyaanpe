@@ -15550,6 +15550,25 @@ if ('serviceWorker' in navigator) {
 
   function now(){ return Date.now(); }
   function all(){ try{ var a = JSON.parse(localStorage.getItem(KEY) || '[]') || []; return a.filter(function(x){ return x && x.code && x.kind; }); }catch(e){ return []; } }
+  /* One-time migration: an older build stored app-redeemed codes under 'gp_codes'
+     (the same name buy.html uses for its purchase history). Move entries that have
+     a `kind` (redeemed in the app) to KEY; leave buy.html's history alone. */
+  (function migrate(){
+    try{
+      var oldArr = JSON.parse(localStorage.getItem('gp_codes') || '[]') || [];
+      var mine = oldArr.filter(function(x){ return x && x.code && x.kind; });
+      if (!mine.length) return;
+      var cur = JSON.parse(localStorage.getItem(KEY) || '[]') || [];
+      mine.forEach(function(x){
+        if (cur.some(function(y){ return y && y.code === x.code; })) return;
+        var y = { code:x.code, kind:x.kind, product:x.product, courseId:x.courseId || null, expiresAt:x.expiresAt || null, at:x.at || 0 };
+        cur.push(y);   /* no `bad` copied: it is re-checked with the server on load */
+      });
+      localStorage.setItem(KEY, JSON.stringify(cur.slice(0, 30)));
+      var rest = oldArr.filter(function(x){ return !(x && x.kind); }).map(function(x){ return { code:x.code, product:x.product, ts:x.ts }; });
+      localStorage.setItem('gp_codes', JSON.stringify(rest));
+    }catch(e){}
+  })();
   function save(a){ try{ localStorage.setItem(KEY, JSON.stringify(a)); }catch(e){} }
   function log(){ try{ console.log.apply(console, ['[GP-Code]'].concat([].slice.call(arguments))); }catch(e){} }
 

@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>GyaanPe Teacher Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<style>
+  :root{--navy:#1A237E;--orange:#FF6F00;--cream:#FFF9F0;--ink:#23233A;--muted:#6B6A7B;--line:#EADFCF;--green:#1E8E5A;--red:#C62828;--amber:#B26A00}
+  *{box-sizing:border-box} html,body{margin:0}
+  body{background:var(--cream);color:var(--ink);font-family:'Nunito',system-ui,-apple-system,'Segoe UI',sans-serif;font-size:16px;line-height:1.5;
+       padding:env(safe-area-inset-top,0) 0 env(safe-area-inset-bottom,0)}
+  main{max-width:1040px;margin:0 auto;padding:20px 16px 48px}
+  header{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+  .brand{font-family:'Anton',Impact,'Arial Narrow',sans-serif;font-size:32px;line-height:1;text-decoration:none}
+  .brand .g{color:var(--navy)} .brand .p{color:var(--orange)} .brand small{font-family:'Nunito',sans-serif;font-size:14px;color:var(--muted);font-weight:800;margin-left:8px;letter-spacing:0}
+  .who{display:flex;align-items:center;gap:10px;font-size:14px;color:var(--muted);font-weight:700}
+  h1{font-size:26px;margin:0 0 4px;color:var(--navy);line-height:1.2}
+  h2{font-size:18px;margin:26px 0 10px;color:var(--navy)}
+  .sub{color:var(--muted);margin:0 0 16px}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:0;border-radius:12px;padding:11px 18px;font:inherit;font-weight:800;font-size:15px;cursor:pointer;background:var(--orange);color:#fff;text-decoration:none}
+  .btn.sec{background:#fff;color:var(--navy);border:2px solid var(--navy)}
+  .btn.ghost{background:transparent;color:var(--muted);border:2px solid var(--line)}
+  .btn.danger{background:#fff;color:var(--red);border:2px solid #F2C9C9}
+  .btn.wa{background:#1FA855}
+  .btn:disabled{opacity:.55;cursor:wait}
+  .btn:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,tr[tabindex]:focus-visible{outline:3px solid var(--navy);outline-offset:2px}
+  .card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px}
+  .center{max-width:460px;margin:40px auto;text-align:center}
+  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+  .stat{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px}
+  .stat .n{font-family:'Anton',Impact,sans-serif;font-size:30px;color:var(--navy);line-height:1.1}
+  .stat .l{color:var(--muted);font-size:13px;font-weight:800}
+  .classes{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
+  .cls{background:#fff;border:2px solid var(--line);border-radius:16px;padding:16px;cursor:pointer;text-align:left;font:inherit;color:inherit}
+  .cls:hover{border-color:var(--orange)}
+  .cls b{display:block;font-size:18px;color:var(--navy)} .cls span{display:block;color:var(--muted);font-size:14px}
+  .code{font-family:'Anton',Impact,sans-serif;letter-spacing:3px;color:var(--orange);font-size:20px}
+  label{display:block;font-weight:800;font-size:14px;margin:12px 0 4px}
+  input[type=text],select{width:100%;font:inherit;font-size:16px;padding:10px 12px;border:2px solid var(--line);border-radius:10px;background:#fff;color:var(--ink)}
+  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  .msg{min-height:1.3em;font-weight:700;font-size:14px;margin-top:8px}
+  .msg.err{color:var(--red)} .msg.ok{color:var(--green)}
+  .wrap{overflow-x:auto;background:#fff;border:1px solid var(--line);border-radius:14px}
+  table{border-collapse:collapse;width:100%;font-size:14px;min-width:760px}
+  th,td{padding:10px;text-align:right;border-bottom:1px solid #F3EADB;white-space:nowrap}
+  th:first-child,td:first-child{text-align:left}
+  th{background:#FBF4E8;color:var(--navy);font-size:12.5px;position:sticky;top:0}
+  tbody tr{cursor:pointer} tbody tr:hover{background:#FFF6EA}
+  .pill{display:inline-block;border-radius:999px;padding:2px 10px;font-size:12.5px;font-weight:800}
+  .p-good{background:#E3F4EA;color:var(--green)} .p-mid{background:#FFF1D6;color:var(--amber)} .p-low{background:#FDE5E5;color:var(--red)} .p-none{background:#EEE;color:#777}
+  .list{list-style:none;margin:0;padding:0}
+  .list li{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #F3EADB}
+  .list li .pill{flex:0 0 auto}
+  .list li:last-child{border-bottom:0}
+  .muted{color:var(--muted);font-size:14px}
+  .grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px}
+  .bars{display:flex;align-items:flex-end;gap:6px;height:90px;margin-top:8px}
+  .bars div{flex:1;background:var(--orange);border-radius:6px 6px 0 0;min-height:3px;position:relative}
+  .bars span{position:absolute;bottom:-20px;left:0;right:0;text-align:center;font-size:11px;color:var(--muted)}
+  .ov{position:fixed;inset:0;background:rgba(10,14,40,.55);display:none;align-items:flex-start;justify-content:center;padding:24px 14px;overflow:auto;z-index:50}
+  .ov.show{display:flex}
+  .ov .card{width:100%;max-width:640px}
+  [hidden]{display:none !important}
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <a class="brand" href="./"><span class="g">Gyaan</span><span class="p">Pe</span><small>Teacher Dashboard</small></a>
+    <div class="who" id="who" hidden><span id="whoName"></span><button class="btn ghost" id="signOut" type="button">Sign out</button></div>
+  </header>
+
+  <!-- setup missing -->
+  <section id="vSetup" class="card center" hidden>
+    <h1>Setup baaki hai</h1>
+    <p class="sub">teacher.html ke andar Firebase ka <b>apiKey</b> aur <b>appId</b> daalna hai (CONFIG section).</p>
+  </section>
+
+  <!-- sign in -->
+  <section id="vSignin" class="card center" hidden>
+    <h1>Teachers ke liye GyaanPe</h1>
+    <p class="sub">Apni class banaiye, parents ko code bhejiye, aur dekhiye bachche kya padh rahe hain, kahan atak rahe hain aur kaun 3 din se nahi aaya.</p>
+    <button class="btn" id="signIn" type="button">Google se sign in karein</button>
+    <p class="msg err" id="signMsg" role="status" aria-live="polite"></p>
+  </section>
+
+  <!-- classes -->
+  <section id="vHome" hidden>
+    <h1>Meri classes</h1>
+    <p class="sub">Class pe click karke bachchon ki progress dekhiye.</p>
+    <div class="classes" id="classList"></div>
+    <h2>Nayi class banayein</h2>
+    <div class="card">
+      <div class="grid2">
+        <div><label for="newName">Class ka naam</label><input type="text" id="newName" maxlength="40" placeholder="Jaise Class 3 A"></div>
+        <div><label for="newSchool">School ka naam</label><input type="text" id="newSchool" maxlength="60" placeholder="Jaise Carmel English Medium School"></div>
+      </div>
+      <div class="row" style="margin-top:14px"><button class="btn" id="createBtn" type="button">Class banayein</button></div>
+      <p class="msg" id="createMsg" role="status" aria-live="polite"></p>
+    </div>
+  </section>
+
+  <!-- one class -->
+  <section id="vClass" hidden>
+    <div class="row" style="justify-content:space-between">
+      <button class="btn ghost" id="backBtn" type="button">&#8592; Saari classes</button>
+      <button class="btn ghost" id="refreshBtn" type="button">Refresh</button>
+    </div>
+    <h1 id="cTitle" style="margin-top:14px"></h1>
+    <p class="sub" id="cSub"></p>
+
+    <div class="card">
+      <div class="row" style="justify-content:space-between">
+        <div><div class="muted">Class code</div><div class="code" id="cCode"></div></div>
+        <div class="row">
+          <a class="btn wa" id="waShare" target="_blank" rel="noopener">Parents ko WhatsApp karein</a>
+          <button class="btn sec" id="copyLink" type="button">Link copy karein</button>
+        </div>
+      </div>
+      <p class="muted" style="margin:10px 0 0">Parents link kholein, ya GyaanPe app mein <b>Parent Dashboard &#8594; Class se judein</b> mein yeh code daalein.</p>
+    </div>
+
+    <h2>Overview</h2>
+    <div class="cards" id="cStats"></div>
+
+    <div class="grid2" style="margin-top:12px">
+      <div class="card"><h2 style="margin-top:0">Class ke weak topics</h2><ul class="list" id="cWeak"></ul></div>
+      <div class="card"><h2 style="margin-top:0">3+ din se nahi aaye</h2><ul class="list" id="cInactive"></ul></div>
+    </div>
+
+    <h2>Bachche</h2>
+    <div class="row" style="margin-bottom:10px">
+      <label for="sortBy" style="margin:0">Sort:</label>
+      <select id="sortBy" style="width:auto">
+        <option value="name">Naam</option>
+        <option value="last">Last active</option>
+        <option value="acc">Accuracy (kam pehle)</option>
+        <option value="mins">Is hafte ka time</option>
+        <option value="xp">XP</option>
+      </select>
+    </div>
+    <div class="wrap"><table>
+      <thead><tr><th>Naam</th><th>Last active</th><th>Streak</th><th>Accuracy</th><th>Questions</th><th>Min (7 din)</th><th>Chapters done</th><th>XP</th></tr></thead>
+      <tbody id="cRows"></tbody>
+    </table></div>
+    <p class="muted">Kisi bachche pe click karke subject-wise detail dekhiye.</p>
+
+    <div class="row" style="margin-top:28px"><button class="btn danger" id="delClass" type="button">Class delete karein</button></div>
+  </section>
+</main>
+
+<div class="ov" id="ov" role="dialog" aria-modal="true" aria-labelledby="sName"><div class="card" id="ovBox"></div></div>
+
+<script>
+/* ===== CONFIG: Firebase Console > Project settings > Your apps > Web app ===== */
+var CONFIG = {
+  apiKey: "AIzaSyDy7Cip2itCD8gsQIuk-fHjQkGQDzTxdPc",
+  authDomain: "zapzone-98727.firebaseapp.com",
+  databaseURL: "https://zapzone-98727-default-rtdb.firebaseio.com",
+  projectId: "zapzone-98727",
+  storageBucket: "zapzone-98727.firebasestorage.app",
+  messagingSenderId: "884845281907",
+  appId: "1:884845281907:web:6be3cd071feb6a058f2006"
+};
+/* ========================================================================== */
+
+(function(){
+  'use strict';
+  var $ = function(id){ return document.getElementById(id); };
+  function esc(t){ return String(t==null?'':t).replace(/[&<>"']/g,function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+  function show(id){ ['vSetup','vSignin','vHome','vClass'].forEach(function(v){ $(v).hidden = (v!==id); }); window.scrollTo(0,0); }
+  var ALPHA = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  var DAY = 86400000;
+
+  if (!window.firebase || CONFIG.apiKey.indexOf('PASTE') === 0) { show('vSetup'); return; }
+  firebase.initializeApp(CONFIG);
+  var auth = firebase.auth(), db = firebase.database();
+  var me = null, cur = null, students = {};
+
+  /* ---------- auth ---------- */
+  $('signIn').onclick = function(){
+    var p = new firebase.auth.GoogleAuthProvider();
+    $('signMsg').textContent = '';
+    auth.signInWithPopup(p).catch(function(e){
+      if (e && (e.code === 'auth/popup-blocked' || e.code === 'auth/operation-not-supported-in-this-environment')) return auth.signInWithRedirect(p);
+      $('signMsg').textContent = 'Sign in nahi ho paaya. ' + (e && e.code === 'auth/unauthorized-domain' ? 'Is website ko Firebase ke Authorized domains mein jodna hai.' : 'Dobara try karein.');
+    });
+  };
+  $('signOut').onclick = function(){ auth.signOut(); };
+  auth.onAuthStateChanged(function(u){
+    me = u;
+    $('who').hidden = !u;
+    if (!u) { show('vSignin'); return; }
+    $('whoName').textContent = u.displayName || u.email || '';
+    db.ref('gyaanpeTeachers/'+u.uid+'/name').set(u.displayName || '').catch(function(){});
+    loadClasses();
+  });
+
+  /* ---------- classes ---------- */
+  function loadClasses(){
+    show('vHome');
+    $('classList').innerHTML = '<p class="muted">Loading…</p>';
+    db.ref('gyaanpeTeachers/'+me.uid+'/classes').once('value').then(function(snap){
+      var codes = Object.keys(snap.val() || {});
+      if (!codes.length) { $('classList').innerHTML = '<p class="muted">Abhi koi class nahi hai. Neeche pehli class banaiye.</p>'; return; }
+      return Promise.all(codes.map(function(c){
+        return Promise.all([
+          db.ref('gyaanpeClasses/'+c+'/info').once('value'),
+          db.ref('gyaanpeClasses/'+c+'/students').once('value').catch(function(){ return null; })
+        ]).then(function(r){ return { code:c, info:r[0].val(), n: r[1] ? Object.keys(r[1].val()||{}).length : 0 }; });
+      })).then(function(list){
+        $('classList').innerHTML = list.filter(function(x){ return x.info; }).map(function(x){
+          return '<button class="cls" type="button" data-code="'+esc(x.code)+'"><b>'+esc(x.info.name)+'</b><span>'+esc(x.info.school||'')+'</span><span class="code">'+esc(x.code)+'</span><span>'+x.n+' bachche jude</span></button>';
+        }).join('') || '<p class="muted">Abhi koi class nahi hai.</p>';
+        Array.prototype.forEach.call(document.querySelectorAll('.cls'), function(b){ b.onclick = function(){ openClass(b.getAttribute('data-code')); }; });
+      });
+    }).catch(function(){ $('classList').innerHTML = '<p class="msg err">Classes load nahi hui. Firebase rules check karein.</p>'; });
+  }
+
+  function newCode(){ var b = new Uint8Array(6); crypto.getRandomValues(b); var s=''; for (var i=0;i<6;i++) s += ALPHA[b[i] & 31]; return s; }
+  function createClass(tries){
+    var name = $('newName').value.trim().slice(0,40), school = $('newSchool').value.trim().slice(0,60), m = $('createMsg');
+    if (name.length < 2) { m.className='msg err'; m.textContent='Class ka naam daaliye.'; return; }
+    $('createBtn').disabled = true; m.className='msg'; m.textContent='Ban rahi hai…';
+    var code = newCode();
+    db.ref('gyaanpeClasses/'+code+'/info').once('value').then(function(s){
+      if (s.exists()) { if ((tries||0) < 5) { $('createBtn').disabled=false; return createClass((tries||0)+1); } throw new Error('code'); }
+      return db.ref('gyaanpeClasses/'+code+'/info').set({ name:name, school:school, teacher:(me.displayName||'').slice(0,40), owner:me.uid, created:Date.now() })
+        .then(function(){ return db.ref('gyaanpeTeachers/'+me.uid+'/classes/'+code).set(true); })
+        .then(function(){ $('newName').value=''; $('newSchool').value=''; m.className='msg ok'; m.textContent='Class ban gayi! Code: '+code; openClass(code); });
+    }).catch(function(){ m.className='msg err'; m.textContent='Class nahi ban payi. Firebase rules check karein.'; })
+      .then(function(){ $('createBtn').disabled = false; });
+  }
+  $('createBtn').onclick = function(){ createClass(0); };
+
+  /* ---------- one class ---------- */
+  function joinLink(code){ return 'https://gyaanpe.com/?class=' + code; }
+  function openClass(code){
+    show('vClass');
+    cur = { code:code };
+    $('cTitle').textContent = 'Loading…'; $('cSub').textContent=''; $('cCode').textContent = code;
+    db.ref('gyaanpeClasses/'+code+'/info').once('value').then(function(s){
+      cur.info = s.val() || {};
+      $('cTitle').textContent = cur.info.name || code;
+      $('cSub').textContent = cur.info.school || '';
+      var text = 'Namaste parents! Hamari class "'+(cur.info.name||'')+'" ab GyaanPe app pe hai. Bachche ki padhai ki progress main dekh paungi/paunga.\n\n'
+        + '1) Is link se judein: ' + joinLink(code) + '\n'
+        + '2) Ya GyaanPe app (Google Play pe "GyaanPe") mein Parent Dashboard > Class se judein mein code daalein: ' + code + '\n\n'
+        + 'Sirf bachche ka naam aur padhai ki progress dikhegi, aur aap kabhi bhi class chhod sakte hain.';
+      $('waShare').href = 'https://wa.me/?text=' + encodeURIComponent(text);
+    });
+    loadStudents();
+  }
+  $('backBtn').onclick = function(){ loadClasses(); };
+  $('refreshBtn').onclick = function(){ loadStudents(); };
+  $('copyLink').onclick = function(){
+    var b = this, l = joinLink(cur.code);
+    if (navigator.clipboard) navigator.clipboard.writeText(l).then(function(){ b.textContent='Copy ho gaya'; setTimeout(function(){ b.textContent='Link copy karein'; }, 2000); });
+    else prompt('Link copy karein:', l);
+  };
+  $('sortBy').onchange = function(){ renderRows(); };
+
+  function loadStudents(){
+    $('cRows').innerHTML = '<tr><td colspan="8" class="muted">Loading…</td></tr>';
+    db.ref('gyaanpeClasses/'+cur.code+'/students').once('value').then(function(s){
+      students = s.val() || {}; render();
+    }).catch(function(){ $('cRows').innerHTML = '<tr><td colspan="8" class="msg err">Data load nahi hua.</td></tr>'; });
+  }
+
+  function arr(x){ return Array.isArray(x) ? x : (x && typeof x === 'object' ? Object.keys(x).sort(function(a,b){return a-b;}).map(function(k){ return x[k]; }) : []); }
+  function sum(a){ return arr(a).reduce(function(t,v){ return t + (+v||0); }, 0); }
+  function chDone(st){ return arr(st.sb).reduce(function(t,x){ return t + (+(x&&x.d)||0); }, 0); }
+  function ago(ts){
+    if (!ts) return '—';
+    var d = Math.floor((Date.now() - ts) / DAY);
+    if (d <= 0) return 'Aaj'; if (d === 1) return 'Kal'; return d + ' din pehle';
+  }
+  function accPill(a, att){
+    if (!att) return '<span class="pill p-none">—</span>';
+    var c = a >= 75 ? 'p-good' : (a >= 50 ? 'p-mid' : 'p-low');
+    return '<span class="pill '+c+'">'+a+'%</span>';
+  }
+  function subj(s){
+    s = String(s||'');
+    var m = s.match(/^c(\d)(.*)$/), cls = m ? 'Class '+m[1]+' ' : '', k = (m ? m[2] : s).toLowerCase();
+    var map = { maths:'Maths', math:'Maths', eng:'English', english:'English', hin:'Hindi', hindi:'Hindi', evs:'EVS', sci:'Science', science:'Science',
+                sst:'Social Science', social:'Social Science', gk:'GK', comp:'Computer', computer:'Computer', art:'Art', poetry:'Poetry' };
+    return cls + (map[k] || (k.charAt(0).toUpperCase() + k.slice(1)));
+  }
+
+  function render(){
+    var ids = Object.keys(students), list = ids.map(function(k){ return students[k]; });
+    var now = Date.now();
+    var today = list.filter(function(s){ return now - (s.last||0) < DAY; }).length;
+    var week = list.filter(function(s){ return now - (s.last||0) < 7*DAY; }).length;
+    var withQ = list.filter(function(s){ return s.att > 0; });
+    var avgAcc = withQ.length ? Math.round(withQ.reduce(function(t,s){ return t + (+s.acc||0); }, 0) / withQ.length) : 0;
+    var avgMin = list.length ? Math.round(list.reduce(function(t,s){ return t + sum(s.m7); }, 0) / list.length / 7) : 0;
+    var qs = list.reduce(function(t,s){ return t + (+s.att||0); }, 0);
+    function stat(n,l){ return '<div class="stat"><div class="n">'+n+'</div><div class="l">'+l+'</div></div>'; }
+    $('cStats').innerHTML = stat(list.length,'Bachche jude') + stat(today,'Aaj active') + stat(week,'7 din mein active')
+      + stat(withQ.length ? avgAcc+'%' : '—','Average accuracy') + stat(avgMin,'Avg min / din') + stat(qs,'Questions solved');
+
+    /* weak topics across the class */
+    var agg = {};
+    list.forEach(function(s){ arr(s.w).forEach(function(t){ if(!t) return; var k = t.s+'|'+t.n; if(!agg[k]) agg[k] = { s:t.s, n:t.n, c:0, a:0 }; agg[k].c++; agg[k].a += (+t.a||0); }); });
+    var weak = Object.keys(agg).map(function(k){ var x = agg[k]; x.avg = Math.round(x.a / x.c); return x; })
+      .sort(function(a,b){ return b.c - a.c || a.avg - b.avg; }).slice(0, 8);
+    $('cWeak').innerHTML = weak.length ? weak.map(function(x){
+      return '<li><span><b>'+esc(x.n)+'</b><br><span class="muted">'+esc(subj(x.s))+'</span></span><span style="text-align:right"><b>'+x.c+' bachche</b><br><span class="muted">avg '+x.avg+'%</span></span></li>';
+    }).join('') : '<li class="muted">Abhi kaafi data nahi hai. Bachche quiz karenge to yahan dikhega.</li>';
+
+    var inact = list.filter(function(s){ return now - (s.last||0) >= 3*DAY; }).sort(function(a,b){ return (a.last||0) - (b.last||0); });
+    $('cInactive').innerHTML = inact.length ? inact.map(function(s){
+      return '<li><span>'+esc(s.n)+'</span><span class="muted">'+ago(s.last)+'</span></li>';
+    }).join('') : '<li class="muted">Sab bachche pichhle 3 din mein aaye hain. &#127881;</li>';
+
+    renderRows();
+  }
+
+  function renderRows(){
+    var by = $('sortBy').value;
+    var ids = Object.keys(students).sort(function(a,b){
+      var x = students[a], y = students[b];
+      if (by === 'last') return (y.last||0) - (x.last||0);
+      if (by === 'acc') return ((x.att?x.acc:999) - (y.att?y.acc:999));
+      if (by === 'mins') return sum(y.m7) - sum(x.m7);
+      if (by === 'xp') return (y.xp||0) - (x.xp||0);
+      return String(x.n||'').localeCompare(String(y.n||''));
+    });
+    $('cRows').innerHTML = ids.length ? ids.map(function(id){
+      var s = students[id];
+      return '<tr tabindex="0" data-id="'+esc(id)+'"><td><b>'+esc(s.n)+'</b></td><td>'+ago(s.last)+'</td><td>'+(+s.st||0)+'</td><td>'+accPill(+s.acc||0, +s.att||0)+'</td><td>'+(+s.att||0)+'</td><td>'+sum(s.m7)+'</td><td>'+chDone(s)+'</td><td>'+(+s.xp||0)+'</td></tr>';
+    }).join('') : '<tr><td colspan="8" class="muted">Abhi koi bachcha nahi juda. Upar se parents ko WhatsApp karein.</td></tr>';
+    Array.prototype.forEach.call(document.querySelectorAll('#cRows tr[data-id]'), function(tr){
+      tr.onclick = function(){ openStudent(tr.getAttribute('data-id')); };
+      tr.onkeydown = function(e){ if (e.key === 'Enter') openStudent(tr.getAttribute('data-id')); };
+    });
+  }
+
+  /* ---------- one student ---------- */
+  function openStudent(id){
+    var s = students[id]; if (!s) return;
+    var m7 = arr(s.m7), mx = Math.max.apply(null, m7.concat([1]));
+    var days = ['Aaj','Kal','2d','3d','4d','5d','6d'];
+    var bars = m7.slice(0,7).map(function(v,i){ return {v:+v||0, l:days[i]}; }).reverse()
+      .map(function(b){ return '<div style="height:'+Math.max(3, Math.round(b.v/mx*90))+'px" title="'+b.v+' min"><span>'+b.l+'</span></div>'; }).join('');
+    var sb = arr(s.sb).map(function(x){ return '<li><span>'+esc(subj(x.s))+'<br><span class="muted">'+(+x.d||0)+'/'+(+x.t||0)+' chapters, '+(+x.q||0)+' questions</span></span>'+accPill(+x.a||0, +x.q||0)+'</li>'; }).join('');
+    var w = arr(s.w).map(function(t){ return '<li><span>'+esc(t.n)+'<br><span class="muted">'+esc(subj(t.s))+'</span></span>'+accPill(+t.a||0,1)+'</li>'; }).join('');
+    var g = arr(s.sg).map(function(t){ return '<li><span>'+esc(t.n)+'<br><span class="muted">'+esc(subj(t.s))+'</span></span>'+accPill(+t.a||0,1)+'</li>'; }).join('');
+    $('ovBox').innerHTML =
+      '<div class="row" style="justify-content:space-between"><h1 id="sName" style="margin:0">'+esc(s.n)+'</h1><button class="btn ghost" id="ovClose" type="button">Band karein</button></div>'+
+      '<p class="muted">Last active: '+ago(s.last)+' &nbsp; Streak: '+(+s.st||0)+' din &nbsp; XP: '+(+s.xp||0)+'</p>'+
+      '<div class="cards"><div class="stat"><div class="n">'+((+s.att||0)?(+s.acc||0)+'%':'—')+'</div><div class="l">Accuracy</div></div><div class="stat"><div class="n">'+(+s.att||0)+'</div><div class="l">Questions</div></div><div class="stat"><div class="n">'+sum(s.m7)+'</div><div class="l">Min, 7 din</div></div></div>'+
+      '<h2>Padhai ka time (7 din)</h2><div class="bars">'+bars+'</div><div style="height:24px"></div>'+
+      '<h2>Subjects</h2><ul class="list">'+(sb || '<li class="muted">Abhi data nahi hai.</li>')+'</ul>'+
+      '<div class="grid2"><div><h2>Weak topics</h2><ul class="list">'+(w || '<li class="muted">Koi weak topic nahi.</li>')+'</ul></div>'+
+      '<div><h2>Strong topics</h2><ul class="list">'+(g || '<li class="muted">Abhi data nahi hai.</li>')+'</ul></div></div>'+
+      '<div class="row" style="margin-top:20px"><button class="btn danger" id="rmStudent" type="button">Class se hatayein</button></div>';
+    $('ov').classList.add('show');
+    $('ovClose').onclick = closeOv; $('ovClose').focus();
+    $('rmStudent').onclick = function(){
+      if (!confirm(s.n + ' ko class se hata dein?')) return;
+      db.ref('gyaanpeClasses/'+cur.code+'/students/'+id).remove().then(function(){ closeOv(); loadStudents(); });
+    };
+  }
+  function closeOv(){ $('ov').classList.remove('show'); }
+  $('ov').onclick = function(e){ if (e.target === $('ov')) closeOv(); };
+  document.addEventListener('keydown', function(e){ if (e.key === 'Escape') closeOv(); });
+
+  $('delClass').onclick = function(){
+    if (!confirm('Poori class aur saare bachchon ka data delete ho jayega. Pakka?')) return;
+    var code = cur.code;
+    db.ref('gyaanpeClasses/'+code).remove()
+      .then(function(){ return db.ref('gyaanpeTeachers/'+me.uid+'/classes/'+code).remove(); })
+      .then(loadClasses)
+      .catch(function(){ alert('Delete nahi ho paaya.'); });
+  };
+})();
+</script>
+</body>
+</html>

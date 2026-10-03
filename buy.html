@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
-<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script src="https://sdk.cashfree.com/js/v3/cashfree.js"></script>
 <style>
   :root{
     --navy:#1A237E; --orange:#FF6F00; --cream:#FFF9F0; --paper:#FFFFFF;
@@ -188,6 +188,21 @@
     payBtn.textContent = '₹' + PRICES[plan()].toLocaleString('en-IN') + ' pay karein';
   }
   document.querySelectorAll('input[name=plan]').forEach(function(r){ r.addEventListener('change', refresh); });
+
+  // App se aaye to plan pehle se chuna ho: buy.html?p=premium_365 / ?p=course_maths30
+  (function(){
+    var want = '';
+    try { want = new URLSearchParams(location.search).get('p') || ''; } catch(e){}
+    if (want === 'premium_30' || want === 'premium_365') {
+      document.querySelector('input[name=plan][value=' + want + ']').checked = true;
+    } else if (want.indexOf('course_') === 0) {
+      var id = want.slice(7);
+      if (COURSES.some(function(c){ return c[0] === id; })) {
+        document.querySelector('input[name=plan][value=course]').checked = true;
+        sel.value = id;
+      }
+    }
+  })();
   refresh();
 
   function say(t, isErr){ msg.textContent = t || ''; msg.className = 'msg' + (isErr ? ' err' : ''); }
@@ -204,45 +219,54 @@
     }).then(function(r){ return r.json(); });
   }
 
-  // ---- pay ----
+  // ---- pay (Cashfree) ----
+  var cf = null;
+  function cashfree(){
+    if (cf) return cf;
+    if (typeof Cashfree === 'undefined') return null;
+    cf = Cashfree({ mode:'production' });
+    return cf;
+  }
+
   payBtn.addEventListener('click', function(){
-    if (typeof Razorpay === 'undefined') { say('Payment system load nahi hua. Internet check karke page refresh karein.', true); return; }
+    var sdk = cashfree();
+    if (!sdk) { say('Payment system load nahi hua. Internet check karke page refresh karein.', true); return; }
     var p = productKey();
     busy(true); say('Payment khul raha hai…');
     post('/order', { product:p }).then(function(o){
       if (!o.ok) throw new Error(o.error || 'order');
-      var lastFail = '';
-      var rz = new Razorpay({
-        key:o.keyId, amount:o.amount, currency:'INR', order_id:o.orderId,
-        name:'GyaanPe', description:label(p), theme:{ color:'#FF6F00' },
-        handler:function(r){
-          confirmPay({ orderId:r.razorpay_order_id, paymentId:r.razorpay_payment_id, signature:r.razorpay_signature });
-        },
-        modal:{ ondismiss:function(){ busy(false); say(lastFail ? 'Payment nahi hua' + lastFail + '. Paisa kata ho to 5-7 din mein wapas aa jata hai.' : 'Payment band kar diya gaya. Jab chahein dobara try karein.', !!lastFail); } }
+      var pend = { orderId:o.orderId, product:p };
+      save('gp_pending_cf', pend);
+      return sdk.checkout({ paymentSessionId:o.paymentSessionId, redirectTarget:'_modal' }).then(function(result){
+        if (result && result.paymentDetails) { confirmPay(pend); return; }
+        // Popup band kiya ya payment fail hua: phir bhi ek baar check karo, kabhi paisa kat jata hai
+        confirmPay(pend, 0, true);
       });
-      // Window khuli rehti hai aur user dobara try kar sakta hai — message sirf band hone pe
-      rz.on('payment.failed', function(e){
-        lastFail = (e && e.error && e.error.description) ? ': ' + e.error.description : ' ';
-      });
-      rz.open();
     }).catch(function(){
       busy(false); say('Abhi payment shuru nahi ho paaya. Thodi der mein dobara try karein.', true);
     });
   });
 
   // ---- confirm (retries; worker is idempotent) ----
-  function confirmPay(p, tries){
+  function confirmPay(p, tries, quiet){
     tries = tries || 0;
-    save('gp_pending', p);
-    busy(true); say('Payment check ho raha hai, code ban raha hai…');
+    busy(true); say(quiet ? 'Payment status check ho raha hai…' : 'Payment check ho raha hai, code ban raha hai…');
     post('/confirm', p).then(function(res){
-      if (res.ok) { drop('gp_pending'); showCode(res); return; }
+      if (res.ok) { drop('gp_pending_cf'); showCode(res); return; }
+      if (res.error === 'not_paid') {
+        // UPI kabhi kabhi kuch second baad confirm hota hai
+        if (!quiet && tries < 5) { setTimeout(function(){ confirmPay(p, tries + 1); }, 3000); return; }
+        drop('gp_pending_cf'); busy(false);
+        say(quiet ? 'Payment band kar diya gaya. Jab chahein dobara try karein.'
+                  : 'Payment complete nahi hua. Paisa kata ho to 5-7 din mein wapas aa jata hai.', !quiet);
+        return;
+      }
       busy(false);
-      say('Code nahi ban paaya (' + res.error + '). Payment ID ' + p.paymentId + ' ke saath humein WhatsApp karein.', true);
+      say('Code nahi ban paaya (' + res.error + '). Order ID ' + p.orderId + ' ke saath humein WhatsApp karein.', true);
     }).catch(function(){
-      if (tries < 3) { setTimeout(function(){ confirmPay(p, tries + 1); }, 2000); return; }
+      if (tries < 3) { setTimeout(function(){ confirmPay(p, tries + 1, quiet); }, 2000); return; }
       busy(false);
-      say('Payment ho gaya hai, par internet ki wajah se code nahi aaya. Page refresh karein, code apne aap aa jayega.', true);
+      say('Internet ki wajah se payment check nahi ho paaya. Page refresh karein, code apne aap aa jayega.', true);
     });
   }
 
@@ -290,8 +314,9 @@
   renderHistory();
 
   // Payment ho gaya tha par code nahi aaya — refresh pe dobara try
-  var pending = load('gp_pending', null);
-  if (pending && pending.paymentId) confirmPay(pending);
+  drop('gp_pending');   // purana Razorpay wala pending, ab kaam ka nahi
+  var pending = load('gp_pending_cf', null);
+  if (pending && pending.orderId) confirmPay(pending, 0, true);
 })();
 </script>
 </body>

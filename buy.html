@@ -94,6 +94,9 @@
   .history h3{font-size:16px; margin:0 0 8px}
   .history li{font-size:15px; margin-bottom:4px}
   .history code{font-weight:800; color:var(--navy); font-family:inherit; letter-spacing:1px}
+  .legal{display:flex; flex-wrap:wrap; justify-content:center; gap:6px 16px; margin-top:34px; padding-top:16px; border-top:1px solid var(--line); font-size:14px}
+  .legal a{color:var(--muted); font-weight:700}
+  .legal a:hover{color:var(--navy)}
   [hidden]{display:none !important}
   @media (prefers-reduced-motion:no-preference){
     .ticket{animation:pop .35s ease-out}
@@ -173,6 +176,13 @@
     <h3>Is phone se kharide gaye codes</h3>
     <ul id="historyList"></ul>
   </section>
+
+  <nav class="legal" aria-label="Policies">
+    <a href="terms.html">Terms</a>
+    <a href="refund.html">Refund Policy</a>
+    <a href="privacy.html">Privacy Policy</a>
+    <a href="contact.html">Contact</a>
+  </nav>
 </main>
 
 <script>

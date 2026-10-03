@@ -1,16 +1,21 @@
-const CACHE = 'gyaanpe-v5';
+const CACHE = 'gyaanpe-v6';
+
+/* Works on both https://mahapatraswapnajit-prog.github.io/gyaanpe/ and https://gyaanpe.com/ :
+   every path is resolved against the folder this sw.js lives in. */
+const BASE = self.registration ? self.registration.scope : new URL('./', self.location).href;
+const at = p => new URL(p, BASE).href;
 
 /* Shell + big static data files. These are cache-first, so bump CACHE
    above whenever any of them changes, or clients keep the old copy. */
 const FILES = [
-  '/gyaanpe/',
-  '/gyaanpe/index.html',
-  '/gyaanpe/manifest.json',
-  '/gyaanpe/data-questions-1.js',
-  '/gyaanpe/data-questions-2.js',
-  '/gyaanpe/data-hub-1.js',
-  '/gyaanpe/data-hub-2.js'
-];
+  './',
+  'index.html',
+  'manifest.json',
+  'data-questions-1.js',
+  'data-questions-2.js',
+  'data-hub-1.js',
+  'data-hub-2.js'
+].map(at);
 
 self.addEventListener('install', e => {
   e.waitUntil(
@@ -65,7 +70,7 @@ self.addEventListener('fetch', e => {
         }
         return r;
       }).catch(() =>
-        caches.match(req).then(r => r || caches.match('/gyaanpe/index.html'))
+        caches.match(req).then(r => r || caches.match(at('index.html')))
       )
     );
     return;

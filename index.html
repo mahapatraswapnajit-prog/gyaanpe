@@ -15774,5 +15774,110 @@ body.gp-web #premiumScreen .pass-badge{display:none !important;}
   if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', adjust); else adjust();
 })();
 </script>
+<!-- ============ USAGE STATS (anonymous, no names; Firebase REST: gyaanpeStats) ============ -->
+<script>
+(function(){
+  'use strict';
+  var DB = 'https://zapzone-98727-default-rtdb.firebaseio.com/gyaanpeStats';
+  function g(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
+  function s(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
+  function pad(n){ return (n<10?'0':'')+n; }
+  function day(){ var t=new Date(); return t.getFullYear()+'-'+pad(t.getMonth()+1)+'-'+pad(t.getDate()); }
+
+  function uid(){
+    var u = g('gp_uid');
+    if(!u){ u = 'u'+Date.now()+Math.random().toString(36).slice(2,7); s('gp_uid',u); }
+    return u;
+  }
+  function platform(){
+    try{ if(g('gp_twa')==='1' || ('getDigitalGoodsService' in window)) return 'play'; }catch(e){}
+    return 'web';
+  }
+  /* Source: gyaanpe.com/?src=store  (QR / poster / school links). Saved once, first visit wins. */
+  (function(){
+    try{
+      var q = new URLSearchParams(location.search);
+      var src = (q.get('src') || q.get('utm_source') || '').toLowerCase().replace(/[^a-z0-9_-]/g,'').slice(0,30);
+      if(src && !g('gps_src')) s('gps_src', src);
+    }catch(e){}
+  })();
+  function source(){ return g('gps_src') || 'direct'; }
+
+  var KEY = function(){ return 'gps_day_'+day(); };
+  function load(){ try{ return JSON.parse(g(KEY())||'{}'); }catch(e){ return {}; } }
+  function save(d){ s(KEY(), JSON.stringify(d)); }
+  function bump(field, n){
+    try{ var d = load(); d[field] = (d[field]||0) + (n||1); save(d); dirty = true; }catch(e){}
+  }
+
+  /* Wrap existing global functions without changing what they do */
+  function hook(name, field, countArg){
+    try{
+      var orig = window[name];
+      if(typeof orig !== 'function' || orig._gpsHooked) return;
+      var w = function(){
+        try{ bump(field, countArg ? (parseInt(arguments[0],10)||0) : 1); }catch(e){}
+        return orig.apply(this, arguments);
+      };
+      w._gpsHooked = true;
+      window[name] = w;
+    }catch(e){}
+  }
+  /* XP earned today + number of rewarded activities (all learning) */
+  (function(){
+    try{
+      var orig = window.addXP;
+      if(typeof orig !== 'function' || orig._gpsHooked) return;
+      var w = function(n){
+        try{ bump('xp', parseInt(n,10)||0); bump('act', 1); }catch(e){}
+        return orig.apply(this, arguments);
+      };
+      w._gpsHooked = true; window.addXP = w;
+    }catch(e){}
+  })();
+  hook('showFinalResult','quiz'); /* main quizzes finished */
+  hook('tutorSend','ai');         /* AI tutor questions */
+  hook('stOpenStory','story');    /* stories opened */
+  hook('gplOpenBook','book');     /* library books opened */
+  hook('gpStageAction','flow');   /* learning-flow steps */
+  hook('gpcUnlock','course');     /* course purchased (Play) */
+
+  function record(){
+    var d = load(), p = {};
+    try{ p = (typeof gpProfile==='function' && gpProfile()) || {}; }catch(e){}
+    var prem = false; try{ prem = typeof isPremium==='function' && !!isPremium(); }catch(e){}
+    var mins = 0; try{ mins = Math.round((parseInt(g('gpsm_secs_'+(typeof gpTodayKey==='function'?gpTodayKey():day())),10)||0)/60); }catch(e){}
+    var first = g('gps_first');
+    if(!first){ first = day(); s('gps_first', first); }
+    return {
+      pl: platform(), src: source(), cls: String(p.cls||''), prem: prem,
+      nw: first === day(), mins: mins,
+      xp: d.xp||0, act: d.act||0, quiz: d.quiz||0, ai: d.ai||0,
+      story: d.story||0, book: d.book||0, flow: d.flow||0, course: d.course||0,
+      t: Date.now()
+    };
+  }
+
+  var dirty = true, lastSent = 0;
+  function flush(force){
+    try{
+      if(!force && !dirty) return;
+      if(!force && Date.now()-lastSent < 120000) return;
+      dirty = false; lastSent = Date.now();
+      fetch(DB+'/daily/'+day()+'/'+uid()+'.json', {
+        method:'PUT', body: JSON.stringify(record()), keepalive:true,
+        headers:{'Content-Type':'application/json'}
+      }).catch(function(){ dirty = true; });
+    }catch(e){}
+  }
+
+  setTimeout(function(){ flush(true); }, 5000);          /* app open = active today */
+  setInterval(function(){ flush(false); }, 60000);         /* changes, at most every 2 min */
+  document.addEventListener('visibilitychange', function(){
+    if(document.visibilityState === 'hidden') flush(true); /* app closed / switched */
+  });
+  window.gpStats = { flush: flush, record: record };
+})();
+</script>
 </body>
 </html>

@@ -1202,6 +1202,7 @@ function gpcRenderCert(s){
 }
 async function gpcBuy(){
   var c = gpcCourse;
+  if(window.gpWebBuy && window.gpWebBuy.isWeb()){ window.gpWebBuy.go('course_' + gpcId); return; }
   if(!window.PaymentRequest){ gpToast('Ye course sirf GyaanPe ki Play Store app me kharida ja sakta hai.'); return; }
   try{
     var request = new PaymentRequest(
@@ -12569,6 +12570,7 @@ if ('serviceWorker' in navigator) {
     var sku = PRODUCTS[planKey];
     if (!sku) { log('unknown plan', planKey); return false; }
     if (!state.supported) {
+      if (window.gpWebBuy && window.gpWebBuy.isWeb()) { window.gpWebBuy.go(planKey === 'yearly' ? 'premium_365' : 'premium_30'); return false; }
       gpToast('Premium purchase sirf GyaanPe ki Play Store app me available hai.');
       return false;
     }
@@ -15742,5 +15744,35 @@ if ('serviceWorker' in navigator) {
 </script>
 <!-- ============ END ACCESS CODE UNLOCK ============ -->
 
+<!-- ============ WEB BUY SWITCH (website -> Cashfree buy page, Play app -> Play Billing) ============ -->
+<style>
+body.gp-web #premiumScreen [onclick="gpBuy('trial')"],
+body.gp-web #premiumScreen [onclick="gpBuy('restore')"],
+body.gp-web #premiumScreen .pass-badge{display:none !important;}
+</style>
+<script>
+(function(){
+  'use strict';
+  /* Inside the Play Store app (TWA) the first page load has an android-app:// referrer.
+     Remember it, so the Cashfree page is NEVER shown inside the Play app (Play payments policy). */
+  try{ if(String(document.referrer||'').indexOf('android-app://') === 0) localStorage.setItem('gp_twa','1'); }catch(e){}
+  function isTWA(){ try{ return localStorage.getItem('gp_twa') === '1'; }catch(e){ return false; } }
+  function isWeb(){ return !('getDigitalGoodsService' in window) && !isTWA(); }
+  function go(product){
+    location.href = 'buy.html' + (product ? ('?p=' + encodeURIComponent(product)) : '');
+  }
+  window.gpWebBuy = { isWeb: isWeb, go: go };
+
+  function adjust(){
+    if(!isWeb()) return;
+    document.body.classList.add('gp-web');
+    var note = document.querySelector('#premiumScreen .prem-note');
+    if(note) note.innerHTML = '100% Secure Payment (UPI, Card, Net Banking) &bull; No Hidden Charges';
+    var sub = document.querySelector('.premium-banner-card .pbc-sub');
+    if(sub) sub.textContent = 'Unlock the full AI-powered experience!';
+  }
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', adjust); else adjust();
+})();
+</script>
 </body>
 </html>

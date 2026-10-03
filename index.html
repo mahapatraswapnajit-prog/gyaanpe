@@ -15879,5 +15879,163 @@ body.gp-web #premiumScreen .pass-badge{display:none !important;}
   window.gpStats = { flush: flush, record: record };
 })();
 </script>
+<!-- ============ CLASS JOIN (links a child to a teacher's class dashboard; parent consent required) ============ -->
+<style>
+.gpcl-ov{position:fixed;inset:0;background:rgba(10,14,40,.55);display:none;align-items:center;justify-content:center;z-index:99999;padding:16px}
+.gpcl-ov.show{display:flex}
+.gpcl-box{background:#fff;color:#23233A;border-radius:18px;max-width:420px;width:100%;padding:22px;max-height:90vh;overflow:auto;box-sizing:border-box}
+.gpcl-box h3{margin:0 0 8px;color:#1A237E;font-size:21px}
+.gpcl-box p{margin:0 0 12px;font-size:15px;color:#4a4a5a;line-height:1.45}
+.gpcl-lbl{display:block;font-weight:800;font-size:14px;margin:12px 0 4px;color:#23233A}
+.gpcl-in{width:100%;box-sizing:border-box;font:inherit;font-size:18px;padding:10px 12px;border:2px solid #EADFCF;border-radius:10px;color:#23233A;background:#fff}
+.gpcl-in:focus-visible{outline:3px solid #1A237E;outline-offset:1px}
+.gpcl-code{text-transform:uppercase;letter-spacing:3px;font-weight:800}
+.gpcl-chk{display:flex;gap:10px;align-items:flex-start;font-size:13.5px;margin:14px 0 6px;line-height:1.45;color:#4a4a5a}
+.gpcl-chk input{width:20px;height:20px;flex:0 0 auto;margin-top:1px;accent-color:#FF6F00}
+.gpcl-btn{display:block;width:100%;border:0;border-radius:12px;padding:13px;font:inherit;font-weight:800;font-size:16px;background:#FF6F00;color:#fff;cursor:pointer;margin-top:10px}
+.gpcl-btn.sec{background:#fff;color:#1A237E;border:2px solid #1A237E}
+.gpcl-btn:disabled{opacity:.55;cursor:wait}
+.gpcl-btn:focus-visible{outline:3px solid #1A237E;outline-offset:2px}
+.gpcl-msg{min-height:1.2em;font-weight:700;font-size:14px;margin-top:10px;color:#C62828}
+.gpcl-card{display:flex;gap:12px;align-items:center;background:#fff;border:2px solid #EADFCF;border-radius:14px;padding:12px 14px;margin:0 0 14px;cursor:pointer;text-align:left;width:100%;box-sizing:border-box;font:inherit;color:#23233A}
+.gpcl-card .ic{font-size:28px}
+.gpcl-card b{display:block;color:#1A237E;font-size:15px}
+.gpcl-card span{font-size:13px;color:#6B6A7B}
+</style>
+<div class="gpcl-ov" id="gpclOv" role="dialog" aria-modal="true" aria-labelledby="gpclTitle"><div class="gpcl-box" id="gpclBox"></div></div>
+<script>
+(function(){
+  'use strict';
+  var DB = 'https://zapzone-98727-default-rtdb.firebaseio.com/gyaanpeClasses/';
+  function g(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
+  function s(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
+  function del(k){ try{ localStorage.removeItem(k); }catch(e){} }
+  function uid(){ var u=g('gp_uid'); if(!u){ u='u'+Date.now()+Math.random().toString(36).slice(2,7); s('gp_uid',u); } return u; }
+  function cleanCode(v){ return String(v||'').toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,8); }
+  function esc(t){ return String(t==null?'':t).replace(/[&<>"']/g,function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+  function joined(){ try{ return JSON.parse(g('gp_class')||'null'); }catch(e){ return null; } }
+  function $(id){ return document.getElementById(id); }
+
+  function open(html){ $('gpclBox').innerHTML = html; $('gpclOv').classList.add('show'); }
+  function close(){ $('gpclOv').classList.remove('show'); refreshCard(); }
+  function msg(t){ var m=$('gpclMsg'); if(m) m.textContent = t||''; }
+  function profileName(){ try{ var p=gpProfile(); return (p && p.name && p.name!=='Champ') ? p.name : ''; }catch(e){ return ''; } }
+
+  function showJoin(prefill){
+    var j = joined(); if(j) return showJoined(j);
+    open('<h3 id="gpclTitle">&#127979; Class se judein</h3>'+
+      '<p>Teacher ne jo class code diya hai, woh daaliye. Isse teacher bachche ki padhai ki progress dekh payenge.</p>'+
+      '<label class="gpcl-lbl" for="gpclCode">Class code</label>'+
+      '<input class="gpcl-in gpcl-code" type="text" id="gpclCode" maxlength="8" autocomplete="off" value="'+esc(cleanCode(prefill))+'" placeholder="Jaise AB12CD">'+
+      '<label class="gpcl-lbl" for="gpclName">Bachche ka naam (teacher ko dikhega)</label>'+
+      '<input class="gpcl-in" type="text" id="gpclName" maxlength="30" value="'+esc(profileName())+'" placeholder="Naam ya nickname">'+
+      '<div class="gpcl-chk"><input type="checkbox" id="gpclOk"><label for="gpclOk">Main parent/guardian hoon. Main anumati deta/deti hoon ki bachche ka naam, class, quiz score, padhai ka time aur weak topics sirf is class ke teacher ko dikhein. Ise kabhi bhi "Class chhodein" se band kar sakte hain.</label></div>'+
+      '<button class="gpcl-btn" id="gpclJoin" type="button">Class join karein</button>'+
+      '<button class="gpcl-btn sec" id="gpclCancel" type="button">Abhi nahi</button>'+
+      '<div class="gpcl-msg" id="gpclMsg" role="status" aria-live="polite"></div>');
+    $('gpclCancel').onclick = close;
+    $('gpclJoin').onclick = doJoin;
+  }
+
+  function doJoin(){
+    var code = cleanCode($('gpclCode').value);
+    var name = String($('gpclName').value||'').trim().slice(0,30);
+    if(code.length < 4) return msg('Sahi class code daaliye.');
+    if(name.length < 2) return msg('Bachche ka naam ya nickname daaliye.');
+    if(!$('gpclOk').checked) return msg('Aage badhne ke liye parent ki anumati wala box tick karein.');
+    var b = $('gpclJoin'); b.disabled = true; msg('');
+    fetch(DB+code+'/info.json').then(function(r){ return r.json(); }).then(function(info){
+      if(!info || !info.name){ b.disabled = false; return msg('Yeh class code nahi mila. Teacher se dobara check karein.'); }
+      var j = { code:code, name:name, cls:String(info.name), school:String(info.school||''), teacher:String(info.teacher||''), joined:Date.now() };
+      s('gp_class', JSON.stringify(j));
+      return push(true).then(function(){ showJoined(j, true); });
+    }).catch(function(){ b.disabled = false; msg('Internet check karke dobara try karein.'); });
+  }
+
+  function showJoined(j, fresh){
+    open('<h3 id="gpclTitle">&#127979; '+(fresh?'Class join ho gayi!':'Meri class')+'</h3>'+
+      '<p><b>'+esc(j.cls)+'</b>'+(j.school?(', '+esc(j.school)):'')+(j.teacher?('<br>Teacher: '+esc(j.teacher)):'')+'</p>'+
+      '<p>Naam: <b>'+esc(j.name)+'</b><br>Class code: <b>'+esc(j.code)+'</b></p>'+
+      '<p>Bachche ki progress apne aap teacher tak pahunchti rahegi.</p>'+
+      '<button class="gpcl-btn" id="gpclDone" type="button">Theek hai</button>'+
+      '<button class="gpcl-btn sec" id="gpclLeave" type="button">Class chhodein</button>'+
+      '<div class="gpcl-msg" id="gpclMsg" role="status" aria-live="polite"></div>');
+    $('gpclDone').onclick = close;
+    $('gpclLeave').onclick = function(){
+      if(!confirm('Class chhod dein? Teacher ko is bachche ki progress dikhna band ho jaayegi.')) return;
+      fetch(DB+j.code+'/students/'+uid()+'.json', { method:'DELETE' }).catch(function(){}).then(function(){
+        del('gp_class'); close();
+        if(typeof gpToast === 'function') gpToast('Class chhod di gayi');
+      });
+    };
+  }
+
+  /* ---- progress summary sent to the teacher (numbers only, no messages or AI chats) ---- */
+  function summary(j){
+    var o={}, weak=[], strong=[], subj=[];
+    try{ o = gpGetOverallStats() || {}; }catch(e){}
+    try{ weak = gpGetWeakTopics(5).map(function(t){ return { s:String(t.sec), n:String(t.name).slice(0,60), a:t.accuracy }; }); }catch(e){}
+    try{ strong = gpGetStrongTopics(3).map(function(t){ return { s:String(t.sec), n:String(t.name).slice(0,60), a:t.accuracy }; }); }catch(e){}
+    try{ subj = gpGetSubjectStats().slice(0,12).map(function(x){ return { s:String(x.sec), a:x.accuracy, q:x.attempted, d:x.completedChapters, t:x.totalChapters }; }); }catch(e){}
+    var mins = [];
+    for(var i=0;i<7;i++){
+      var d = new Date(); d.setDate(d.getDate()-i);
+      var k = d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();
+      mins.push(Math.round((parseInt(g('gpsm_secs_'+k)||'0',10)||0)/60));
+    }
+    var xp=0; try{ xp = gpXPget(); }catch(e){}
+    var cls=''; try{ cls = (gpProfile()||{}).cls || ''; }catch(e){}
+    return { n:j.name, c:String(cls), last:Date.now(), st:parseInt(g('gp_streak')||'0',10)||0, xp:xp,
+             acc:o.accuracy||0, att:o.attempted||0, m7:mins, w:weak, sg:strong, sb:subj, v:1 };
+  }
+
+  var lastPush = 0;
+  function push(force){
+    var j = joined(); if(!j) return Promise.resolve();
+    if(!force && Date.now()-lastPush < 300000) return Promise.resolve();
+    lastPush = Date.now();
+    return fetch(DB+j.code+'/students/'+uid()+'.json', {
+      method:'PUT', body:JSON.stringify(summary(j)), keepalive:true, headers:{'Content-Type':'application/json'}
+    }).then(function(r){
+      if(r.status === 401 || r.status === 403){
+        /* class was deleted by the teacher */
+        return fetch(DB+j.code+'/info.json').then(function(x){ return x.json(); }).then(function(info){ if(!info) del('gp_class'); });
+      }
+    }).catch(function(){});
+  }
+
+  /* ---- entry point: card at the top of the Parent Dashboard ---- */
+  function refreshCard(){
+    var body = $('parentBody'); if(!body) return;
+    var c = $('gpclCard');
+    if(!c){
+      c = document.createElement('button'); c.type='button'; c.id='gpclCard'; c.className='gpcl-card';
+      c.onclick = function(){ showJoin(''); };
+      body.insertBefore(c, body.firstChild);
+    }
+    var j = joined();
+    c.innerHTML = '<span class="ic" aria-hidden="true">&#127979;</span><div><b>'+(j?('Class: '+esc(j.cls)):'Teacher / School class se judein')+'</b><span>'+(j?('Teacher ko progress dikh rahi hai. Code '+esc(j.code)):'Teacher ka diya class code daaliye')+'</span></div>';
+  }
+  try{
+    var origParent = window.gpParent;
+    if(typeof origParent === 'function'){
+      window.gpParent = function(){ var r = origParent.apply(this, arguments); try{ refreshCard(); }catch(e){} return r; };
+    }
+  }catch(e){}
+
+  /* ---- entry point: link from the teacher, e.g. gyaanpe.com/?class=AB12CD ---- */
+  try{
+    var qc = new URLSearchParams(location.search).get('class');
+    if(qc) setTimeout(function(){ showJoin(qc); }, 1500);
+  }catch(e){}
+
+  setTimeout(function(){ push(true); }, 8000);
+  setInterval(function(){ push(false); }, 300000);
+  document.addEventListener('visibilitychange', function(){ if(document.visibilityState === 'hidden') push(true); });
+  document.addEventListener('keydown', function(e){ if(e.key === 'Escape' && $('gpclOv').classList.contains('show')) close(); });
+
+  window.gpClass = { open: showJoin, push: push };
+})();
+</script>
 </body>
 </html>

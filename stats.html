@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>GyaanPe Stats</title>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Nunito:wght@600;800&display=swap" rel="stylesheet">
+<style>
+  :root{--navy:#1A237E;--orange:#FF6F00;--cream:#FFF9F0;--line:#EADFCF;--muted:#6B6A7B;--green:#1E8E5A}
+  *{box-sizing:border-box} body{margin:0;background:var(--cream);font-family:'Nunito',system-ui,sans-serif;color:#23233A}
+  main{max-width:960px;margin:0 auto;padding:24px 16px 48px}
+  h1{font-family:'Anton',Impact,sans-serif;font-size:34px;margin:0;color:var(--navy);letter-spacing:.5px}
+  h1 span{color:var(--orange)} .sub{color:var(--muted);margin:4px 0 20px}
+  h2{font-size:18px;margin:26px 0 10px;color:var(--navy)}
+  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+  .card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px}
+  .card .n{font-family:'Anton',Impact,sans-serif;font-size:30px;color:var(--navy)}
+  .card .l{color:var(--muted);font-size:13px;font-weight:800}
+  .wrap{overflow-x:auto;background:#fff;border:1px solid var(--line);border-radius:14px}
+  table{border-collapse:collapse;width:100%;font-size:14px;min-width:720px}
+  th,td{padding:9px 10px;text-align:right;border-bottom:1px solid #F3EADB;white-space:nowrap}
+  th:first-child,td:first-child{text-align:left} th{background:#FBF4E8;color:var(--navy);font-size:12.5px}
+  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  button{font:inherit;font-weight:800;border:0;border-radius:10px;background:var(--orange);color:#fff;padding:9px 16px;cursor:pointer}
+  .muted{color:var(--muted);font-size:13px} .err{color:#C62828;font-weight:800}
+  .pill{display:inline-block;background:#fff;border:1px solid var(--line);border-radius:999px;padding:6px 12px;margin:0 6px 6px 0;font-weight:800;font-size:14px}
+  .pill b{color:var(--orange)}
+</style>
+</head>
+<body>
+<main>
+  <h1>Gyaan<span>Pe</span> Stats</h1>
+  <p class="sub">Anonymous usage. Koi naam ya phone number store nahi hota.</p>
+  <div class="row">
+    <button id="reload" type="button">Refresh</button>
+    <span class="muted" id="status">Loading…</span>
+  </div>
+
+  <h2>Aaj</h2>
+  <div class="cards" id="today"></div>
+
+  <h2>Pichhle 7 din</h2>
+  <div class="cards" id="week"></div>
+
+  <h2>Kahan se aaye (7 din, unique users)</h2>
+  <div id="sources"></div>
+
+  <h2>Roz ka hisaab (14 din)</h2>
+  <div class="wrap"><table>
+    <thead><tr><th>Date</th><th>Active</th><th>New</th><th>Play</th><th>Web</th><th>Premium</th><th>Avg min</th><th>Quiz</th><th>AI</th><th>Stories</th><th>Books</th><th>XP</th></tr></thead>
+    <tbody id="rows"></tbody>
+  </table></div>
+  <p class="muted">Active = us din app khola. Avg min = active users ka average padhai time (sirf jab app screen pe khula ho).</p>
+</main>
+<script>
+(function(){
+  var DB = 'https://zapzone-98727-default-rtdb.firebaseio.com/gyaanpeStats/daily/';
+  function pad(n){ return (n<10?'0':'')+n; }
+  function key(d){ return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()); }
+  function days(n){ var out=[], t=new Date(); for(var i=0;i<n;i++){ var d=new Date(t); d.setDate(t.getDate()-i); out.push(key(d)); } return out; }
+  function el(id){ return document.getElementById(id); }
+  function card(n,l){ return '<div class="card"><div class="n">'+n+'</div><div class="l">'+l+'</div></div>'; }
+
+  function summarize(rec){
+    var users = Object.keys(rec||{}).map(function(k){ return rec[k]||{}; });
+    var sum = function(f){ return users.reduce(function(a,u){ return a+(+u[f]||0); },0); };
+    var activeMin = users.filter(function(u){ return (u.mins||0)>0; });
+    return {
+      active: users.length,
+      nw: users.filter(function(u){ return u.nw; }).length,
+      play: users.filter(function(u){ return u.pl==='play'; }).length,
+      web: users.filter(function(u){ return u.pl!=='play'; }).length,
+      prem: users.filter(function(u){ return u.prem; }).length,
+      avgMin: activeMin.length ? Math.round(sum('mins')/activeMin.length) : 0,
+      quiz: sum('quiz'), ai: sum('ai'), story: sum('story'), book: sum('book'), xp: sum('xp')
+    };
+  }
+
+  function load(){
+    el('status').textContent = 'Loading…'; el('status').className = 'muted';
+    var list = days(14);
+    Promise.all(list.map(function(d){
+      return fetch(DB+d+'.json').then(function(r){ return r.json(); }).then(function(j){ return [d, j||{}]; });
+    })).then(function(res){
+      var byDay = {}; res.forEach(function(x){ byDay[x[0]] = x[1]; });
+      var t = summarize(byDay[list[0]]);
+      el('today').innerHTML = card(t.active,'Active users') + card(t.nw,'New users') + card(t.play+' / '+t.web,'Play / Web')
+        + card(t.prem,'Premium users') + card(t.avgMin,'Avg minutes') + card(t.quiz,'Quizzes') + card(t.ai,'AI questions');
+
+      var uniq = {}, nw = 0, srcs = {}, quiz = 0, ai = 0, mins = 0, minUsers = 0;
+      list.slice(0,7).forEach(function(d){
+        var rec = byDay[d]; Object.keys(rec).forEach(function(u){
+          var r = rec[u]||{};
+          if(!uniq[u]){ uniq[u] = r; var sname = r.src||'direct'; srcs[sname] = (srcs[sname]||0)+1; }
+          if(r.nw) nw++; quiz += +r.quiz||0; ai += +r.ai||0;
+          if((r.mins||0)>0){ mins += +r.mins; minUsers++; }
+        });
+      });
+      var ids = Object.keys(uniq);
+      var premNow = ids.filter(function(u){ return uniq[u].prem; }).length;
+      el('week').innerHTML = card(ids.length,'Unique users') + card(nw,'New users') + card(premNow,'Premium users')
+        + card(minUsers?Math.round(mins/minUsers):0,'Avg min / din') + card(quiz,'Quizzes') + card(ai,'AI questions');
+
+      var sk = Object.keys(srcs).sort(function(a,b){ return srcs[b]-srcs[a]; });
+      el('sources').innerHTML = sk.length ? sk.map(function(k){ return '<span class="pill">'+k.replace(/[<>&]/g,'')+' <b>'+srcs[k]+'</b></span>'; }).join('') : '<span class="muted">Abhi data nahi hai.</span>';
+
+      el('rows').innerHTML = list.map(function(d){
+        var x = summarize(byDay[d]);
+        return '<tr><td>'+d+'</td><td>'+x.active+'</td><td>'+x.nw+'</td><td>'+x.play+'</td><td>'+x.web+'</td><td>'+x.prem+'</td><td>'+x.avgMin+'</td><td>'+x.quiz+'</td><td>'+x.ai+'</td><td>'+x.story+'</td><td>'+x.book+'</td><td>'+x.xp+'</td></tr>';
+      }).join('');
+      el('status').textContent = 'Updated ' + new Date().toLocaleTimeString('en-IN');
+    }).catch(function(){
+      el('status').textContent = 'Data load nahi hua. Internet ya Firebase rules check karein.'; el('status').className = 'err';
+    });
+  }
+  el('reload').addEventListener('click', load);
+  load();
+})();
+</script>
+</body>
+</html>

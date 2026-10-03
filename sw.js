@@ -1,4 +1,4 @@
-const CACHE = 'gyaanpe-v6';
+const CACHE = 'gyaanpe-v7';
 
 /* Works on both https://mahapatraswapnajit-prog.github.io/gyaanpe/ and https://gyaanpe.com/ :
    every path is resolved against the folder this sw.js lives in. */
@@ -64,6 +64,9 @@ self.addEventListener('fetch', e => {
         credentials: 'same-origin',
         redirect: 'follow'
       })).then(r => {
+        /* Cloudflare Pages redirects /page.html -> /page. A redirected response
+           cannot be handed to a navigation, so let the browser follow it itself. */
+        if (r && r.redirected) return Response.redirect(r.url, 301);
         if (r && r.ok) {
           const cp = r.clone();
           caches.open(CACHE).then(c => c.put(req, cp)).catch(() => {});

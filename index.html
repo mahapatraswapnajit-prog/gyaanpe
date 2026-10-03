@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>GyaanPe – Loved by Kids, Trusted by Parents</title><link rel="manifest" href="/gyaanpe/manifest.json">
- <link rel="icon" href="/gyaanpe/GyaanPe_Logo_Final.png">
+<title>GyaanPe – Loved by Kids, Trusted by Parents</title><link rel="manifest" href="manifest.json">
+ <link rel="icon" href="GyaanPe_Logo_Final.png">
  <meta name="theme-color" content="#1A237E">
 <meta name="description" content="GyaanPe - Nursery se Class 7 tak ke bacchon ke liye CBSE learning app. Lessons, quiz, videos, kahaniyan aur 30-day courses. Loved by Kids, Trusted by Parents.">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -2456,7 +2456,7 @@ loadDailyQuiz();
 
 // ============ CHALLENGE A FRIEND ============
 var CH_URL='https://zapzone-98727-default-rtdb.firebaseio.com/gyaanpeChallenge';
-function sendChallenge(){var nm=prompt('Apna naam likho:')||'A friend';var sc=levelCorrect[currentLevel];fetch(CH_URL+'.json',{method:'POST',body:JSON.stringify({n:nm,s:sc,sec:currentSection,lvl:currentLevel})}).then(function(r){return r.json();}).then(function(d){var link='https://mahapatraswapnajit-prog.github.io/gyaanpe/?ch='+d.name;var msg='\uD83C\uDFC6 '+nm+' ne GyaanPe pe '+sc+'/10 score kiya! Kya aap hara sakte ho? Khelo: '+link;if(typeof gpShareToWhatsApp==='function'){gpShareToWhatsApp(msg);}else{window.open('https://wa.me/?text='+encodeURIComponent(msg));}}).catch(function(e){gpToast('Internet check karo!');});}
+function sendChallenge(){var nm=prompt('Apna naam likho:')||'A friend';var sc=levelCorrect[currentLevel];fetch(CH_URL+'.json',{method:'POST',body:JSON.stringify({n:nm,s:sc,sec:currentSection,lvl:currentLevel})}).then(function(r){return r.json();}).then(function(d){var link='https://gyaanpe.com/?ch='+d.name;var msg='\uD83C\uDFC6 '+nm+' ne GyaanPe pe '+sc+'/10 score kiya! Kya aap hara sakte ho? Khelo: '+link;if(typeof gpShareToWhatsApp==='function'){gpShareToWhatsApp(msg);}else{window.open('https://wa.me/?text='+encodeURIComponent(msg));}}).catch(function(e){gpToast('Internet check karo!');});}
 function checkChallenge(){var m=location.search.match(/ch=([^&]+)/);if(!m)return;fetch(CH_URL+'/'+m[1]+'.json').then(function(r){return r.json();}).then(function(d){if(!d||!d.n)return;if(!allData[d.sec])return;localStorage.setItem('gp_ch',JSON.stringify(d));var b=document.getElementById('chBanner');b.style.display='block';document.getElementById('chText').textContent=d.n+' ne '+d.s+'/10 score kiya hai! Hara ke dikhao!';}).catch(function(e){});}
 function acceptChallenge(){var d=JSON.parse(localStorage.getItem('gp_ch')||'null');if(!d)return;if(!allData[d.sec])return;startSection(d.sec);loadLevel(d.lvl);}
 checkChallenge();
@@ -5278,8 +5278,8 @@ var TUTOR_DAILY_LIMIT = 25;
 var _tutorState = {messages: [], loading: false, pendingImage: null};
 
 var TUTOR_PERSONAS = {
-anika: {name:"Anika Ma'am", avatar:"👩‍🏫", img:"/gyaanpe/anika.png", classes:["nursery","lkg","ukg","c1","c2","c3"], welcome:"Hi there! I am Anika Ma'am! 🌟 Ask me anything about your studies, or tap a fun idea below!"},
-arjun: {name:"Arjun Sir", avatar:"👨‍🏫", img:"/gyaanpe/arjun.png", classes:["c4","c5","c6","c7"], welcome:"Hello! I am Arjun Sir, your study helper. Ask me a doubt from any subject, or pick a suggestion below."}
+anika: {name:"Anika Ma'am", avatar:"👩‍🏫", img:"anika.png", classes:["nursery","lkg","ukg","c1","c2","c3"], welcome:"Hi there! I am Anika Ma'am! 🌟 Ask me anything about your studies, or tap a fun idea below!"},
+arjun: {name:"Arjun Sir", avatar:"👨‍🏫", img:"arjun.png", classes:["c4","c5","c6","c7"], welcome:"Hello! I am Arjun Sir, your study helper. Ask me a doubt from any subject, or pick a suggestion below."}
 };
 
 var TUTOR_SUGGESTIONS_ANIKA = ["Tell me about animals", "Help me count numbers", "What is a rhyming word?", "Tell me a fun fact"];
@@ -12411,7 +12411,7 @@ gpInit();
 
 </script><script>
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/gyaanpe/sw.js', {scope: '/gyaanpe/'})
+  navigator.serviceWorker.register('sw.js', {scope: './'})
     .then(function(reg){
       /* A waiting worker means a new version is already downloaded. */
       function offerUpdate(sw){

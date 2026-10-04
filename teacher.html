@@ -91,6 +91,24 @@
     <p class="msg err" id="signMsg" role="status" aria-live="polite"></p>
   </section>
 
+  <!-- approval pending -->
+  <section id="vPending" class="card" style="max-width:560px;margin:30px auto" hidden>
+    <h1>Teacher verification</h1>
+    <p class="sub">Bachchon ki safety ke liye har teacher ko verify karte hain. Apni jaankari bhejiye, approve hote hi aap class bana payenge.</p>
+    <div id="reqForm">
+      <label for="rName">Aapka naam</label><input type="text" id="rName" maxlength="40">
+      <label for="rSchool">School ka naam aur jagah</label><input type="text" id="rSchool" maxlength="80" placeholder="Jaise Eden School, Chhatrapada">
+      <label for="rPhone">Mobile number (verification call ke liye)</label><input type="text" id="rPhone" maxlength="14" inputmode="numeric" placeholder="10 digit">
+      <div class="row" style="margin-top:14px"><button class="btn" id="reqBtn" type="button">Request bhejein</button></div>
+    </div>
+    <div id="reqSent" hidden>
+      <p><b>Request mil gayi hai.</b> Hum aam taur pe 24 ghante mein verify karke approve karte hain.</p>
+      <p class="muted">Jaldi chahiye to email karein: <a href="mailto:gyaanpe.support@gmail.com">gyaanpe.support@gmail.com</a></p>
+      <div class="row" style="margin-top:10px"><button class="btn sec" id="reqCheck" type="button">Approval check karein</button></div>
+    </div>
+    <p class="msg" id="reqMsg" role="status" aria-live="polite"></p>
+  </section>
+
   <!-- classes -->
   <section id="vHome" hidden>
     <h1>Meri classes</h1>
@@ -175,7 +193,7 @@ var CONFIG = {
   'use strict';
   var $ = function(id){ return document.getElementById(id); };
   function esc(t){ return String(t==null?'':t).replace(/[&<>"']/g,function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
-  function show(id){ ['vSetup','vSignin','vHome','vClass'].forEach(function(v){ $(v).hidden = (v!==id); }); window.scrollTo(0,0); }
+  function show(id){ ['vSetup','vSignin','vPending','vHome','vClass'].forEach(function(v){ $(v).hidden = (v!==id); }); window.scrollTo(0,0); }
   var ALPHA = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
   var DAY = 86400000;
 
@@ -200,8 +218,40 @@ var CONFIG = {
     if (!u) { show('vSignin'); return; }
     $('whoName').textContent = u.displayName || u.email || '';
     db.ref('gyaanpeTeachers/'+u.uid+'/name').set(u.displayName || '').catch(function(){});
-    loadClasses();
+    checkApproval();
   });
+
+  /* ---------- teacher verification ---------- */
+  function checkApproval(){
+    $('reqMsg').textContent = '';
+    db.ref('gyaanpeTeachers/'+me.uid+'/approved').once('value').then(function(a){
+      if (a.val() === true) { loadClasses(); return; }
+      if (a.val() === false) {
+        show('vPending'); $('reqForm').hidden = true; $('reqSent').hidden = true;
+        $('reqMsg').className = 'msg err';
+        $('reqMsg').innerHTML = 'Aapka teacher access abhi active nahi hai. Madad ke liye email karein: <a href="mailto:gyaanpe.support@gmail.com">gyaanpe.support@gmail.com</a>';
+        return;
+      }
+      return db.ref('gyaanpeTeachers/'+me.uid+'/request').once('value').then(function(rq){
+        show('vPending');
+        var sent = rq.exists();
+        $('reqForm').hidden = sent; $('reqSent').hidden = !sent;
+        if (!sent) $('rName').value = me.displayName || '';
+      });
+    }).catch(function(){ show('vPending'); $('reqMsg').className='msg err'; $('reqMsg').textContent='Status check nahi ho paaya. Refresh karein.'; });
+  }
+  $('reqCheck').onclick = function(){ checkApproval(); };
+  $('reqBtn').onclick = function(){
+    var name = $('rName').value.trim().slice(0,40), school = $('rSchool').value.trim().slice(0,80);
+    var phone = $('rPhone').value.replace(/\D/g,'').slice(-10), m = $('reqMsg');
+    if (name.length < 2 || school.length < 3) { m.className='msg err'; m.textContent='Naam aur school dono bhariye.'; return; }
+    if (!/^[6-9]\d{9}$/.test(phone)) { m.className='msg err'; m.textContent='Sahi 10 digit mobile number daaliye.'; return; }
+    $('reqBtn').disabled = true;
+    db.ref('gyaanpeTeachers/'+me.uid+'/request').set({ name:name, school:school, phone:phone, email:me.email||'', at:Date.now() })
+      .then(function(){ m.textContent=''; checkApproval(); })
+      .catch(function(){ m.className='msg err'; m.textContent='Request nahi gayi. Dobara try karein.'; })
+      .then(function(){ $('reqBtn').disabled = false; });
+  };
 
   /* ---------- classes ---------- */
   function loadClasses(){

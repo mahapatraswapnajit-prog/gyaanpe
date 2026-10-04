@@ -15902,6 +15902,15 @@ body.gp-web #premiumScreen .pass-badge{display:none !important;}
 .gpcl-card .ic{font-size:28px}
 .gpcl-card b{display:block;color:#1A237E;font-size:15px}
 .gpcl-card span{font-size:13px;color:#6B6A7B}
+.gphw-card{background:#fff;border:2px solid #FFB74D;border-radius:16px;padding:12px 14px;margin:12px 0;box-shadow:0 2px 0 #FFE0B2}
+.gphw-card h4{margin:0 0 8px;color:#E65100;font-size:16px}
+.gphw-item{display:flex;justify-content:space-between;align-items:center;gap:10px;width:100%;background:#FFF8EE;border:0;border-radius:12px;padding:10px 12px;margin-top:8px;font:inherit;color:#23233A;cursor:pointer;text-align:left}
+.gphw-item b{color:#1A237E;font-size:14.5px} .gphw-item small{display:block;color:#6B6A7B;font-size:12.5px}
+.gphw-go{background:#FF6F00;color:#fff;border-radius:999px;padding:6px 14px;font-weight:800;font-size:13px;white-space:nowrap}
+.gphw-q{font-size:18px;font-weight:800;color:#1A237E;margin:6px 0 12px;line-height:1.35}
+.gphw-opt{display:block;width:100%;text-align:left;border:2px solid #EADFCF;background:#fff;border-radius:12px;padding:12px 14px;margin-top:8px;font:inherit;font-size:16px;font-weight:700;color:#23233A;cursor:pointer}
+.gphw-opt.ok{border-color:#1E8E5A;background:#E3F4EA} .gphw-opt.no{border-color:#C62828;background:#FDE5E5}
+.gphw-bar{height:8px;background:#F3EADB;border-radius:99px;overflow:hidden;margin:4px 0 6px} .gphw-bar i{display:block;height:100%;background:#FF6F00}
 </style>
 <div class="gpcl-ov" id="gpclOv" role="dialog" aria-modal="true" aria-labelledby="gpclTitle"><div class="gpcl-box" id="gpclBox"></div></div>
 <script>
@@ -15978,7 +15987,7 @@ body.gp-web #premiumScreen .pass-badge{display:none !important;}
     var b = $('gpclJoin'); b.disabled = true; msg('');
     var j = { code:code, name:name, cls:String(info.name), school:String(info.school||''), teacher:String(info.teacher||''), joined:Date.now() };
     s('gp_class', JSON.stringify(j));
-    push(true).then(function(){ showJoined(j, true); });
+    push(true).then(function(){ showJoined(j, true); loadHw(); });
   }
 
   function showJoined(j, fresh){
@@ -15993,7 +16002,7 @@ body.gp-web #premiumScreen .pass-badge{display:none !important;}
     $('gpclLeave').onclick = function(){
       if(!confirm('Class chhod dein? Teacher ko is bachche ki progress dikhna band ho jaayegi.')) return;
       fetch(DB+j.code+'/students/'+uid()+'.json', { method:'DELETE' }).catch(function(){}).then(function(){
-        del('gp_class'); close();
+        del('gp_class'); close(); hwList = []; renderHwCard();
         if(typeof gpToast === 'function') gpToast('Class chhod di gayi');
       });
     };
@@ -16062,6 +16071,84 @@ body.gp-web #premiumScreen .pass-badge{display:none !important;}
   setInterval(function(){ push(false); }, 300000);
   document.addEventListener('visibilitychange', function(){ if(document.visibilityState === 'hidden') push(true); });
   document.addEventListener('keydown', function(e){ if(e.key === 'Escape' && $('gpclOv').classList.contains('show')) close(); });
+
+  /* ================= Homework from the teacher ================= */
+  var hwList = [];
+  function hwDone(){ try{ return JSON.parse(g('gp_hw_done')||'{}'); }catch(e){ return {}; } }
+  function hwSetDone(id, rec){ var d = hwDone(); d[id] = rec; s('gp_hw_done', JSON.stringify(d)); }
+  function hwDate(ts){ try{ return new Date(ts).toLocaleDateString('en-IN',{day:'numeric',month:'short'}); }catch(e){ return ''; } }
+  function loadHw(){
+    var j = joined(); if(!j){ hwList = []; renderHwCard(); return; }
+    fetch(DB+j.code+'/hw.json').then(function(r){ return r.json(); }).then(function(hw){
+      hw = hw || {};
+      hwList = Object.keys(hw).map(function(id){ var h = hw[id]; h.id = id; return h; })
+        .filter(function(h){ return h && h.qs && h.qs.length; })
+        .sort(function(a,b){ return (a.due||0) - (b.due||0); });
+      renderHwCard();
+    }).catch(function(){});
+  }
+  function renderHwCard(){
+    var mount = $('gphwMount');
+    if(!mount){
+      var anchor = $('gpsmMount'); if(!anchor || !anchor.parentNode) return;
+      mount = document.createElement('div'); mount.id = 'gphwMount';
+      anchor.parentNode.insertBefore(mount, anchor);
+    }
+    var done = hwDone(), now = Date.now();
+    var show = hwList.filter(function(h){ var d = done[h.id]; return !d ? (!h.due || now < h.due + 7*86400000) : (now - d.at < 3*86400000); });
+    if(!show.length){ mount.innerHTML = ''; return; }
+    var pending = show.filter(function(h){ return !done[h.id]; }).length;
+    mount.innerHTML = '<div class="gphw-card"><h4>&#128218; Teacher ka homework'+(pending?(' ('+pending+' baaki)'):'')+'</h4>'+
+      show.map(function(h){
+        var d = done[h.id], late = h.due && now > h.due;
+        return '<button type="button" class="gphw-item" data-hwid="'+esc(h.id)+'"><span><b>'+esc(h.t)+'</b><small>'+(h.n||h.qs.length)+' sawaal'+(h.due?(', last date '+esc(hwDate(h.due))+(late&&!d?' (der ho gayi)':'')):'')+'</small></span>'+
+          (d ? '<span class="gphw-go" style="background:#1E8E5A">&#10003; '+d.s+'/'+d.t+'</span>' : '<span class="gphw-go">Shuru karo</span>')+'</button>';
+      }).join('')+'</div>';
+    Array.prototype.forEach.call(mount.querySelectorAll('[data-hwid]'), function(b){
+      b.onclick = function(){ var id = b.getAttribute('data-hwid'); var h = hwList.filter(function(x){ return x.id === id; })[0]; if(h && !hwDone()[id]) startHw(h); else if(typeof gpToast === 'function') gpToast('Yeh homework ho chuka hai'); };
+    });
+  }
+  function startHw(h){
+    var i = 0, score = 0, ans = [], locked = false;
+    function show(){
+      var q = h.qs[i];
+      open('<div style="display:flex;justify-content:space-between;align-items:center"><b style="color:#E65100">&#128218; '+esc(h.t)+'</b><span style="font-size:13px;color:#6B6A7B">'+(i+1)+' / '+h.qs.length+'</span></div>'+
+        '<div class="gphw-bar"><i style="width:'+Math.round(i/h.qs.length*100)+'%"></i></div>'+
+        '<div class="gphw-q" id="gpclTitle">'+esc(q.q)+'</div>'+
+        q.o.map(function(o,k){ return '<button type="button" class="gphw-opt" data-k="'+k+'">'+'ABCDEF'[k]+'. '+esc(o)+'</button>'; }).join('')+
+        '<button class="gpcl-btn sec" id="gphwQuit" type="button" style="margin-top:16px">Baad mein karunga</button>');
+      $('gphwQuit').onclick = close;
+      locked = false;
+      Array.prototype.forEach.call(document.querySelectorAll('.gphw-opt'), function(b){
+        b.onclick = function(){
+          if(locked) return; locked = true;
+          var k = +b.getAttribute('data-k'), right = k === +q.a;
+          ans.push(k); if(right) score++;
+          b.classList.add(right ? 'ok' : 'no');
+          if(!right){ var c = document.querySelector('.gphw-opt[data-k="'+q.a+'"]'); if(c) c.classList.add('ok'); }
+          setTimeout(function(){ i++; if(i < h.qs.length) show(); else finish(); }, right ? 600 : 1300);
+        };
+      });
+    }
+    function finish(){
+      var j = joined(), rec = { n:(j&&j.name)||'', s:score, t:h.qs.length, at:Date.now(), ans:ans };
+      open('<h3 id="gpclTitle">&#127881; Homework ho gaya!</h3><p style="font-size:30px;font-weight:800;color:#1A237E;margin:6px 0">'+score+' / '+h.qs.length+'</p>'+
+        '<p>'+(score === h.qs.length ? 'Waah! Sab sahi.' : (score >= h.qs.length/2 ? 'Bahut achha! Galat wale ek baar dobara padh lena.' : 'Koi baat nahi, chapter ek baar aur padho, phir sab aa jayega.'))+'</p>'+
+        '<p id="gphwSend" style="font-size:13px;color:#6B6A7B">Teacher ko bhej rahe hain…</p>'+
+        '<button class="gpcl-btn" id="gphwOk" type="button">Theek hai</button>');
+      $('gphwOk').onclick = close;
+      hwSetDone(h.id, { s:score, t:h.qs.length, at:rec.at });
+      try{ if(typeof addXP === 'function') addXP(score * 3); }catch(e){}
+      if(!j){ return; }
+      fetch(DB+j.code+'/hwsub/'+h.id+'/'+uid()+'.json', { method:'PUT', body:JSON.stringify(rec), headers:{'Content-Type':'application/json'} })
+        .then(function(r){ var el = $('gphwSend'); if(el) el.textContent = r.ok ? 'Teacher ko bhej diya \u2713' : 'Teacher tak nahi gaya. Internet check karke app dobara kholo.'; })
+        .catch(function(){ var el = $('gphwSend'); if(el) el.textContent = 'Teacher tak nahi gaya. Internet aane pe app dobara kholo.'; });
+      renderHwCard();
+    }
+    show();
+  }
+  setTimeout(loadHw, 3000);
+  document.addEventListener('visibilitychange', function(){ if(document.visibilityState === 'visible') loadHw(); });
 
   /* ---- Teacher Dashboard button: grown-up check, then open the teacher site ---- */
   function teacherOpen(){

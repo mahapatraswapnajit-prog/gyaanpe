@@ -1726,6 +1726,7 @@ function gpToast(msg){
 <div class="quote-card"><div class="quote-text" id="gpQuote">Loading...</div></div>
 <button class="parent-open-btn" onclick="gpParent()">&#128104;&#8205;&#128105;&#8205;&#128103; PARENT DASHBOARD</button>
 <button class="parent-open-btn" onclick="gppcOpen()">&#128218; PARENTS CORNER</button>
+<button class="parent-open-btn" style="background:#FFF3E0;color:#E65100;" onclick="gpTeacherOpen()">&#127979; TEACHER DASHBOARD</button>
 <button class="parent-open-btn" onclick="gpqbOpen()">&#128278; SAVE KIYE SAWAAL</button>
 <button class="parent-open-btn" onclick="gpfqOpen()">&#10067; HELP &amp; FAQ</button>
 <button class="parent-open-btn" style="background:#F3E5F5;color:#6A1B9A;" onclick="gpOpenAnalytics()">&#128202; MY PROGRESS</button>
@@ -15921,35 +15922,63 @@ body.gp-web #premiumScreen .pass-badge{display:none !important;}
   function msg(t){ var m=$('gpclMsg'); if(m) m.textContent = t||''; }
   function profileName(){ try{ var p=gpProfile(); return (p && p.name && p.name!=='Champ') ? p.name : ''; }catch(e){ return ''; } }
 
+  var TEACHER_LINK = '<p style="margin:14px 0 0;font-size:13.5px;text-align:center">Aap teacher hain? Apni class yahan banaiye: <a href="https://gyaanpe.com/teacher" target="_blank" rel="noopener" style="color:#1A237E;font-weight:800">gyaanpe.com/teacher</a></p>';
+
+  /* Step 1: class code */
   function showJoin(prefill){
     var j = joined(); if(j) return showJoined(j);
-    open('<h3 id="gpclTitle">&#127979; Class se judein</h3>'+
-      '<p>Teacher ne jo class code diya hai, woh daaliye. Isse teacher bachche ki padhai ki progress dekh payenge.</p>'+
+    open('<h3 id="gpclTitle">&#127979; Bachche ko school class se jodein</h3>'+
+      '<p>Teacher ne jo class code diya hai, woh daaliye. Agle step mein aap dekh payenge ki class kis teacher aur school ki hai.</p>'+
       '<label class="gpcl-lbl" for="gpclCode">Class code</label>'+
       '<input class="gpcl-in gpcl-code" type="text" id="gpclCode" maxlength="8" autocomplete="off" value="'+esc(cleanCode(prefill))+'" placeholder="Jaise AB12CD">'+
+      '<button class="gpcl-btn" id="gpclNext" type="button">Aage</button>'+
+      '<button class="gpcl-btn sec" id="gpclCancel" type="button">Abhi nahi</button>'+
+      '<div class="gpcl-msg" id="gpclMsg" role="status" aria-live="polite"></div>'+ TEACHER_LINK);
+    $('gpclCancel').onclick = close;
+    $('gpclNext').onclick = checkCode;
+    $('gpclCode').onkeydown = function(e){ if(e.key === 'Enter') checkCode(); };
+    if(cleanCode(prefill).length >= 4) checkCode();
+  }
+
+  function checkCode(){
+    var code = cleanCode($('gpclCode').value);
+    if(code.length < 4) return msg('Sahi class code daaliye.');
+    var b = $('gpclNext'); b.disabled = true; msg('');
+    fetch(DB+code+'/info.json').then(function(r){ return r.json(); }).then(function(info){
+      b.disabled = false;
+      if(!info || !info.name) return msg('Yeh class code nahi mila. Teacher se dobara check karein.');
+      showConfirm(code, info);
+    }).catch(function(){ b.disabled = false; msg('Internet check karke dobara try karein.'); });
+  }
+
+  /* Step 2: show exactly whose class this is, then consent */
+  function showConfirm(code, info){
+    var teacher = String(info.teacher||'').trim() || 'Naam nahi diya';
+    open('<h3 id="gpclTitle">&#127979; Kya yahi class hai?</h3>'+
+      '<div style="background:#FFF9F0;border:2px solid #EADFCF;border-radius:12px;padding:12px 14px;margin:0 0 12px">'+
+        '<div style="font-size:13px;color:#6B6A7B;font-weight:800">CLASS</div><div style="font-size:18px;font-weight:800;color:#1A237E">'+esc(info.name)+'</div>'+
+        '<div style="font-size:13px;color:#6B6A7B;font-weight:800;margin-top:8px">SCHOOL</div><div style="font-weight:700">'+esc(info.school||'—')+'</div>'+
+        '<div style="font-size:13px;color:#6B6A7B;font-weight:800;margin-top:8px">TEACHER</div><div style="font-weight:700">'+esc(teacher)+'</div>'+
+      '</div>'+
+      '<p style="font-size:13.5px">Agar aap is teacher ya school ko nahi jaante, to join mat kariye.</p>'+
       '<label class="gpcl-lbl" for="gpclName">Bachche ka naam (teacher ko dikhega)</label>'+
       '<input class="gpcl-in" type="text" id="gpclName" maxlength="30" value="'+esc(profileName())+'" placeholder="Naam ya nickname">'+
       '<div class="gpcl-chk"><input type="checkbox" id="gpclOk"><label for="gpclOk">Main parent/guardian hoon. Main anumati deta/deti hoon ki bachche ka naam, class, quiz score, padhai ka time aur weak topics sirf is class ke teacher ko dikhein. Ise kabhi bhi "Class chhodein" se band kar sakte hain.</label></div>'+
-      '<button class="gpcl-btn" id="gpclJoin" type="button">Class join karein</button>'+
-      '<button class="gpcl-btn sec" id="gpclCancel" type="button">Abhi nahi</button>'+
+      '<button class="gpcl-btn" id="gpclJoin" type="button">Haan, class join karein</button>'+
+      '<button class="gpcl-btn sec" id="gpclBack" type="button">Nahi, wapas jaayein</button>'+
       '<div class="gpcl-msg" id="gpclMsg" role="status" aria-live="polite"></div>');
-    $('gpclCancel').onclick = close;
-    $('gpclJoin').onclick = doJoin;
+    $('gpclBack').onclick = function(){ showJoin(''); };
+    $('gpclJoin').onclick = function(){ doJoin(code, info); };
   }
 
-  function doJoin(){
-    var code = cleanCode($('gpclCode').value);
+  function doJoin(code, info){
     var name = String($('gpclName').value||'').trim().slice(0,30);
-    if(code.length < 4) return msg('Sahi class code daaliye.');
     if(name.length < 2) return msg('Bachche ka naam ya nickname daaliye.');
     if(!$('gpclOk').checked) return msg('Aage badhne ke liye parent ki anumati wala box tick karein.');
     var b = $('gpclJoin'); b.disabled = true; msg('');
-    fetch(DB+code+'/info.json').then(function(r){ return r.json(); }).then(function(info){
-      if(!info || !info.name){ b.disabled = false; return msg('Yeh class code nahi mila. Teacher se dobara check karein.'); }
-      var j = { code:code, name:name, cls:String(info.name), school:String(info.school||''), teacher:String(info.teacher||''), joined:Date.now() };
-      s('gp_class', JSON.stringify(j));
-      return push(true).then(function(){ showJoined(j, true); });
-    }).catch(function(){ b.disabled = false; msg('Internet check karke dobara try karein.'); });
+    var j = { code:code, name:name, cls:String(info.name), school:String(info.school||''), teacher:String(info.teacher||''), joined:Date.now() };
+    s('gp_class', JSON.stringify(j));
+    push(true).then(function(){ showJoined(j, true); });
   }
 
   function showJoined(j, fresh){
@@ -16014,7 +16043,7 @@ body.gp-web #premiumScreen .pass-badge{display:none !important;}
       body.insertBefore(c, body.firstChild);
     }
     var j = joined();
-    c.innerHTML = '<span class="ic" aria-hidden="true">&#127979;</span><div><b>'+(j?('Class: '+esc(j.cls)):'Teacher / School class se judein')+'</b><span>'+(j?('Teacher ko progress dikh rahi hai. Code '+esc(j.code)):'Teacher ka diya class code daaliye')+'</span></div>';
+    c.innerHTML = '<span class="ic" aria-hidden="true">&#127979;</span><div><b>'+(j?('Class: '+esc(j.cls)):'Bachche ko school class se jodein')+'</b><span>'+(j?('Teacher ko progress dikh rahi hai. Code '+esc(j.code)):'Teacher ka diya class code daaliye')+'</span></div>';
   }
   try{
     var origParent = window.gpParent;
@@ -16033,6 +16062,28 @@ body.gp-web #premiumScreen .pass-badge{display:none !important;}
   setInterval(function(){ push(false); }, 300000);
   document.addEventListener('visibilitychange', function(){ if(document.visibilityState === 'hidden') push(true); });
   document.addEventListener('keydown', function(e){ if(e.key === 'Escape' && $('gpclOv').classList.contains('show')) close(); });
+
+  /* ---- Teacher Dashboard button: grown-up check, then open the teacher site ---- */
+  function teacherOpen(){
+    var x = 3 + Math.floor(Math.random()*7), y = 6 + Math.floor(Math.random()*4);
+    open('<h3 id="gpclTitle">&#127979; Teacher Dashboard</h3>'+
+      '<p>Yeh teachers ke liye hai: apni class banaiye aur bachchon ki progress dekhiye. Yeh browser mein khulega.</p>'+
+      '<label class="gpcl-lbl" for="gptAns">Bade hi aage badhein: '+x+' &times; '+y+' = ?</label>'+
+      '<input class="gpcl-in" type="text" id="gptAns" inputmode="numeric" maxlength="3" autocomplete="off">'+
+      '<button class="gpcl-btn" id="gptGo" type="button">Teacher Dashboard kholein</button>'+
+      '<button class="gpcl-btn sec" id="gptCancel" type="button">Wapas</button>'+
+      '<div class="gpcl-msg" id="gpclMsg" role="status" aria-live="polite"></div>');
+    $('gptCancel').onclick = close;
+    var go = function(){
+      if (parseInt($('gptAns').value,10) !== x*y) { msg('Jawab sahi nahi hai.'); return; }
+      close();
+      try { window.open('https://gyaanpe.com/teacher', '_blank', 'noopener'); } catch(e) { location.href = 'https://gyaanpe.com/teacher'; }
+    };
+    $('gptGo').onclick = go;
+    $('gptAns').onkeydown = function(e){ if (e.key === 'Enter') go(); };
+    setTimeout(function(){ try{ $('gptAns').focus(); }catch(e){} }, 50);
+  }
+  window.gpTeacherOpen = teacherOpen;
 
   window.gpClass = { open: showJoin, push: push };
 })();

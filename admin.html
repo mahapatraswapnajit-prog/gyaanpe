@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>GyaanPe Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<style>
+  :root{--navy:#1A237E;--orange:#FF6F00;--cream:#FFF9F0;--ink:#23233A;--muted:#6B6A7B;--line:#EADFCF;--green:#1E8E5A;--red:#C62828}
+  *{box-sizing:border-box} html,body{margin:0}
+  body{background:var(--cream);color:var(--ink);font-family:'Nunito',system-ui,-apple-system,'Segoe UI',sans-serif;font-size:16px;line-height:1.5;
+       padding:env(safe-area-inset-top,0) 0 env(safe-area-inset-bottom,0)}
+  main{max-width:860px;margin:0 auto;padding:20px 16px 48px}
+  header{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+  .brand{font-family:'Anton',Impact,'Arial Narrow',sans-serif;font-size:32px;line-height:1;text-decoration:none}
+  .brand .g{color:var(--navy)} .brand .p{color:var(--orange)} .brand small{font-family:'Nunito',sans-serif;font-size:14px;color:var(--muted);font-weight:800;margin-left:8px}
+  .who{display:flex;align-items:center;gap:10px;font-size:14px;color:var(--muted);font-weight:700}
+  h1{font-size:24px;margin:0 0 4px;color:var(--navy)}
+  h2{font-size:18px;margin:26px 0 10px;color:var(--navy);display:flex;align-items:center;gap:8px}
+  .count{background:var(--orange);color:#fff;border-radius:999px;font-size:13px;padding:1px 10px}
+  .count.n{background:#C9CEF2;color:var(--navy)}
+  .btn{display:inline-flex;align-items:center;justify-content:center;border:0;border-radius:10px;padding:9px 14px;font:inherit;font-weight:800;font-size:14px;cursor:pointer;background:var(--orange);color:#fff;text-decoration:none}
+  .btn.ok{background:var(--green)} .btn.sec{background:#fff;color:var(--navy);border:2px solid var(--navy)}
+  .btn.ghost{background:transparent;color:var(--muted);border:2px solid var(--line)} .btn.danger{background:#fff;color:var(--red);border:2px solid #F2C9C9}
+  .btn:disabled{opacity:.55;cursor:wait}
+  .btn:focus-visible,a:focus-visible{outline:3px solid var(--navy);outline-offset:2px}
+  .card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px}
+  .center{max-width:480px;margin:40px auto;text-align:center}
+  .t{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin-bottom:10px;display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;align-items:center}
+  .t b{font-size:17px;color:var(--navy)} .t .meta{color:var(--muted);font-size:14px}
+  .t .acts{display:flex;gap:8px;flex-wrap:wrap}
+  .muted{color:var(--muted);font-size:14px}
+  code{background:#FBF4E8;border:1px solid var(--line);border-radius:6px;padding:2px 6px;font-size:13px;word-break:break-all}
+  .msg{min-height:1.3em;font-weight:700;font-size:14px;margin-top:8px} .msg.err{color:var(--red)}
+  [hidden]{display:none !important}
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <a class="brand" href="./"><span class="g">Gyaan</span><span class="p">Pe</span><small>Admin</small></a>
+    <div class="who" id="who" hidden><span id="whoName"></span><button class="btn ghost" id="signOut" type="button">Sign out</button></div>
+  </header>
+
+  <section id="vSignin" class="card center" hidden>
+    <h1>Admin sign in</h1>
+    <p class="muted">Sirf GyaanPe admin ke liye.</p>
+    <button class="btn" id="signIn" type="button">Google se sign in karein</button>
+    <p class="msg err" id="signMsg" role="status" aria-live="polite"></p>
+  </section>
+
+  <section id="vNoAdmin" class="card center" hidden>
+    <h1>Admin access nahi hai</h1>
+    <p class="muted">Agar aap GyaanPe ke owner hain, to Firebase Console &rarr; Realtime Database &rarr; Data mein <code>gyaanpeAdmins</code> ke andar yeh ID jodiye, value <code>true</code>:</p>
+    <p><code id="myUid"></code></p>
+    <button class="btn sec" id="retry" type="button">Dobara check karein</button>
+  </section>
+
+  <section id="vAdmin" hidden>
+    <div class="row" style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+      <h1>Teacher requests</h1>
+      <button class="btn ghost" id="refresh" type="button">Refresh</button>
+    </div>
+    <p class="muted">Approve karne se pehle phone karke confirm kar lijiye ki woh sach mein us school ke teacher hain.</p>
+
+    <h2>Pending <span class="count" id="nPending">0</span></h2>
+    <div id="pending"></div>
+
+    <h2>Approved <span class="count n" id="nApproved">0</span></h2>
+    <div id="approved"></div>
+
+    <h2>Rejected / band <span class="count n" id="nRejected">0</span></h2>
+    <div id="rejected"></div>
+    <p class="msg err" id="loadMsg" role="status" aria-live="polite"></p>
+  </section>
+</main>
+
+<script>
+/* Same Firebase web config as teacher.html */
+var CONFIG = {
+  apiKey: "AIzaSyDy7Cip2itCD8gsQIuk-fHjQkGQDzTxdPc",
+  authDomain: "zapzone-98727.firebaseapp.com",
+  databaseURL: "https://zapzone-98727-default-rtdb.firebaseio.com",
+  projectId: "zapzone-98727",
+  storageBucket: "zapzone-98727.firebasestorage.app",
+  messagingSenderId: "884845281907",
+  appId: "1:884845281907:web:6be3cd071feb6a058f2006"
+};
+
+(function(){
+  'use strict';
+  var $ = function(id){ return document.getElementById(id); };
+  function esc(t){ return String(t==null?'':t).replace(/[&<>"']/g,function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+  function show(id){ ['vSignin','vNoAdmin','vAdmin'].forEach(function(v){ $(v).hidden = (v!==id); }); }
+  function when(ts){ if(!ts) return ''; var d=new Date(ts); return d.toLocaleDateString('en-IN',{day:'numeric',month:'short'})+', '+d.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'}); }
+
+  firebase.initializeApp(CONFIG);
+  var auth = firebase.auth(), db = firebase.database(), me = null;
+
+  $('signIn').onclick = function(){
+    var p = new firebase.auth.GoogleAuthProvider();
+    auth.signInWithPopup(p).catch(function(e){
+      if (e && e.code === 'auth/popup-blocked') return auth.signInWithRedirect(p);
+      $('signMsg').textContent = 'Sign in nahi ho paaya. Dobara try karein.';
+    });
+  };
+  $('signOut').onclick = function(){ auth.signOut(); };
+  $('retry').onclick = function(){ checkAdmin(); };
+  $('refresh').onclick = function(){ load(); };
+
+  auth.onAuthStateChanged(function(u){
+    me = u; $('who').hidden = !u;
+    if (!u) { show('vSignin'); return; }
+    $('whoName').textContent = u.email || u.displayName || '';
+    checkAdmin();
+  });
+
+  function checkAdmin(){
+    db.ref('gyaanpeAdmins/'+me.uid).once('value').then(function(s){
+      if (s.val() === true) { show('vAdmin'); load(); }
+      else { $('myUid').textContent = me.uid; show('vNoAdmin'); }
+    }).catch(function(){ $('myUid').textContent = me.uid; show('vNoAdmin'); });
+  }
+
+  function load(){
+    $('loadMsg').textContent = '';
+    db.ref('gyaanpeTeachers').once('value').then(function(s){
+      var all = s.val() || {}, P = [], A = [], R = [];
+      Object.keys(all).forEach(function(uid){
+        var t = all[uid] || {}, row = { uid:uid, t:t, rq:t.request || {}, nc:Object.keys(t.classes||{}).length };
+        if (t.approved === true) A.push(row);
+        else if (t.approved === false) R.push(row);
+        else if (t.request) P.push(row);
+      });
+      P.sort(function(a,b){ return (a.rq.at||0) - (b.rq.at||0); });
+      A.sort(function(a,b){ return String(a.rq.name||a.t.name).localeCompare(String(b.rq.name||b.t.name)); });
+      $('nPending').textContent = P.length; $('nApproved').textContent = A.length; $('nRejected').textContent = R.length;
+      $('pending').innerHTML  = P.length ? P.map(function(r){ return card(r,'p'); }).join('') : '<p class="muted">Koi pending request nahi hai.</p>';
+      $('approved').innerHTML = A.length ? A.map(function(r){ return card(r,'a'); }).join('') : '<p class="muted">Abhi koi approved teacher nahi.</p>';
+      $('rejected').innerHTML = R.length ? R.map(function(r){ return card(r,'r'); }).join('') : '<p class="muted">Koi nahi.</p>';
+      Array.prototype.forEach.call(document.querySelectorAll('[data-act]'), function(b){
+        b.onclick = function(){ act(b.getAttribute('data-uid'), b.getAttribute('data-act'), b); };
+      });
+    }).catch(function(){ $('loadMsg').textContent = 'Teachers load nahi hue. Firebase rules check karein.'; });
+  }
+
+  function card(r, kind){
+    var name = r.rq.name || r.t.name || 'Naam nahi', phone = r.rq.phone || '';
+    var info = '<div><b>'+esc(name)+'</b>'+
+      '<div class="meta">'+esc(r.rq.school || 'School nahi diya')+'</div>'+
+      '<div class="meta">'+(phone ? '<a href="tel:+91'+esc(phone)+'">+91 '+esc(phone)+'</a> &nbsp;' : '')+esc(r.rq.email || '')+'</div>'+
+      '<div class="meta">'+(r.rq.at ? 'Request: '+when(r.rq.at)+' &nbsp; ' : '')+r.nc+' class</div></div>';
+    var btns = '';
+    if (kind === 'p') btns = '<button class="btn ok" type="button" data-act="approve" data-uid="'+esc(r.uid)+'">Approve</button><button class="btn danger" type="button" data-act="reject" data-uid="'+esc(r.uid)+'">Reject</button>';
+    if (kind === 'a') btns = '<button class="btn danger" type="button" data-act="reject" data-uid="'+esc(r.uid)+'">Access band karein</button>';
+    if (kind === 'r') btns = '<button class="btn ok" type="button" data-act="approve" data-uid="'+esc(r.uid)+'">Approve karein</button>';
+    return '<div class="t">'+info+'<div class="acts">'+btns+'</div></div>';
+  }
+
+  function act(uid, what, btn){
+    var ok = what === 'approve';
+    if (!ok && !confirm('Is teacher ka access band karein? Woh nayi class nahi bana payenge. Pehle bani classes chalti rahengi.')) return;
+    btn.disabled = true;
+    db.ref('gyaanpeTeachers/'+uid+'/approved').set(ok).then(load)
+      .catch(function(){ btn.disabled = false; alert('Save nahi hua. Firebase rules check karein.'); });
+  }
+})();
+</script>
+</body>
+</html>

@@ -118,6 +118,7 @@
       <li><span class="mark">✓</span><span>Most information stays on the device. Learning progress is stored against a random ID that is not linked to a real identity.</span></li>
       <li><span class="mark no">✕</span><span>AI tutor conversations are not stored by us, and are not used to train AI models.</span></li>
       <li><span class="mark">✓</span><span>If a parent buys Premium or a course on our website, gyaanpe.com, we ask for the parent's mobile number for the payment. Nothing like this is asked inside the app.</span></li>
+      <li><span class="mark">✓</span><span>A child's progress is shared with a school teacher only if a parent joins a teacher's class and gives permission. The parent can leave the class at any time.</span></li>
       <li><span class="mark">✓</span><span>A parent can ask us to delete everything at any time by writing to the email address at the end of this page.</span></li>
     </ul>
   </section>
@@ -181,6 +182,17 @@
   <p>We instruct the AI to give age-appropriate, education-focused answers. AI systems can still occasionally produce an answer that is wrong or unsuitable, so we ask parents to supervise use of this feature. If you see an answer that seems inappropriate, please report it to us at the email address in section 12 and we will review it.</p>
   <p>Please tell your child not to type personal details — such as their full name, address, school or phone number — into the tutor.</p>
 
+  <h3>Joining a teacher's class (optional)</h3>
+  <p>A teacher can create a class on GyaanPe and give parents a class code. If a parent enters that code in the app's Parent Dashboard, confirms they are the parent or guardian and gives permission, the following is shared with that class's teacher only:</p>
+  <ul class="body">
+    <li>the child's name or nickname as typed by the parent, and class level;</li>
+    <li>when the app was last used, the daily streak and XP;</li>
+    <li>quiz accuracy and number of questions answered, overall and by subject;</li>
+    <li>chapters completed, minutes of learning over the last 7 days, and the topics the child finds hard or easy.</li>
+  </ul>
+  <p>AI tutor conversations, typed answers and anything else are not shared. The summary is updated automatically while the app is used. The parent can stop sharing at any time with "Class chhodein", which deletes the child's record from the class. A teacher can also remove a child, and deleting a class deletes all its records.</p>
+  <p>Teachers sign in with their Google account using Firebase Authentication, so we store the teacher's name and email, the school name and mobile number they give so we can verify them, and the classes they create. Every teacher is verified by us before they can create a class, and only the teacher who created a class can see its children's progress.</p>
+
   <h2>6. Advertising</h2>
   <p>GyaanPe does not show advertisements. There is no advertising network in the app, and no advertising identifier is collected, used or shared.</p>
   <p>If we ever introduce advertising, we will update this policy first and give notice inside the app. Any advertising in a children's app would be contextual only — never personalised, never based on behavioural profiling, and never used to build a profile of a child.</p>
@@ -202,7 +214,7 @@
   <table>
     <thead><tr><th>Provider</th><th>Purpose</th></tr></thead>
     <tbody>
-      <tr><td>Google Firebase</td><td>Storing learning progress</td></tr>
+      <tr><td>Google Firebase</td><td>Storing learning progress, class records and teacher sign-in</td></tr>
       <tr><td>Google Play Billing</td><td>Processing purchases inside the app</td></tr>
       <tr><td>Cashfree Payments</td><td>Processing purchases on gyaanpe.com</td></tr>
       <tr><td>Google Gemini</td><td>Generating AI tutor answers</td></tr>

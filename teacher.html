@@ -451,9 +451,12 @@ var CONFIG = {
   var C1 = ['english','maths','evs','hindi','gk','poetry','art'];
   function loadBank(){
     if (bankReady) return bankReady;
-    bankReady = Promise.all(['data-questions-1.js','data-questions-2.js'].map(function(src){
-      return new Promise(function(res, rej){ var sc = document.createElement('script'); sc.src = src; sc.onload = res; sc.onerror = rej; document.head.appendChild(sc); });
-    })).catch(function(e){ bankReady = null; throw e; });
+    var files = ['data-questions-1.js','data-questions-2.js','data-ncert.js'];
+    var load = function(src){ return new Promise(function(res, rej){ var sc = document.createElement('script'); sc.src = src; sc.onload = res; sc.onerror = rej; document.head.appendChild(sc); }); };
+    /* one after another: data-ncert.js replaces some arrays from the files before it */
+    bankReady = files.reduce(function(p, f){ return p.then(function(){ return load(f); }); }, Promise.resolve())
+      .then(function(){ if (window.NCERT_CHAPTERS) for (var k in NCERT_CHAPTERS) M.CH[k] = NCERT_CHAPTERS[k]; })
+      .catch(function(e){ bankReady = null; throw e; });
     return bankReady;
   }
   function subjectsFor(cl){

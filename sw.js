@@ -1,4 +1,4 @@
-const CACHE = 'gyaanpe-v7';
+const CACHE = 'gyaanpe-v8';
 
 /* Works on both https://mahapatraswapnajit-prog.github.io/gyaanpe/ and https://gyaanpe.com/ :
    every path is resolved against the folder this sw.js lives in. */
@@ -13,6 +13,7 @@ const FILES = [
   'manifest.json',
   'data-questions-1.js',
   'data-questions-2.js',
+  'data-ncert.js',
   'data-hub-1.js',
   'data-hub-2.js'
 ].map(at);

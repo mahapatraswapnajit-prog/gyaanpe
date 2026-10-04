@@ -67,6 +67,22 @@
   .ov{position:fixed;inset:0;background:rgba(10,14,40,.55);display:none;align-items:flex-start;justify-content:center;padding:24px 14px;overflow:auto;z-index:50}
   .ov.show{display:flex}
   .ov .card{width:100%;max-width:640px}
+  .hw{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-bottom:8px;cursor:pointer;text-align:left;width:100%;font:inherit;color:inherit}
+  .hw:hover{border-color:var(--orange)}
+  .hw b{color:var(--navy)} .hw .muted{display:block}
+  .qprev{background:#FFF9F0;border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin:8px 0;max-height:320px;overflow:auto}
+  .qprev ol{margin:0;padding-left:22px} .qprev li{margin-bottom:8px} .qprev .opt{color:var(--muted);font-size:14px}
+  #printArea{display:none}
+  @media print{
+    @page{margin:14mm}
+    body{background:#fff} main,header,.ov{display:none !important}
+    #printArea{display:block !important;color:#000;font-family:'Nunito',Arial,sans-serif;font-size:13pt;line-height:1.45}
+    #printArea h1{font-size:18pt;margin:0 0 4px;color:#000} #printArea .ph{display:flex;justify-content:space-between;border-bottom:2px solid #000;padding-bottom:6px;margin-bottom:10px}
+    #printArea .lines{display:flex;gap:24px;margin:8px 0 14px} #printArea .lines span{flex:1;border-bottom:1px solid #000;padding-bottom:2px}
+    #printArea ol{padding-left:32px} #printArea li{margin-bottom:12px;break-inside:avoid}
+    #printArea .ops{display:grid;grid-template-columns:1fr 1fr;gap:2px 18px;margin-top:4px}
+    #printArea .key{break-before:page}
+  }
   [hidden]{display:none !important}
 </style>
 </head>
@@ -153,6 +169,10 @@
       <div class="card"><h2 style="margin-top:0">3+ din se nahi aaye</h2><ul class="list" id="cInactive"></ul></div>
     </div>
 
+    <h2>Homework</h2>
+    <div class="row" style="margin-bottom:10px"><button class="btn" id="hwNew" type="button">+ Naya homework</button></div>
+    <div id="hwList"><p class="muted">Abhi koi homework nahi.</p></div>
+
     <h2>Bachche</h2>
     <div class="row" style="margin-bottom:10px">
       <label for="sortBy" style="margin:0">Sort:</label>
@@ -175,6 +195,8 @@
 </main>
 
 <div class="ov" id="ov" role="dialog" aria-modal="true" aria-labelledby="sName"><div class="card" id="ovBox"></div></div>
+<div id="printArea" aria-hidden="true"></div>
+<script>window.HW_META = {"CH":{"c7sst":["New Kings, Kingdoms & The Delhi Sultans","The Mughal Empire","Bhakti-Sufi Movements & Regional Cultures","Towns, Traders, Tribes & Nomads","Inside Our Earth & Our Changing Earth","Air & Water","Natural Vegetation, Wildlife & Settlements","On Equality & Role of Government in Health","Media, Advertising & Markets","Gender Equality & Struggles for Equality"],"c6sst":["What, Where, How and When","From Hunting-Gathering to Growing Food","In the Earliest Cities (Harappa)","Vedic Age, Mahajanapadas & Ashoka","The Earth in the Solar System & Globe","Maps & Major Domains of the Earth","India: Land, Climate & Vegetation","Understanding Diversity & Government","Panchayati Raj & Rural Administration","Urban Administration & Livelihoods"],"c7evs":["Nutrition in Plants & Animals","Heat & Temperature","Acids, Bases & Salts","Physical & Chemical Changes","Weather, Climate & Adaptation","Winds, Storms & Cyclones","Soil","Respiration in Organisms","Transportation in Animals & Plants","Reproduction in Plants"],"c7gk":["Indian Polity & Governance","Freedom Movement","World History Basics","Indian & World Geography","Economy Basics","Science & Technology","Sports","Awards & Honours","International Organizations","Current Affairs & General Awareness"],"c7art":["Colour Theory & Advanced Mixing","Perspective Drawing","Shading & Rendering Techniques","Craft & Mixed Media","Origami & 3D Paper Art","Still Life & Object Studies","Landscape & Scenic Art","Cultural & Folk Art Forms","Portrait & Human Figure Basics","Art History & Appreciation"],"c7comp":["Computer Networks & Internet","Advanced MS Word Features","Advanced MS Excel","Advanced MS PowerPoint","Introduction to HTML & Web Basics","Cybersecurity & Safe Computing","Cloud Computing & Storage","Advanced Coding & Algorithms","Emerging Technologies","Computer Ethics & Digital Citizenship"],"c7eng":["Nouns & Determiners","Pronouns & Verb Agreement","Tenses (Advanced)","Modals (Advanced)","Direct & Indirect Speech","Active & Passive Voice","Clauses (Noun, Adjective, Adverb)","Prepositions & Phrasal Verbs","Vocabulary & Figures of Speech","Reading Comprehension"],"c7hin":["संधि (विस्तार)","समास (सभी भेद)","कारक","अलंकार (उपमा और रूपक)","मुहावरे और लोकोक्तियाँ","वाच्य (कर्तृ-कर्म)","विलोम और पर्यायवाची","पत्र लेखन (औपचारिक)","वाक्य शुद्धि और रचना","अपठित गद्यांश"],"c7maths":["Integers","Fractions & Decimals","Rational Numbers","Simple Equations","Lines and Angles","Triangles & Congruence","Comparing Quantities","Perimeter and Area","Algebraic Expressions & Exponents","Data Handling & Symmetry"],"c6art":["Colour Theory & Colour Wheel","Shading, Texture & Perspective","Drawing Tools & Mixed Media","Craft & Recycled Art","Origami & 3D Paper Craft","Object & Still Life Drawing","Nature & Landscape Art","Festival & Cultural Art","Portrait, Cartoon & Composition","Art History & Appreciation"],"c6comp":["Computer Systems & Networking","Operating Systems","Storage Devices & Memory Units","MS Word","MS Excel: Formulas & Functions","MS PowerPoint","Internet & Web Browsing Skills","Cyber Safety & Digital Citizenship","Coding & Algorithms","AI & Emerging Technologies"],"c6evs":["Food: Sources & Components","Fibres & Fabrics","Materials: Sorting & Grouping","Separation of Substances","Changes Around Us","Living Organisms & Habitats","Body Movements","Motion & Measurement","Light, Shadows & Reflections","Electricity, Water & Air"],"c6gk":["India: States, Capitals & UTs","Ancient Indian History","Indian Government & Civics","World Geography","Science & Technology","Space & Astronomy","Sports","Famous Personalities","Environment & Current Affairs","General Awareness & Culture"],"c6hin":["संज्ञा एवं सर्वनाम","विशेषण (तुलना)","क्रिया और वाच्य","काल","उपसर्ग और प्रत्यय","संधि और समास","पर्यायवाची शब्द","विलोम शब्द","मुहावरे और लोकोक्तियां","अपठित गद्यांश एवं वाक्य शुद्धि"],"c6eng":["Nouns (Gender, Number, Case)","Pronouns (All Types)","Verbs & Tenses","Modals","Adjectives & Degrees of Comparison","Adverbs & Prepositions","Conjunctions & Clauses","Active & Passive Voice","Synonyms & Antonyms","Reading Comprehension"],"c6maths":["Knowing Our Numbers & Whole Numbers","Playing with Numbers","Integers","Fractions","Decimals","Basic Geometrical Ideas & Shapes","Symmetry & Practical Geometry","Mensuration","Ratio, Proportion & Algebra","Data Handling"],"c5gk":["India: Geography & States","Indian Constitution & Government","Freedom Struggle & Personalities","Science & Technology","Space & Astronomy","Sports","Environment & Conservation","World Geography & Facts","Culture, Festivals & Heritage","Current Affairs & General Awareness"],"c5art":["Colour Theory & Mixing","Shading, Texture & Techniques","Drawing Tools & Materials","Craft Materials & Recycled Art","Origami & Paper Craft","Object & Still Life Drawing","Nature & Landscape Art","Festival & Cultural Art","Portrait, Cartoon & Composition","Art Appreciation & Famous Artists"],"c5comp":["Computer Systems & Generations","Operating Systems","Input, Output & Storage Devices","MS Word","MS Excel Basics","MS PowerPoint Basics","Internet & Email","Cyber Safety & Digital Citizenship","Coding & Scratch Basics","Emerging Tech: AI, Robots & Fun Facts"],"c5evs":["Our Senses & Body","Digestion & Nutrition","Plants: Seeds & Germination","Water Conservation","Air & Science Experiments","Community, Transport & Communication","Natural Disasters & Safety","Space","Blood, Health & Germs","Magnets & Fun Science Facts"],"c5hin":["संज्ञा और सर्वनाम","क्रिया और वाच्य","विशेषण (तुलना)","समास","मुहावरे और लोकोक्तियाँ","विलोम शब्द","पर्यायवाची शब्द","अनेकार्थी शब्द","वाक्य शुद्धि एवं विराम चिह्न","अपठित गद्यांश"],"c5eng":["Nouns & Pronouns (Advanced)","Verbs & Perfect Tenses","Adjectives & Adverbs (Degrees)","Prepositions & Conjunctions","Active & Passive Voice","Direct & Indirect Speech","Synonyms & Antonyms","Sentence Types & Punctuation","Vocabulary & Word Formation","Reading Comprehension"],"c5maths":["Large Numbers & Operations","Fractions","Decimals","HCF & LCM","Percentage & Profit-Loss","Perimeter, Area & Volume","Geometry (Angles & Shapes)","Time, Speed & Distance","Data Handling (Average & Graphs)","Patterns, Symmetry & Money"],"c4comp":["Computer Basics & Generations","Input & Output Devices","Storage Devices","MS Paint","Word Processing","Typing Skills","Internet Basics","Internet Safety & Digital Citizenship","Coding Basics","AI Awareness & Fun Facts"],"c4gk":["India, States & Capitals","National Symbols","Science Facts","Space","Sports","Famous Personalities","Environment & Nature","World Facts","Culture & Festivals","General Awareness"],"c4art":["Colour Theory","Shading & Painting Techniques","Drawing Tools & Materials","Craft Materials & Techniques","Origami","Object Drawing","Nature Art","Festival Art","Portrait, Cartoon & Composition","Creative Thinking & Famous Art"],"c4evs":["Family & Relationships","Plants","Animals (Habitats & Adaptations)","Food & Nutrition","Water","Air & Weather","Our Body (Systems)","Travel, Communication & Maps","States of India & Natural Resources","Environment, Pollution & Safety"],"c4hin":["संज्ञा","सर्वनाम","विशेषण (तुलना)","क्रिया और काल","विलोम शब्द","पर्यायवाची शब्द","मुहावरे","संधि","वाक्य निर्माण एवं विराम चिह्न","अपठित गद्यांश"],"c4eng":["Nouns (Abstract, Material, Collective)","Pronouns (Relative & Reflexive)","Verbs & Tenses","Adjectives & Adverbs","Articles & Prepositions","Conjunctions","Synonyms","Antonyms","Sentence Formation & Punctuation","Reading Comprehension"],"c4maths":["Large Numbers & Roman Numerals","Addition & Subtraction","Multiplication","Division","Factors & Multiples","Fractions","Decimals","Measurement, Perimeter & Area","Time, Calendar & Money","Geometry, Symmetry & Data Handling"],"c3maths":["Numbers to 1000","Place Value","Addition","Subtraction","Multiplication","Division","Fractions","Money","Measurement & Time","Geometry, Patterns & Data"],"c3comp":["Computer Parts & Hardware","Software Basics","The Mouse","The Keyboard","MS Paint","Typing Skills","Internet Basics","Uses of Computers & Internet","Computer Safety & Care","Digital Etiquette & Fun Facts"],"c3gk":["India & States","National Symbols","Animals & Birds","Science Facts","Space","Sports","Famous Personalities","Nature","World Facts","General Awareness"],"c3art":["Colour Theory","Shapes & Patterns","Drawing Tools & Techniques","Shading & Texture","Craft Materials & Techniques","Object Drawing","Nature Drawing","Festival Art","Creative Thinking & Composition","Famous Art & Artists"],"c3evs":["Family & Community","Food & Nutrition","Water","Plants","Animals & Insects","Birds","Our Body & Health","Travel & Communication","Maps & Directions","Weather, Seasons & Safety"],"c3hin":["संज्ञा","सर्वनाम","क्रिया (काल)","विशेषण","विलोम शब्द","पर्यायवाची शब्द","मुहावरे","वाक्य एवं विराम चिह्न","गद्यांश","कविता एवं भाषा ज्ञान"],"c3eng":["Nouns","Pronouns","Verbs & Tenses","Adjectives","Articles & Prepositions","Synonyms","Antonyms","Sentence Formation & Punctuation","Vocabulary & Word Building","Reading Comprehension"],"c2maths":["Numbers","Place Value","Addition","Subtraction","Multiplication","Division","Shapes & Patterns","Measurement","Time & Calendar","Money & Data"],"c2eng":["Vowels & Consonants","Nouns","Pronouns","Verbs","Adjectives","Opposite Words","Synonyms","Articles & Sentences","Reading Comprehension","Rhyming Words"],"c2hin":["स्वर","व्यंजन","मात्रा","दो अक्षर शब्द","तीन अक्षर शब्द","वाक्य निर्माण","लिंग और वचन","विलोम शब्द","चित्र पहचान","कहानी पढ़ना"],"c2evs":["My Family","My Body","My School","Plants","Animals & Birds","Food & Water","Air & Environment","Transport","Community Helpers","Seasons & Weather"],"c2gk":["India Basics","National Symbols","Animals","Birds","Science Facts","Space","Sports","Famous Personalities","Nature","General Awareness"],"c2art":["Primary & Secondary Colours","Shapes We Draw","Drawing Tools & Materials","Colour Mixing","Warm & Cool Colours","Craft Materials","Object Drawing","Nature Drawing","Art Techniques","Fun Art Facts"],"c2comp":["Parts of a Computer","Input Devices","Output Devices","The Mouse","The Keyboard","The Monitor","Uses of a Computer","MS Paint Basics","Computer Safety & Care","Fun Computer Facts"]},"SL":{"c6sst":"Social Science (C6)","c7sst":"Social Science (C7)","c7maths":"Maths (C7)","c7eng":"English (C7)","c7hin":"हिंदी (C7)","c7evs":"Science (C7)","c7gk":"GK (C7)","c7art":"Art (C7)","c7comp":"Computer (C7)","c6maths":"Maths (C6)","c6eng":"English (C6)","c6hin":"हिंदी (C6)","c6evs":"Science (C6)","c6gk":"GK (C6)","c6art":"Art (C6)","c6comp":"Computer (C6)","c5maths":"Maths (C5)","c5eng":"English (C5)","c5hin":"हिंदी (C5)","c5evs":"EVS (C5)","c5gk":"GK (C5)","c5art":"Art (C5)","c5comp":"Computer (C5)","c4maths":"Maths (C4)","c4eng":"English (C4)","c4hin":"हिंदी (C4)","c4evs":"EVS (C4)","c4gk":"GK (C4)","c4art":"Art (C4)","c4comp":"Computer (C4)","c3maths":"Maths (C3)","c3eng":"English (C3)","c3hin":"हिंदी (C3)","c3evs":"EVS (C3)","c3gk":"GK (C3)","c3art":"Art (C3)","c3comp":"Computer (C3)","c2maths":"Maths (C2)","c2eng":"English (C2)","c2hin":"हिंदी (C2)","c2evs":"EVS (C2)","c2gk":"GK (C2)","c2art":"Art (C2)","c2comp":"Computer (C2)","english":"English","maths":"Maths","evs":"EVS","hindi":"Hindi","poetry":"Poetry","gk":"GK","art":"Art"}};</script>
 
 <script>
 /* ===== CONFIG: Firebase Console > Project settings > Your apps > Web app ===== */
@@ -373,6 +395,7 @@ var CONFIG = {
     }).join('') : '<li class="muted">Sab bachche pichhle 3 din mein aaye hain. &#127881;</li>';
 
     renderRows();
+    hwLoadList();
   }
 
   function renderRows(){
@@ -422,6 +445,137 @@ var CONFIG = {
     };
   }
   function closeOv(){ $('ov').classList.remove('show'); }
+
+  /* ================= HOMEWORK ================= */
+  var M = window.HW_META || { CH:{}, SL:{} }, bankReady = null, hwCache = {};
+  var C1 = ['english','maths','evs','hindi','gk','poetry','art'];
+  function loadBank(){
+    if (bankReady) return bankReady;
+    bankReady = Promise.all(['data-questions-1.js','data-questions-2.js'].map(function(src){
+      return new Promise(function(res, rej){ var sc = document.createElement('script'); sc.src = src; sc.onload = res; sc.onerror = rej; document.head.appendChild(sc); });
+    })).catch(function(e){ bankReady = null; throw e; });
+    return bankReady;
+  }
+  function subjectsFor(cl){
+    if (cl === '1') return C1;
+    return Object.keys(M.SL).filter(function(k){ return k.indexOf('c'+cl) === 0; });
+  }
+  function subName(k){ return String(M.SL[k] || subj(k)).replace(/\s*\(C\d\)\s*$/, '').replace(/^./, function(c){ return c.toUpperCase(); }); }
+  function chapters(k){ var b = window[k+'Q'] || []; var names = M.CH[k] || []; return b.map(function(_, i){ return names[i] || ('Level ' + (i+1)); }); }
+  function shuffle(a){ a = a.slice(); for (var i=a.length-1;i>0;i--){ var j = Math.floor(Math.random()*(i+1)); var t=a[i]; a[i]=a[j]; a[j]=t; } return a; }
+  function qText(q){ var t = q.q || ''; if (q.vis && q.vis.t){ try { t += ' ' + String.fromCodePoint(parseInt(q.vis.t,16)).repeat(Math.min(+q.vis.n||1, 20)); } catch(e){} } return t; }
+  function pickQs(k, ch, n){ var lvl = (window[k+'Q'] || [])[ch] || []; return shuffle(lvl).slice(0, n).map(function(q){ return { q:qText(q), o:q.o.slice(0,6), a:q.a }; }); }
+  function dateStr(ts){ return ts ? new Date(ts).toLocaleDateString('en-IN', { day:'numeric', month:'short' }) : ''; }
+
+  function hwLoadList(){
+    if (!cur) return;
+    db.ref('gyaanpeClasses/'+cur.code+'/hw').once('value').then(function(s){
+      var hw = s.val() || {}; hwCache = hw;
+      var ids = Object.keys(hw).sort(function(a,b){ return (hw[b].created||0) - (hw[a].created||0); });
+      if (!ids.length) { $('hwList').innerHTML = '<p class="muted">Abhi koi homework nahi. "+ Naya homework" se banaiye.</p>'; return; }
+      return db.ref('gyaanpeClasses/'+cur.code+'/hwsub').once('value').then(function(ss){
+        var subs = ss.val() || {}, total = Object.keys(students).length;
+        $('hwList').innerHTML = ids.map(function(id){
+          var h = hw[id], sb = subs[id] || {}, done = Object.keys(sb), avg = done.length ? Math.round(done.reduce(function(t,u){ return t + (sb[u].s / Math.max(1, sb[u].t))*100; }, 0) / done.length) : null;
+          var late = h.due && Date.now() > h.due + 86400000;
+          return '<button class="hw" type="button" data-hw="'+esc(id)+'"><span><b>'+esc(h.t)+'</b><span class="muted">'+(+h.n||0)+' sawaal, last date '+esc(dateStr(h.due))+(late?' (khatam)':'')+'</span></span>'+
+                 '<span style="text-align:right"><b>'+done.length+' / '+total+'</b> ne kiya<span class="muted">'+(avg===null?'—':'avg '+avg+'%')+'</span></span></button>';
+        }).join('');
+        Array.prototype.forEach.call(document.querySelectorAll('[data-hw]'), function(b){ b.onclick = function(){ hwDetail(b.getAttribute('data-hw'), subs[b.getAttribute('data-hw')] || {}); }; });
+      });
+    }).catch(function(){ $('hwList').innerHTML = '<p class="msg err">Homework load nahi hua.</p>'; });
+  }
+
+  var draft = null;
+  $('hwNew').onclick = function(){
+    $('ovBox').innerHTML = '<h1 id="sName">Naya homework</h1><p class="muted">Sawaal GyaanPe app ke apne question bank se aate hain, wahi jo bachche app mein padhte hain.</p><p class="muted" id="hwLoad">Question bank load ho raha hai…</p>';
+    $('ov').classList.add('show');
+    loadBank().then(hwForm).catch(function(){ $('hwLoad').textContent = 'Question bank load nahi hua. Internet check karke dobara try karein.'; });
+  };
+
+  function hwForm(){
+    var due = new Date(Date.now() + 3*86400000).toISOString().slice(0,10);
+    $('ovBox').innerHTML =
+      '<div class="row" style="justify-content:space-between"><h1 id="sName" style="margin:0">Naya homework</h1><button class="btn ghost" id="hwClose" type="button">Band karein</button></div>'+
+      '<div class="grid2">'+
+        '<div><label for="hwCls">Class</label><select id="hwCls">'+[1,2,3,4,5,6,7].map(function(n){ return '<option value="'+n+'">Class '+n+'</option>'; }).join('')+'</select></div>'+
+        '<div><label for="hwSub">Subject</label><select id="hwSub"></select></div>'+
+        '<div><label for="hwCh">Chapter</label><select id="hwCh"></select></div>'+
+        '<div><label for="hwN">Kitne sawaal</label><select id="hwN"><option value="5">5</option><option value="10" selected>10</option></select></div>'+
+        '<div><label for="hwDue">Last date</label><input type="text" id="hwDue" value="'+due+'" placeholder="YYYY-MM-DD"></div>'+
+        '<div><label for="hwT">Title</label><input type="text" id="hwT" maxlength="60"></div>'+
+      '</div>'+
+      '<div class="row" style="justify-content:space-between;margin-top:14px"><b>Sawaal (preview)</b><button class="btn ghost" id="hwShuffle" type="button">Naye sawaal</button></div>'+
+      '<div class="qprev" id="hwPrev"></div>'+
+      '<label style="display:flex;gap:8px;align-items:center;font-weight:700"><input type="checkbox" id="hwKey" checked style="width:18px;height:18px"> PDF mein answer key bhi (alag page pe)</label>'+
+      '<div class="row" style="margin-top:14px"><button class="btn" id="hwAssign" type="button">App mein assign karein</button><button class="btn sec" id="hwPrint" type="button">Print / PDF</button></div>'+
+      '<p class="msg" id="hwMsg" role="status" aria-live="polite"></p>';
+    try { $('hwDue').type = 'date'; } catch(e){}
+    $('hwClose').onclick = closeOv;
+    var fillSub = function(){ var cl = $('hwCls').value; $('hwSub').innerHTML = subjectsFor(cl).filter(function(k){ return window[k+'Q']; }).map(function(k){ return '<option value="'+k+'">'+esc(subName(k))+'</option>'; }).join(''); fillCh(); };
+    var fillCh = function(){ var k = $('hwSub').value; $('hwCh').innerHTML = chapters(k).map(function(n,i){ return '<option value="'+i+'">'+(i+1)+'. '+esc(n)+'</option>'; }).join(''); makeDraft(true); };
+    var makeDraft = function(retitle){
+      var k = $('hwSub').value, ch = +$('hwCh').value, n = +$('hwN').value;
+      if (retitle) $('hwT').value = (subName(k) + ': ' + (chapters(k)[ch] || '')).slice(0,60);
+      draft = { sec:k, ch:ch, chn:chapters(k)[ch] || '', qs:pickQs(k, ch, n) };
+      $('hwPrev').innerHTML = '<ol>' + draft.qs.map(function(q){ return '<li>'+esc(q.q)+'<div class="opt">'+q.o.map(function(o,i){ return '('+'ABCDEF'[i]+') '+esc(o); }).join(' &nbsp; ')+'</div></li>'; }).join('') + '</ol>';
+    };
+    $('hwCls').onchange = fillSub; $('hwSub').onchange = fillCh; $('hwCh').onchange = function(){ makeDraft(true); };
+    $('hwN').onchange = function(){ makeDraft(false); }; $('hwShuffle').onclick = function(){ makeDraft(false); };
+    var guess = String((cur.info && cur.info.name) || '').match(/[1-7]/); if (guess) $('hwCls').value = guess[0];
+    fillSub();
+    $('hwPrint').onclick = function(){ printHw({ t:$('hwT').value.trim() || 'Homework', due:dueTs(), qs:draft.qs }, $('hwKey').checked); };
+    $('hwAssign').onclick = function(){
+      var t = $('hwT').value.trim().slice(0,60), m = $('hwMsg');
+      if (!draft || !draft.qs.length) { m.className='msg err'; m.textContent='Is chapter mein sawaal nahi mile.'; return; }
+      if (t.length < 3) { m.className='msg err'; m.textContent='Title daaliye.'; return; }
+      this.disabled = true;
+      var ref = db.ref('gyaanpeClasses/'+cur.code+'/hw').push();
+      ref.set({ t:t, sec:draft.sec, ch:draft.ch, chn:draft.chn, n:draft.qs.length, qs:draft.qs, due:dueTs(), created:Date.now() })
+        .then(function(){ closeOv(); hwLoadList(); })
+        .catch(function(){ m.className='msg err'; m.textContent='Assign nahi hua. Dobara try karein.'; $('hwAssign').disabled = false; });
+    };
+  }
+  function dueTs(){ var v = ($('hwDue') && $('hwDue').value) || ''; var d = new Date(v + 'T23:59:00'); return isNaN(d) ? Date.now() + 3*86400000 : d.getTime(); }
+
+  function printHw(h, withKey){
+    var info = cur.info || {};
+    var html = '<div class="ph"><div><b>GyaanPe</b> Homework</div><div>'+esc(info.school||'')+(info.name?(' | '+esc(info.name)):'')+'</div></div>'+
+      '<h1>'+esc(h.t)+'</h1>'+(h.due?'<div>Last date: '+esc(dateStr(h.due))+'</div>':'')+
+      '<div class="lines"><span>Naam:</span><span>Roll no.:</span><span>Date:</span></div>'+
+      '<ol>'+h.qs.map(function(q){ return '<li>'+esc(q.q)+'<div class="ops">'+q.o.map(function(o,i){ return '<span>('+'ABCDEF'[i]+') '+esc(o)+'</span>'; }).join('')+'</div></li>'; }).join('')+'</ol>'+
+      '<div style="margin-top:10px;font-size:10pt">Yahi homework GyaanPe app mein bhi kar sakte hain: Home &rarr; Teacher ka homework.</div>';
+    if (withKey) html += '<div class="key"><h1>Answer key: '+esc(h.t)+'</h1><ol>'+h.qs.map(function(q){ return '<li>('+'ABCDEF'[q.a]+') '+esc(q.o[q.a])+'</li>'; }).join('')+'</ol></div>';
+    $('printArea').innerHTML = html;
+    setTimeout(function(){ window.print(); }, 50);
+  }
+
+  function hwDetail(id, sb){
+    var h = hwCache[id]; if (!h) return;
+    var ids = Object.keys(students).sort(function(a,b){ return String(students[a].n||'').localeCompare(String(students[b].n||'')); });
+    var rows = ids.map(function(u){
+      var x = sb[u];
+      return '<tr><td><b>'+esc(students[u].n)+'</b></td><td>'+(x ? accPill(Math.round(x.s/Math.max(1,x.t)*100), 1)+' &nbsp;'+x.s+'/'+x.t : '<span class="pill p-none">Baaki</span>')+'</td><td>'+(x ? esc(dateStr(x.at)) : '')+'</td></tr>';
+    }).join('');
+    var wrong = (h.qs||[]).map(function(q, i){
+      var tried = 0, bad = 0; Object.keys(sb).forEach(function(u){ var a = (sb[u].ans||[])[i]; if (a !== undefined && a !== null){ tried++; if (+a !== +q.a) bad++; } });
+      return { i:i, q:q.q, bad:bad, tried:tried };
+    }).filter(function(x){ return x.bad > 0; }).sort(function(a,b){ return b.bad - a.bad; }).slice(0,5);
+    $('ovBox').innerHTML =
+      '<div class="row" style="justify-content:space-between"><h1 id="sName" style="margin:0">'+esc(h.t)+'</h1><button class="btn ghost" id="hwClose" type="button">Band karein</button></div>'+
+      '<p class="muted">'+(+h.n||0)+' sawaal, last date '+esc(dateStr(h.due))+'</p>'+
+      '<div class="wrap"><table style="min-width:0"><thead><tr><th>Naam</th><th>Score</th><th>Kab</th></tr></thead><tbody>'+(rows || '<tr><td colspan="3" class="muted">Class mein abhi koi bachcha nahi.</td></tr>')+'</tbody></table></div>'+
+      (wrong.length ? '<h2>Sabse zyada galat hue sawaal</h2><ul class="list">'+wrong.map(function(w){ return '<li><span>Q'+(w.i+1)+'. '+esc(w.q)+'</span><b>'+w.bad+'/'+w.tried+'</b></li>'; }).join('')+'</ul>' : '')+
+      '<div class="row" style="margin-top:16px"><button class="btn sec" id="hwRePrint" type="button">Print / PDF</button><button class="btn danger" id="hwDel" type="button">Homework delete karein</button></div>';
+    $('ov').classList.add('show');
+    $('hwClose').onclick = closeOv;
+    $('hwRePrint').onclick = function(){ printHw(h, true); };
+    $('hwDel').onclick = function(){
+      if (!confirm('Yeh homework aur saare jawab delete ho jaayenge. Pakka?')) return;
+      Promise.all([ db.ref('gyaanpeClasses/'+cur.code+'/hw/'+id).remove(), db.ref('gyaanpeClasses/'+cur.code+'/hwsub/'+id).remove() ])
+        .then(function(){ closeOv(); hwLoadList(); });
+    };
+  }
   $('ov').onclick = function(e){ if (e.target === $('ov')) closeOv(); };
   document.addEventListener('keydown', function(e){ if (e.key === 'Escape') closeOv(); });
 

@@ -38,6 +38,26 @@
   .muted{color:var(--muted);font-size:14px}
   code{background:#FBF4E8;border:1px solid var(--line);border-radius:6px;padding:2px 6px;font-size:13px;word-break:break-all}
   .msg{min-height:1.3em;font-weight:700;font-size:14px;margin-top:8px} .msg.err{color:var(--red)}
+  .tabs{display:flex;gap:8px;margin:0 0 16px}
+  .tabs button{border:2px solid var(--line);background:#fff;color:var(--muted);border-radius:999px;padding:8px 18px;font:inherit;font-weight:800;cursor:pointer}
+  .tabs button[aria-selected=true]{background:var(--navy);border-color:var(--navy);color:#fff}
+  label{display:block;font-weight:800;font-size:14px;margin:12px 0 4px}
+  input[type=text],input[type=number],input[type=password],select{width:100%;font:inherit;font-size:16px;padding:10px 12px;border:2px solid var(--line);border-radius:10px;background:#fff;color:var(--ink)}
+  .grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+  .wrap{overflow-x:auto;background:#fff;border:1px solid var(--line);border-radius:14px;margin-top:10px}
+  table{border-collapse:collapse;width:100%;font-size:14px}
+  th,td{padding:9px 10px;text-align:left;border-bottom:1px solid #F3EADB;white-space:nowrap}
+  th{background:#FBF4E8;color:var(--navy);font-size:12.5px}
+  .mono{font-family:ui-monospace,Consolas,monospace;font-weight:700;letter-spacing:1px}
+  .ok-t{color:var(--green);font-weight:800} .no-t{color:var(--muted)}
+  .b-row{cursor:pointer} .b-row:hover{background:#FFF6EA}
+  #printArea{display:none}
+  @media print{
+    body{background:#fff} main,header{display:none !important}
+    #printArea{display:grid !important;grid-template-columns:1fr 1fr;gap:8px;padding:8px}
+    .slip{border:2px dashed #999;border-radius:10px;padding:12px;font-family:'Nunito',sans-serif;break-inside:avoid}
+    .slip .c{font-family:ui-monospace,Consolas,monospace;font-size:22px;font-weight:800;letter-spacing:2px;margin:6px 0}
+  }
   [hidden]{display:none !important}
 </style>
 </head>
@@ -63,6 +83,11 @@
   </section>
 
   <section id="vAdmin" hidden>
+    <div class="tabs" role="tablist">
+      <button type="button" role="tab" id="tabT" aria-selected="true">Teachers</button>
+      <button type="button" role="tab" id="tabC" aria-selected="false">School codes</button>
+    </div>
+    <div id="paneT">
     <div class="row" style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
       <h1>Teacher requests</h1>
       <button class="btn ghost" id="refresh" type="button">Refresh</button>
@@ -78,7 +103,47 @@
     <h2>Rejected / band <span class="count n" id="nRejected">0</span></h2>
     <div id="rejected"></div>
     <p class="msg err" id="loadMsg" role="status" aria-live="polite"></p>
+    </div>
+
+    <div id="paneC" hidden>
+      <h1>School codes</h1>
+      <p class="muted">School ke bachchon ke liye ek saath unlock codes banaiye. Har bachche ko ek code, jo app mein "Code se unlock karein" mein daalna hai. Premium ke din code pehli baar daalne se ginte hain.</p>
+
+      <div class="card" id="keyCard">
+        <label for="aKey">Admin key (gyaanpe-pay Worker ka ADMIN_KEY)</label>
+        <input type="password" id="aKey" autocomplete="off">
+        <p class="muted" style="margin:6px 0 0">Sirf is device pe yaad rahegi. Kisi ko mat batana.</p>
+      </div>
+
+      <h2>Naya batch</h2>
+      <div class="card">
+        <div class="grid2">
+          <div><label for="cSchool">School / class ka naam</label><input type="text" id="cSchool" maxlength="80" placeholder="Jaise Eden School, Class 3 A"></div>
+          <div><label for="cPlan">Plan</label><select id="cPlan"></select></div>
+          <div><label for="cCount">Kitne codes (1 se 200)</label><input type="number" id="cCount" min="1" max="200" value="30"></div>
+          <div><label for="cDev">Ek code kitne phone pe chale</label><select id="cDev"><option value="1">1 phone</option><option value="2">2 phone</option><option value="3">3 phone</option></select></div>
+        </div>
+        <div class="row" style="display:flex;gap:10px;margin-top:14px"><button class="btn" id="genBtn" type="button">Codes banayein</button></div>
+        <p class="msg" id="genMsg" role="status" aria-live="polite"></p>
+      </div>
+
+      <div id="batchView" hidden>
+        <h2 id="bTitle"></h2>
+        <p class="muted" id="bSub"></p>
+        <div class="row" style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn sec" id="bCopy" type="button">Saare codes copy</button>
+          <button class="btn sec" id="bCsv" type="button">Excel (CSV) download</button>
+          <button class="btn sec" id="bPrint" type="button">Print slips</button>
+        </div>
+        <div class="wrap"><table><thead><tr><th>#</th><th>Code</th><th>Status</th><th>Valid till</th></tr></thead><tbody id="bRows"></tbody></table></div>
+      </div>
+
+      <h2>Purane batches <button class="btn ghost" id="bRefresh" type="button" style="margin-left:auto">Refresh</button></h2>
+      <div class="wrap"><table><thead><tr><th>Date</th><th>School / class</th><th>Plan</th><th>Codes</th><th>Phone/code</th></tr></thead><tbody id="bList"></tbody></table></div>
+      <p class="msg err" id="bMsg" role="status" aria-live="polite"></p>
+    </div>
   </section>
+  <div id="printArea" aria-hidden="true"></div>
 </main>
 
 <script>
@@ -162,6 +227,98 @@ var CONFIG = {
     if (kind === 'r') btns = '<button class="btn ok" type="button" data-act="approve" data-uid="'+esc(r.uid)+'">Approve karein</button>';
     return '<div class="t">'+info+'<div class="acts">'+btns+'</div></div>';
   }
+
+  /* ================= School codes ================= */
+  var PAY = 'https://gyaanpe-pay.mahapatraswapnajit.workers.dev';
+  var COURSES = [['maths30','Maths'],['english30','English'],['hindi30','Hindi'],['science30','Science'],['gk30','General Knowledge'],['vedic30','Vedic Maths'],['logic30','Logic'],['coding30','Coding'],['computer30','Computer'],['ailab30','AI Lab'],['speaking30','Speaking'],['money30','Money'],['space30','Space'],['body30','Human Body'],['dino30','Dinosaurs'],['ocean30','Ocean'],['nature30','Nature'],['env30','Environment'],['geo30','Geography'],['ancient30','Ancient History'],['freedom30','Freedom Struggle'],['chess30','Chess'],['art30','Art'],['creative30','Creative Writing'],['music30','Music'],['health30','Health'],['manners30','Manners'],['study30','Study Skills']];
+  function planName(p){
+    if (p === 'premium_365') return 'Premium, 1 saal';
+    if (p === 'premium_30') return 'Premium, 30 din';
+    if (p && p.indexOf('course_') === 0){ var id=p.slice(7); for (var i=0;i<COURSES.length;i++) if (COURSES[i][0]===id) return 'Course: '+COURSES[i][1]; return 'Course: '+id; }
+    return p;
+  }
+  (function(){
+    var sel = $('cPlan'), h = '<option value="premium_365">Premium, 1 saal</option><option value="premium_30">Premium, 30 din</option><optgroup label="30-din courses">';
+    COURSES.forEach(function(c){ h += '<option value="course_'+c[0]+'">Course: '+c[1]+'</option>'; });
+    sel.innerHTML = h + '</optgroup>';
+    try { var k = localStorage.getItem('gp_admin_key'); if (k) $('aKey').value = k; } catch(e){}
+  })();
+  function akey(){ var k = $('aKey').value.trim(); try { if (k) localStorage.setItem('gp_admin_key', k); } catch(e){} return k; }
+  function api(path, method, body){
+    return fetch(PAY + path, { method:method||'GET', headers:{ 'Content-Type':'application/json', 'X-Admin-Key':akey() }, body: body ? JSON.stringify(body) : undefined })
+      .then(function(r){ return r.json().then(function(j){ if (!r.ok || !j.ok) { var e = new Error(j.error||('http '+r.status)); e.code = j.error; throw e; } return j; }); });
+  }
+  function errText(e){ return e && e.code === 'unauthorized' ? 'Admin key galat hai.' : 'Kuch gadbad hui: ' + (e && e.message || 'network'); }
+
+  $('tabT').onclick = function(){ $('tabT').setAttribute('aria-selected','true'); $('tabC').setAttribute('aria-selected','false'); $('paneT').hidden=false; $('paneC').hidden=true; };
+  $('tabC').onclick = function(){ $('tabC').setAttribute('aria-selected','true'); $('tabT').setAttribute('aria-selected','false'); $('paneT').hidden=true; $('paneC').hidden=false; if (akey()) loadBatches(); };
+
+  var curBatch = null;
+  $('genBtn').onclick = function(){
+    var m = $('genMsg'), note = $('cSchool').value.trim(), n = parseInt($('cCount').value,10)||0;
+    if (!akey()) { m.className='msg err'; m.textContent='Pehle admin key daaliye.'; return; }
+    if (note.length < 3) { m.className='msg err'; m.textContent='School / class ka naam daaliye.'; return; }
+    if (n < 1 || n > 200) { m.className='msg err'; m.textContent='1 se 200 ke beech ginti daaliye.'; return; }
+    if (!confirm(n+' codes banenge: '+planName($('cPlan').value)+', '+note+'. Pakka?')) return;
+    $('genBtn').disabled = true; m.className='msg'; m.textContent='Ban rahe hain…';
+    api('/admin/generate','POST',{ product:$('cPlan').value, count:n, maxDevices:parseInt($('cDev').value,10), note:note })
+      .then(function(j){ m.className='msg'; m.textContent=''; openBatch(j.batchId); loadBatches(); })
+      .catch(function(e){ m.className='msg err'; m.textContent=errText(e); })
+      .then(function(){ $('genBtn').disabled = false; });
+  };
+
+  function loadBatches(){
+    $('bMsg').textContent = '';
+    $('bList').innerHTML = '<tr><td colspan="5" class="muted">Loading…</td></tr>';
+    api('/admin/batches').then(function(j){
+      $('bList').innerHTML = j.batches.length ? j.batches.map(function(b){
+        return '<tr class="b-row" tabindex="0" data-id="'+esc(b.id)+'"><td>'+esc(when(b.created))+'</td><td>'+esc(b.note)+'</td><td>'+esc(planName(b.product))+'</td><td>'+b.count+'</td><td>'+b.maxDevices+'</td></tr>';
+      }).join('') : '<tr><td colspan="5" class="muted">Abhi koi batch nahi.</td></tr>';
+      Array.prototype.forEach.call(document.querySelectorAll('.b-row'), function(tr){
+        tr.onclick = function(){ openBatch(tr.getAttribute('data-id')); };
+        tr.onkeydown = function(e){ if (e.key==='Enter') openBatch(tr.getAttribute('data-id')); };
+      });
+    }).catch(function(e){ $('bList').innerHTML=''; $('bMsg').textContent = errText(e); });
+  }
+  $('bRefresh').onclick = loadBatches;
+
+  function openBatch(id){
+    $('batchView').hidden = false; $('bRows').innerHTML = '<tr><td colspan="4" class="muted">Loading…</td></tr>';
+    api('/admin/batch?id='+encodeURIComponent(id)).then(function(j){
+      curBatch = j;
+      var used = j.codes.filter(function(c){ return c.used > 0; }).length;
+      $('bTitle').textContent = j.batch.note;
+      $('bSub').textContent = planName(j.batch.product)+', '+j.batch.count+' codes, '+j.batch.maxDevices+' phone/code. Use hue: '+used+' / '+j.batch.count;
+      $('bRows').innerHTML = j.codes.map(function(c,i){
+        var st = c.revoked ? '<span class="no-t">Band</span>' : (c.used ? '<span class="ok-t">Use hua ('+c.used+'/'+c.maxDevices+')</span>' : '<span class="no-t">Abhi nahi</span>');
+        var till = c.expiresAt ? new Date(c.expiresAt).toLocaleDateString('en-IN') : (j.batch.product.indexOf('course_')===0 ? 'Hamesha' : 'Pehli baar use se');
+        return '<tr><td>'+(i+1)+'</td><td class="mono">'+esc(c.code)+'</td><td>'+st+'</td><td>'+till+'</td></tr>';
+      }).join('');
+      $('batchView').scrollIntoView({behavior:'smooth', block:'start'});
+    }).catch(function(e){ $('bRows').innerHTML = '<tr><td colspan="4" class="msg err">'+esc(errText(e))+'</td></tr>'; });
+  }
+
+  $('bCopy').onclick = function(){
+    if (!curBatch) return; var b = this, t = curBatch.codes.map(function(c){ return c.code; }).join('\n');
+    navigator.clipboard.writeText(t).then(function(){ b.textContent='Copy ho gaye'; setTimeout(function(){ b.textContent='Saare codes copy'; }, 2000); });
+  };
+  $('bCsv').onclick = function(){
+    if (!curBatch) return;
+    var rows = [['No','School / class','Plan','Code','How to use']];
+    curBatch.codes.forEach(function(c,i){ rows.push([i+1, curBatch.batch.note, planName(curBatch.batch.product), c.code, 'GyaanPe app > GO PREMIUM > Code se unlock karein']); });
+    var csv = '\uFEFF' + rows.map(function(r){ return r.map(function(v){ return '"'+String(v).replace(/"/g,'""')+'"'; }).join(','); }).join('\r\n');
+    var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], {type:'text/csv;charset=utf-8'}));
+    a.download = 'GyaanPe-codes-' + curBatch.batch.note.replace(/[^a-z0-9]+/gi,'-').slice(0,40) + '.csv';
+    document.body.appendChild(a); a.click(); setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 500);
+  };
+  $('bPrint').onclick = function(){
+    if (!curBatch) return;
+    $('printArea').innerHTML = curBatch.codes.map(function(c){
+      return '<div class="slip"><b>GyaanPe</b> &nbsp;'+esc(planName(curBatch.batch.product))+'<div class="c">'+esc(c.code)+'</div>'+
+        '<div style="font-size:12px">'+esc(curBatch.batch.note)+'<br>App kholiye &rarr; GO PREMIUM &rarr; "Code se unlock karein" &rarr; yeh code daaliye.<br>App: Google Play pe "GyaanPe" ya gyaanpe.com</div></div>';
+    }).join('');
+    window.print();
+  };
 
   function act(uid, what, btn){
     var ok = what === 'approve';

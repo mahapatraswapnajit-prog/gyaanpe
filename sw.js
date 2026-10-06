@@ -1,4 +1,4 @@
-const CACHE = 'gyaanpe-v16';
+const CACHE = 'gyaanpe-v17';
 
 /* Works on both https://mahapatraswapnajit-prog.github.io/gyaanpe/ and https://gyaanpe.com/ :
    every path is resolved against the folder this sw.js lives in. */

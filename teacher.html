@@ -130,6 +130,10 @@
     <h1>Meri classes</h1>
     <p class="sub">Class pe click karke bachchon ki progress dekhiye.</p>
     <div class="classes" id="classList"></div>
+
+    <h2>Mera Partner Card</h2>
+    <div class="card" id="partnerCard"><p class="muted">Loading…</p></div>
+
     <h2>Nayi class banayein</h2>
     <div class="card">
       <div class="grid2">
@@ -281,19 +285,58 @@ var CONFIG = {
     $('classList').innerHTML = '<p class="muted">Loading…</p>';
     db.ref('gyaanpeTeachers/'+me.uid+'/classes').once('value').then(function(snap){
       var codes = Object.keys(snap.val() || {});
-      if (!codes.length) { $('classList').innerHTML = '<p class="muted">Abhi koi class nahi hai. Neeche pehli class banaiye.</p>'; return; }
+      if (!codes.length) { $('classList').innerHTML = '<p class="muted">Abhi koi class nahi hai. Neeche pehli class banaiye.</p>'; partnerCard([]); return; }
       return Promise.all(codes.map(function(c){
         return Promise.all([
           db.ref('gyaanpeClasses/'+c+'/info').once('value'),
           db.ref('gyaanpeClasses/'+c+'/students').once('value').catch(function(){ return null; })
-        ]).then(function(r){ return { code:c, info:r[0].val(), n: r[1] ? Object.keys(r[1].val()||{}).length : 0 }; });
+        ]).then(function(r){ var st = r[1] ? (r[1].val()||{}) : {}; return { code:c, info:r[0].val(), st:st, n: Object.keys(st).length }; });
       })).then(function(list){
+        try{ partnerCard(list.filter(function(x){ return x.info; })); }catch(e){}
         $('classList').innerHTML = list.filter(function(x){ return x.info; }).map(function(x){
           return '<button class="cls" type="button" data-code="'+esc(x.code)+'"><b>'+esc(x.info.name)+'</b><span>'+esc(x.info.school||'')+'</span><span class="code">'+esc(x.code)+'</span><span>'+x.n+' bachche jude</span></button>';
         }).join('') || '<p class="muted">Abhi koi class nahi hai.</p>';
         Array.prototype.forEach.call(document.querySelectorAll('.cls'), function(b){ b.onclick = function(){ openClass(b.getAttribute('data-code')); }; });
       });
     }).catch(function(){ $('classList').innerHTML = '<p class="msg err">Classes load nahi hui. Firebase rules check karein.</p>'; });
+  }
+
+  /* ---------- Partner card: tutors/teachers earn for every parent who buys Premium ---------- */
+  var RATE_Y = 150, RATE_M = 30;   /* Rs per new Premium parent: yearly / monthly (one time) */
+  function rs(n){ return '\u20B9' + Number(n||0).toLocaleString('en-IN'); }
+  function partnerCard(list){
+    var box = $('partnerCard'); if (!box) return;
+    var kids = 0, y = 0, m = 0, c = 0, yNow = 0, mNow = 0;
+    var d = new Date(), monthStart = new Date(d.getFullYear(), d.getMonth(), 1).getTime();
+    list.forEach(function(x){
+      Object.keys(x.st || {}).forEach(function(id){
+        var k = x.st[id] || {}; kids++;
+        var fresh = (+k.pmAt || 0) >= monthStart;
+        if (k.pm === 'y'){ y++; if (fresh) yNow++; }
+        else if (k.pm === 'm'){ m++; if (fresh) mNow++; }
+        else if (k.pm === 'cy' || k.pm === 'cm'){ c++; }
+      });
+    });
+    function stat(n,l){ return '<div class="stat"><div class="n">'+n+'</div><div class="l">'+l+'</div></div>'; }
+    var links = list.map(function(x){
+      var txt = 'Namaste parents \uD83D\uDE4F Hamari class "'+x.info.name+'" ab GyaanPe app pe hai. Nayi NCERT books ka har chapter, practice aur test. Is link se bachche ko class se jodiye, taaki main uski progress dekh sakoon: '+joinLink(x.code);
+      return '<div class="row" style="justify-content:space-between;border-top:1px solid var(--line);padding-top:10px;margin-top:10px">'+
+        '<div><b style="color:var(--navy)">'+esc(x.info.name)+'</b><div class="muted" style="font-size:13px;word-break:break-all">'+esc(joinLink(x.code))+'</div></div>'+
+        '<a class="btn wa" target="_blank" rel="noopener" href="https://wa.me/?text='+encodeURIComponent(txt)+'">WhatsApp pe bhejein</a></div>';
+    }).join('');
+    box.innerHTML =
+      '<p style="margin:0 0 12px">Aapki class se jude jo parents <b>Premium</b> lete hain, har naye Premium pe aapko milta hai: <b>Yearly '+rs(RATE_Y)+'</b>, <b>Monthly '+rs(RATE_M)+'</b> (ek baar).</p>'+
+      '<div class="cards">'+
+        stat(kids, 'Bachche jude')+
+        stat(y, 'Yearly Premium')+
+        stat(m, 'Monthly Premium')+
+        stat(rs(yNow*RATE_Y + mNow*RATE_M), 'Is mahine ki kamai (andaaza)')+
+      '</div>'+
+      '<p class="muted" style="font-size:13.5px;margin:10px 0 0">Kul ab tak: '+rs(y*RATE_Y + m*RATE_M)+'. '+
+        (c ? c+' bachche code se Premium hain (website ya school code); website wale GyaanPe check karke jodega. ' : '')+
+        'GyaanPe har mahine 5 tareekh tak hisaab check karke UPI se bhejta hai. School code se mila Premium isme nahi ginta.</p>'+
+      (list.length ? '<h3 style="margin:16px 0 0;color:var(--navy);font-size:16px">Apni class ka link parents ko bhejiye</h3>'+links
+                   : '<p class="muted" style="margin:12px 0 0">Pehle neeche ek class banaiye, phir uska link parents ko bhejiye.</p>');
   }
 
   function newCode(){ var b = new Uint8Array(6); crypto.getRandomValues(b); var s=''; for (var i=0;i<6;i++) s += ALPHA[b[i] & 31]; return s; }

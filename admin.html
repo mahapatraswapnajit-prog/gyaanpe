@@ -209,6 +209,10 @@ var CONFIG = {
       $('pending').innerHTML  = P.length ? P.map(function(r){ return card(r,'p'); }).join('') : '<p class="muted">Koi pending request nahi hai.</p>';
       $('approved').innerHTML = A.length ? A.map(function(r){ return card(r,'a'); }).join('') : '<p class="muted">Abhi koi approved teacher nahi.</p>';
       $('rejected').innerHTML = R.length ? R.map(function(r){ return card(r,'r'); }).join('') : '<p class="muted">Koi nahi.</p>';
+      TEACH = all;
+      Array.prototype.forEach.call(document.querySelectorAll('[data-pay]'), function(b){
+        b.onclick = function(){ partner(b.getAttribute('data-pay'), b); };
+      });
       Array.prototype.forEach.call(document.querySelectorAll('[data-act]'), function(b){
         b.onclick = function(){ act(b.getAttribute('data-uid'), b.getAttribute('data-act'), b); };
       });
@@ -223,9 +227,45 @@ var CONFIG = {
       '<div class="meta">'+(r.rq.at ? 'Request: '+when(r.rq.at)+' &nbsp; ' : '')+r.nc+' class</div></div>';
     var btns = '';
     if (kind === 'p') btns = '<button class="btn ok" type="button" data-act="approve" data-uid="'+esc(r.uid)+'">Approve</button><button class="btn danger" type="button" data-act="reject" data-uid="'+esc(r.uid)+'">Reject</button>';
-    if (kind === 'a') btns = '<button class="btn danger" type="button" data-act="reject" data-uid="'+esc(r.uid)+'">Access band karein</button>';
+    if (kind === 'a') btns = '<button class="btn" type="button" data-pay="'+esc(r.uid)+'">Partner hisaab</button><button class="btn danger" type="button" data-act="reject" data-uid="'+esc(r.uid)+'">Access band karein</button>';
     if (kind === 'r') btns = '<button class="btn ok" type="button" data-act="approve" data-uid="'+esc(r.uid)+'">Approve karein</button>';
-    return '<div class="t">'+info+'<div class="acts">'+btns+'</div></div>';
+    return '<div class="t">'+info+'<div class="acts">'+btns+'</div>'+(kind === 'a' ? '<div class="payBox" id="pay_'+esc(r.uid)+'" hidden style="flex-basis:100%"></div>' : '')+'</div>';
+  }
+
+  /* ---------- Partner commission: premium parents in a teacher's classes ---------- */
+  var RATE_Y = 150, RATE_M = 30, TEACH = {};
+  function rs(n){ return '\u20B9' + Number(n||0).toLocaleString('en-IN'); }
+  function partner(uid, btn){
+    var box = $('pay_'+uid); if (!box) return;
+    if (!box.hidden){ box.hidden = true; return; }
+    box.hidden = false; box.innerHTML = '<p class="muted">Loading…</p>';
+    var codes = Object.keys((TEACH[uid] && TEACH[uid].classes) || {});
+    Promise.all(codes.map(function(c){
+      return Promise.all([ db.ref('gyaanpeClasses/'+c+'/info').once('value'), db.ref('gyaanpeClasses/'+c+'/students').once('value') ])
+        .then(function(r){ return { code:c, info:r[0].val()||{}, st:r[1].val()||{} }; });
+    })).then(function(list){
+      var rows = [];
+      list.forEach(function(x){ Object.keys(x.st).forEach(function(id){ var k = x.st[id]||{}; if (k.pm) rows.push({ id:id, k:k, cls:x.info.name||x.code }); }); });
+      return Promise.all(rows.map(function(r){
+        if (r.k.pm !== 'y' && r.k.pm !== 'm') return r;
+        return db.ref('premiumUsers/'+r.id).once('value').then(function(v){ var p = v.val(); r.ok = !!p && p.valid !== false; return r; })
+          .catch(function(){ r.ok = null; return r; });
+      }));
+    }).then(function(rows){
+      var d = new Date(), thisM = new Date(d.getFullYear(), d.getMonth(), 1).getTime(), lastM = new Date(d.getFullYear(), d.getMonth()-1, 1).getTime();
+      function due(from, to){ return rows.filter(function(r){ var t = +r.k.pmAt||0; return r.ok === true && t >= from && t < to; })
+        .reduce(function(a, r){ return a + (r.k.pm === 'y' ? RATE_Y : RATE_M); }, 0); }
+      var PL = { y:'Play yearly', m:'Play monthly', cy:'Code yearly', cm:'Code monthly' };
+      var table = rows.length ? '<div style="overflow-x:auto;margin-top:8px"><table style="width:100%;border-collapse:collapse;font-size:14px">'+
+        '<tr><th style="text-align:left;padding:6px">Bachcha</th><th style="text-align:left;padding:6px">Class</th><th style="text-align:left;padding:6px">Plan</th><th style="text-align:left;padding:6px">Kab se</th><th style="text-align:left;padding:6px">Play check</th></tr>'+
+        rows.map(function(r){
+          var chk = (r.k.pm === 'y' || r.k.pm === 'm') ? (r.ok === true ? '<span style="color:#1E8E5A;font-weight:800">Verified</span>' : r.ok === false ? '<span style="color:#C62828;font-weight:800">Nahi mila</span>' : 'Check nahi hua') : 'Code: buy history dekhein';
+          return '<tr><td style="padding:6px;border-top:1px solid #EADFCF">'+esc(r.k.n)+'</td><td style="padding:6px;border-top:1px solid #EADFCF">'+esc(r.cls)+'</td><td style="padding:6px;border-top:1px solid #EADFCF">'+(PL[r.k.pm]||esc(r.k.pm))+'</td><td style="padding:6px;border-top:1px solid #EADFCF">'+(r.k.pmAt ? when(+r.k.pmAt) : '')+'</td><td style="padding:6px;border-top:1px solid #EADFCF">'+chk+'</td></tr>';
+        }).join('')+'</table></div>' : '<p class="muted">Abhi is teacher ki class mein koi Premium parent nahi.</p>';
+      box.innerHTML = '<div class="card" style="margin-top:8px">'+
+        '<b>Pichhle mahine ka bhugtan (verified): '+rs(due(lastM, thisM))+'</b><br><span class="muted">Is mahine ab tak: '+rs(due(thisM, Infinity))+' &nbsp;·&nbsp; Yearly '+rs(RATE_Y)+', Monthly '+rs(RATE_M)+' per naya Premium</span>'+
+        table+'<p class="muted" style="font-size:13px;margin:8px 0 0">Sirf "Verified" wale ginte hain. Code wale Premium mein school code shaamil ho sakte hain; website kharid ho to haath se jodiye.</p></div>';
+    }).catch(function(){ box.innerHTML = '<p class="msg err">Data load nahi hua. Firebase rules mein admin ko students aur premiumUsers padhne ki anumati chahiye.</p>'; });
   }
 
   /* ================= School codes ================= */

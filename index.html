@@ -15804,8 +15804,13 @@ body.gp-web #premiumScreen .pass-badge{display:none !important;}
       var q = new URLSearchParams(location.search);
       var src = (q.get('src') || q.get('utm_source') || '').toLowerCase().replace(/[^a-z0-9_-]/g,'').slice(0,30);
       if(src && !g('gps_src')) s('gps_src', src);
+      /* Owner's own devices: gyaanpe.com/?me=1 stops counting this device, ?me=0 starts again */
+      var me = q.get('me');
+      if(me === '1') s('gps_me', '1');
+      if(me === '0'){ try{ localStorage.removeItem('gps_me'); }catch(e){} }
     }catch(e){}
   })();
+  function isMe(){ return g('gps_me') === '1'; }
   function source(){ return g('gps_src') || 'direct'; }
 
   var KEY = function(){ return 'gps_day_'+day(); };
@@ -15866,6 +15871,7 @@ body.gp-web #premiumScreen .pass-badge{display:none !important;}
   var dirty = true, lastSent = 0;
   function flush(force){
     try{
+      if(isMe()) return;
       if(!force && !dirty) return;
       if(!force && Date.now()-lastSent < 120000) return;
       dirty = false; lastSent = Date.now();
@@ -15881,7 +15887,7 @@ body.gp-web #premiumScreen .pass-badge{display:none !important;}
   document.addEventListener('visibilitychange', function(){
     if(document.visibilityState === 'hidden') flush(true); /* app closed / switched */
   });
-  window.gpStats = { flush: flush, record: record };
+  window.gpStats = { flush: flush, record: record, isMe: isMe };
 })();
 </script>
 <!-- ============ CLASS JOIN (links a child to a teacher's class dashboard; parent consent required) ============ -->
@@ -16027,8 +16033,29 @@ body.gp-web #premiumScreen .pass-badge{display:none !important;}
     }
     var xp=0; try{ xp = gpXPget(); }catch(e){}
     var cls=''; try{ cls = (gpProfile()||{}).cls || ''; }catch(e){}
+    var pm = premiumKind(), pmAt = 0;
+    if(pm){ pmAt = parseInt(g('gp_pm_at')||'0',10)||0; if(!pmAt){ pmAt = Date.now(); s('gp_pm_at', String(pmAt)); } }
     return { n:j.name, c:String(cls), last:Date.now(), st:parseInt(g('gp_streak')||'0',10)||0, xp:xp,
-             acc:o.accuracy||0, att:o.attempted||0, m7:mins, w:weak, sg:strong, sb:subj, v:1 };
+             acc:o.accuracy||0, att:o.attempted||0, m7:mins, w:weak, sg:strong, sb:subj, pm:pm, pmAt:pmAt, v:1 };
+  }
+
+  /* Which paid Premium this device has, for the teacher's partner card.
+     'y'/'m' = Google Play yearly/monthly (server-verified), 'cy'/'cm' = unlock code (website or school), '' = free.
+     The developer test toggle is ignored on purpose. */
+  function premiumKind(){
+    try{
+      var st = window.GyaanPePremium && GyaanPePremium._state;
+      var play = st && st.premium && (st.plan === 'yearly' || st.plan === 'monthly');
+      if(play && window.gpVerify && typeof gpVerify.premiumOk === 'function' && gpVerify.premiumOk()) return st.plan === 'yearly' ? 'y' : 'm';
+    }catch(e){}
+    try{
+      var codes = JSON.parse(g('gp_access_codes')||'[]') || [];
+      for(var i=0;i<codes.length;i++){
+        var x = codes[i];
+        if(x && x.kind === 'premium' && (!x.expiresAt || x.expiresAt > Date.now())) return x.product === 'premium_30' ? 'cm' : 'cy';
+      }
+    }catch(e){}
+    return '';
   }
 
   var lastPush = 0;

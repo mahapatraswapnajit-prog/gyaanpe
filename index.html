@@ -16481,6 +16481,7 @@ body.gp-web #premiumScreen .pass-badge{display:none !important;}
     $('gpclDone').onclick = close;
     $('gpclLeave').onclick = function(){
       if(!confirm('Class chhod dein? Teacher ko is bachche ki progress dikhna band ho jaayegi.')) return;
+      fetch(DB+j.code+'/mk/'+uid()+'.json', { method:'DELETE' }).catch(function(){});
       fetch(DB+j.code+'/students/'+uid()+'.json', { method:'DELETE' }).catch(function(){}).then(function(){
         del('gp_class'); close(); hwList = []; renderHwCard();
         if(typeof gpToast === 'function') gpToast('Class chhod di gayi');

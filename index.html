@@ -2116,6 +2116,7 @@ function gpToast(msg){
 <div class="jscreen" id="aiTutorScreen">
 <div class="j-head"><button class="home-btn-back" onclick="goHome()">&#8592; HOME</button><span class="j-title" id="tutorHeaderName" style="font-size:14px;">🤖 Gyaan Buddy</span><button class="home-btn-back" style="width:60px;font-size:11px;" onclick="openDoubtHistory()">📋 History</button></div>
 <div style="text-align:center;padding:4px;" id="tutorLangPicker"></div>
+<div id="tutorChapterChip" style="text-align:center;padding:0 4px 4px;"></div>
 <div class="tutor-chat-area" id="tutorChatArea"></div>
 <div id="tutorSuggestArea" style="padding:0 4px;"></div>
 <div id="tutorImgPreviewArea"></div>
@@ -4536,6 +4537,9 @@ stages.push(['mixed','\ud83c\udfaf','Mixed Practice \u2b50NEW','True/False, Fill
 if((typeof CH_MAP!=='undefined')&&CH_MAP[sec+'_'+idx]){
 stages.push(['map','\ud83d\uddfa\ufe0f','Map Practice \u2b50NEW','Tap states, rivers & mountains on the map',function(){openStageMap(sec,idx);}]);
 }
+if(typeof openTutorForChapter==='function'){var _tk=gpSecClassKey(sec);var _tp=(_tk&&TUTOR_PERSONAS.anika.classes.indexOf(_tk)>-1)?TUTOR_PERSONAS.anika:TUTOR_PERSONAS.arjun;
+stages.push(['tutor','\ud83e\udd16','Ask '+_tp.name+' \u2b50NEW','Is chapter ka doubt poochho, samjho aur quiz lo',function(){openTutorForChapter(sec,idx);}]);
+}
 var html='';var doneCount=0;
 stages.forEach(function(s,si){var isDone=!!p[s[0]];if(isDone&&si<6)doneCount++;
 html+='<div class="stage-card'+(isDone?' done':'')+'" onclick="gpStageAction(\''+sec+'\','+idx+',\''+s[0]+'\')"><div class="stage-emo">'+s[1]+'</div><div class="stage-info"><div class="stage-name">'+s[2]+'</div><div class="stage-sub">'+s[3]+'</div></div>'+(isDone?'<div class="stage-check">\u2705</div>':'<div style="color:#CCC;font-size:20px;">\u25B6</div>')+'</div>';
@@ -5306,6 +5310,58 @@ function gpCodeAuth(){
 }
 var TUTOR_DAILY_LIMIT = 25;
 
+/* ---- Chapter-aware tutor (Phase 1) ----
+   When the tutor is opened from a chapter guide, it remembers that chapter
+   and sends its name, subject, summary and lesson points to the Worker. */
+var _tutorChapterCtx = null;
+
+function gpSecClassKey(sec) {
+  var c = (typeof gpSubjectCategory === "function") ? gpSubjectCategory(sec) : "";
+  var m = /Class (\d+)/.exec(c || "");
+  return m ? "c" + m[1] : null;
+}
+
+function tutorChapterName() {
+  var c = _tutorChapterCtx;
+  if (!c || typeof CHAPTERS === "undefined" || !CHAPTERS[c.sec]) return null;
+  return CHAPTERS[c.sec][c.idx] || null;
+}
+
+function tutorChapterWelcome(name) {
+  var lang = tutorGetLang();
+  if (lang === "hi") return "चलो, \"" + name + "\" साथ में पढ़ते हैं! इस पाठ से कुछ भी पूछो, या नीचे कोई आइडिया चुनो।";
+  if (lang === "od") return "ଆସ, \"" + name + "\" ଏକାଠି ପଢ଼ିବା! ଏହି ଅଧ୍ୟାୟରୁ ଯାହା ବି ପଚାର, କିମ୍ବା ତଳେ ଗୋଟିଏ ବାଛ।";
+  return "Let's study \"" + name + "\" together! Ask me anything from this chapter, or tap an idea below.";
+}
+
+var TUTOR_SUGGESTIONS_CHAPTER = ["Explain this chapter simply", "Ask me 3 questions, one by one", "What are the most important points?", "Give me a real-life example"];
+
+function openTutorForChapter(sec, idx) {
+  var name = (typeof CHAPTERS !== "undefined" && CHAPTERS[sec]) ? CHAPTERS[sec][idx] : null;
+  if (!name) { openAITutor(); return; }
+  var cls = gpSecClassKey(sec);
+  if (cls) localStorage.setItem("gp_tutor_class", cls);
+  var same = _tutorChapterCtx && _tutorChapterCtx.sec === sec && _tutorChapterCtx.idx === idx;
+  _tutorChapterCtx = { sec: sec, idx: idx };
+  if (!same) _tutorState.messages = [{ role: "assistant", content: tutorChapterWelcome(name) }];
+  openAITutor();
+}
+
+function tutorClearChapter() {
+  _tutorChapterCtx = null;
+  _tutorState.messages = [];
+  openAITutor();
+}
+
+function tutorRenderChapterChip() {
+  var el = document.getElementById("tutorChapterChip");
+  if (!el) return;
+  var name = tutorChapterName();
+  if (!name) { el.innerHTML = ""; return; }
+  el.innerHTML = '<span class="tutor-suggest" style="background:#FFF3E0;border-color:#FFB74D;color:#E65100;cursor:default;">📖 ' + esc(name) +
+    ' <span role="button" tabindex="0" aria-label="Remove chapter" style="cursor:pointer;margin-left:4px;" onclick="tutorClearChapter()">✖</span></span>';
+}
+
 var _tutorState = {messages: [], loading: false, pendingImage: null};
 
 var TUTOR_PERSONAS = {
@@ -5368,6 +5424,19 @@ function tutorBuildContext() {
     context.streak = parseInt(gpN("gp_streak", "0")) || 0;
     var clsKey = localStorage.getItem("gp_tutor_class") || "c4";
     context.className = CLASS_LABELS[clsKey] || clsKey;
+    if (_tutorChapterCtx) {
+      var _s = _tutorChapterCtx.sec, _i = _tutorChapterCtx.idx;
+      var _nm = tutorChapterName();
+      if (_nm) {
+        context.chapter = _nm;
+        context.subject = String((typeof SUBLABEL !== "undefined" && SUBLABEL[_s]) || _s).replace(/\s*\(C\d+\)\s*$/, "");
+        var _L = (typeof CH_LEARN !== "undefined") ? CH_LEARN[_s + "_" + _i] : null;
+        if (_L) {
+          context.chapterPoints = (_L.learn || []).slice(0, 5).map(function (c) { return String((c.title || "") + ": " + (c.text || "")).slice(0, 170); });
+          if (_L.summary) context.chapterSummary = String(_L.summary).slice(0, 420);
+        }
+      }
+    }
   } catch (e) {}
   return context;
 }
@@ -5401,6 +5470,7 @@ if(persona.img){
   tutorRenderSuggestions();
   tutorUpdateLimitNote();
   tutorRenderLangPicker();
+  tutorRenderChapterChip();
 }
 
 function tutorRenderClassPicker() {
@@ -5445,7 +5515,7 @@ function tutorRenderSuggestions() {
   if (!el) return;
   if (_tutorState.messages.length > 1) { el.innerHTML = ""; return; }
   var pKey = tutorGetPersonaKey();
-  var list = pKey === "anika" ? TUTOR_SUGGESTIONS_ANIKA : TUTOR_SUGGESTIONS_ARJUN;
+  var list = tutorChapterName() ? TUTOR_SUGGESTIONS_CHAPTER : (pKey === "anika" ? TUTOR_SUGGESTIONS_ANIKA : TUTOR_SUGGESTIONS_ARJUN);
   var html = "";
   list.forEach(function (s, i) {
     html += '<span class="tutor-suggest" onclick="tutorSendSuggestion(' + i + ')">' + esc(s) + "</span>";
@@ -5455,6 +5525,7 @@ function tutorRenderSuggestions() {
 }
 
 function tutorChangeClass() {
+  _tutorChapterCtx = null;
   localStorage.removeItem("gp_tutor_class");
   _tutorState.messages = [];
   openAITutor();
@@ -5462,7 +5533,7 @@ function tutorChangeClass() {
 
 function tutorSendSuggestion(i) {
   var pKey = tutorGetPersonaKey();
-  var list = pKey === "anika" ? TUTOR_SUGGESTIONS_ANIKA : TUTOR_SUGGESTIONS_ARJUN;
+  var list = tutorChapterName() ? TUTOR_SUGGESTIONS_CHAPTER : (pKey === "anika" ? TUTOR_SUGGESTIONS_ANIKA : TUTOR_SUGGESTIONS_ARJUN);
   document.getElementById("tutorInputBox").value = list[i];
   tutorSend();
 }
@@ -12512,7 +12583,7 @@ if ('serviceWorker' in navigator) {
   var FREE = {
     maxClass: 4,            // Nursery to Class 4 free
     aiTutor: 5,             // questions / day
-    aiDoubt: 3,             // doubts / day
+    aiDoubt: 5,             // doubts / day (same as PREMIUM_CONFIG.freeLimits and the tutor Worker)
     aiWorksheet: 2,         // worksheets / day
     brainGymGames: 5,       // first 5 of 20 games
     brainGymPlays: 3        // plays / day

@@ -492,6 +492,7 @@ var CONFIG = {
     $('ovClose').onclick = closeOv; $('ovClose').focus();
     $('rmStudent').onclick = function(){
       if (!confirm(s.n + ' ko class se hata dein?')) return;
+      db.ref('gyaanpeClasses/'+cur.code+'/mk/'+id).remove().catch(function(){});
       db.ref('gyaanpeClasses/'+cur.code+'/students/'+id).remove().then(function(){ closeOv(); loadStudents(); });
     };
   }

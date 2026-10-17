@@ -489,6 +489,11 @@ button,.n-opt,.option-btn,.class-chip,.n-card,.section-btn{touch-action:manipula
 .mk-rv{border-left:4px solid #E0E0E0;padding:8px 10px;margin:8px 0;background:#FAFAFA;border-radius:8px;font-size:12.5px;line-height:1.5;}
 .mk-rv.ok{border-color:#2E7D32;} .mk-rv.no{border-color:#C62828;} .mk-rv.na{border-color:#9E9E9E;}
 .mk-hist{display:flex;justify-content:space-between;font-size:12px;padding:6px 0;border-bottom:1px solid #F0F0F0;color:#333;}
+.mk-tabs{display:flex;gap:6px;margin:8px 0 2px;} .mk-tabs div{flex:1;text-align:center;padding:10px 6px;border-radius:12px;background:#ECEFF1;font-weight:800;font-size:13px;color:#455A64;cursor:pointer;} .mk-tabs div.on{background:#1A237E;color:#fff;}
+.mk-series{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;} .mk-series div{border:2px solid #E0E0E0;border-radius:10px;padding:6px 2px;text-align:center;cursor:pointer;background:#FAFAFA;} .mk-series b{display:block;font-size:13px;color:#333;} .mk-series span{font-size:10.5px;color:#888;} .mk-series .done{background:#E8F5E9;border-color:#A5D6A7;} .mk-series .on{border-color:#C62828;background:#FFEBEE;}
+.mk-sel{width:100%;padding:10px;border-radius:10px;border:2px solid #E0E0E0;font-size:13px;background:#fff;}
+.mk-ta{width:100%;min-height:130px;padding:12px;border-radius:12px;border:2px solid #C5CAE9;font-size:14px;font-family:inherit;line-height:1.5;box-sizing:border-box;}
+.mk-marks{color:#fff;font-weight:900;padding:4px 12px;border-radius:16px;font-size:14px;}
 
 .badge-group-head{display:flex;justify-content:space-between;align-items:center;background:#F5F5F5;border-radius:12px;padding:10px 14px;margin:6px 0;cursor:pointer;}
 .badge-group-name{font-size:12.5px;font-weight:800;color:#333;}
@@ -2078,6 +2083,7 @@ function gpToast(msg){
 </div>
 <div class="jscreen" id="class8Home">
 <div class="we-exam-banner" onclick="openWeeklyExam('c8')"><div class="cwb-title">📝 Weekly Exam</div><div class="cwb-sub">Mixed questions from all chapters &bull; Certificate at 80%+</div></div>
+<div class="we-exam-banner mk-banner" onclick="openMockTest('c8')"><div class="cwb-title">🎯 Mock Test &amp; Likhit Abhyas &bull; NEW</div><div class="cwb-sub">Timer wala test, Test Series P1&ndash;P10 &bull; likhe jawab Arjun Sir check karenge</div></div>
 <div class="j-head"><button class="home-btn-back" onclick="goHome()">&#8592; HOME</button><span class="j-title">&#127891; Class 8 &bull; Senior</span><span style="width:60px;"></span></div>
 <div style="text-align:center;margin-bottom:10px;"><span class="n-stats" id="c8Stats"></span></div>
 <div class="c2-grid">
@@ -2092,6 +2098,7 @@ function gpToast(msg){
 </div>
 <div class="jscreen" id="class9Home">
 <div class="we-exam-banner" onclick="openWeeklyExam('c9')"><div class="cwb-title">📝 Weekly Exam</div><div class="cwb-sub">Mixed questions from all chapters &bull; Certificate at 80%+</div></div>
+<div class="we-exam-banner mk-banner" onclick="openMockTest('c9')"><div class="cwb-title">🎯 Mock Test &amp; Likhit Abhyas &bull; NEW</div><div class="cwb-sub">Timer wala test, Test Series P1&ndash;P10 &bull; likhe jawab Arjun Sir check karenge</div></div>
 <div class="j-head"><button class="home-btn-back" onclick="goHome()">&#8592; HOME</button><span class="j-title">&#127891; Class 9 &bull; Senior</span><span style="width:60px;"></span></div>
 <div style="text-align:center;margin-bottom:10px;"><span class="n-stats" id="c9Stats"></span></div>
 <div class="c2-grid">
@@ -2106,7 +2113,7 @@ function gpToast(msg){
 </div>
 <div class="jscreen" id="class10Home">
 <div class="we-exam-banner" onclick="openWeeklyExam('c10')"><div class="cwb-title">📝 Weekly Exam</div><div class="cwb-sub">Mixed questions from all chapters &bull; Certificate at 80%+</div></div>
-<div class="we-exam-banner mk-banner" onclick="openMockTest('c10')"><div class="cwb-title">🎯 Board Mock Test &bull; NEW</div><div class="cwb-sub">Asli exam jaisa: timer, question palette, mark for review &bull; chapter-wise report</div></div>
+<div class="we-exam-banner mk-banner" onclick="openMockTest('c10')"><div class="cwb-title">🎯 Board Mock Test &amp; Likhit Abhyas &bull; NEW</div><div class="cwb-sub">Timer wala test, Test Series P1&ndash;P10 &bull; likhe jawab Arjun Sir check karenge</div></div>
 <div class="j-head"><button class="home-btn-back" onclick="goHome()">&#8592; HOME</button><span class="j-title">&#127891; Class 10 &bull; Board</span><span style="width:60px;"></span></div>
 <div style="text-align:center;margin-bottom:10px;"><span class="n-stats" id="c10Stats"></span></div>
 <div class="c2-grid">
@@ -2175,6 +2182,10 @@ function gpToast(msg){
 </div>
 <div class="jscreen" id="mockExamScreen">
 <div id="mockExamContainer" style="padding-bottom:24px;"></div>
+</div>
+<div class="jscreen" id="wrScreen">
+<div class="j-head"><button class="home-btn-back" onclick="if(confirm('Likhit abhyas band karein?'))openMockTest(_mockSetup.ck||'c10','wr')">&#8592; BACK</button><span class="j-title" style="font-size:14px;">✍️ Likhit Abhyas</span><span style="width:60px;"></span></div>
+<div id="wrContainer" style="padding-bottom:24px;"></div>
 </div>
 <div class="jscreen" id="mockResultScreen">
 <div class="j-head"><button class="home-btn-back" onclick="mockBack()">&#8592; BACK</button><span class="j-title" style="font-size:14px;">📊 Mock Test Result</span><span style="width:60px;"></span></div>
@@ -2574,7 +2585,7 @@ checkChallenge();
 var LVLNAME=['Very Easy','Easy','Easy+','Medium','Medium+','Hard','Hard+','Very Hard','Expert','Master'];
 var CHAPTERS={c7sst:['New Kings, Kingdoms & The Delhi Sultans','The Mughal Empire','Bhakti-Sufi Movements & Regional Cultures','Towns, Traders, Tribes & Nomads','Inside Our Earth & Our Changing Earth','Air & Water','Natural Vegetation, Wildlife & Settlements','On Equality & Role of Government in Health','Media, Advertising & Markets','Gender Equality & Struggles for Equality'],c6sst:['What, Where, How and When','From Hunting-Gathering to Growing Food','In the Earliest Cities (Harappa)','Vedic Age, Mahajanapadas & Ashoka','The Earth in the Solar System & Globe','Maps & Major Domains of the Earth','India: Land, Climate & Vegetation','Understanding Diversity & Government','Panchayati Raj & Rural Administration','Urban Administration & Livelihoods'],c7evs:['Nutrition in Plants & Animals','Heat & Temperature','Acids, Bases & Salts','Physical & Chemical Changes','Weather, Climate & Adaptation','Winds, Storms & Cyclones','Soil','Respiration in Organisms','Transportation in Animals & Plants','Reproduction in Plants'],c7gk:['Indian Polity & Governance','Freedom Movement','World History Basics','Indian & World Geography','Economy Basics','Science & Technology','Sports','Awards & Honours','International Organizations','Current Affairs & General Awareness'],c7art:['Colour Theory & Advanced Mixing','Perspective Drawing','Shading & Rendering Techniques','Craft & Mixed Media','Origami & 3D Paper Art','Still Life & Object Studies','Landscape & Scenic Art','Cultural & Folk Art Forms','Portrait & Human Figure Basics','Art History & Appreciation'],c7comp:['Computer Networks & Internet','Advanced MS Word Features','Advanced MS Excel','Advanced MS PowerPoint','Introduction to HTML & Web Basics','Cybersecurity & Safe Computing','Cloud Computing & Storage','Advanced Coding & Algorithms','Emerging Technologies','Computer Ethics & Digital Citizenship'],c7eng:['Nouns & Determiners','Pronouns & Verb Agreement','Tenses (Advanced)','Modals (Advanced)','Direct & Indirect Speech','Active & Passive Voice','Clauses (Noun, Adjective, Adverb)','Prepositions & Phrasal Verbs','Vocabulary & Figures of Speech','Reading Comprehension'],c7hin:['संधि (विस्तार)','समास (सभी भेद)','कारक','अलंकार (उपमा और रूपक)','मुहावरे और लोकोक्तियाँ','वाच्य (कर्तृ-कर्म)','विलोम और पर्यायवाची','पत्र लेखन (औपचारिक)','वाक्य शुद्धि और रचना','अपठित गद्यांश'],c7maths:['Integers','Fractions & Decimals','Rational Numbers','Simple Equations','Lines and Angles','Triangles & Congruence','Comparing Quantities','Perimeter and Area','Algebraic Expressions & Exponents','Data Handling & Symmetry'],c6art:['Colour Theory & Colour Wheel','Shading, Texture & Perspective','Drawing Tools & Mixed Media','Craft & Recycled Art','Origami & 3D Paper Craft','Object & Still Life Drawing','Nature & Landscape Art','Festival & Cultural Art','Portrait, Cartoon & Composition','Art History & Appreciation'],c6comp:['Computer Systems & Networking','Operating Systems','Storage Devices & Memory Units','MS Word','MS Excel: Formulas & Functions','MS PowerPoint','Internet & Web Browsing Skills','Cyber Safety & Digital Citizenship','Coding & Algorithms','AI & Emerging Technologies'],c6evs:['Food: Sources & Components','Fibres & Fabrics','Materials: Sorting & Grouping','Separation of Substances','Changes Around Us','Living Organisms & Habitats','Body Movements','Motion & Measurement','Light, Shadows & Reflections','Electricity, Water & Air'],c6gk:['India: States, Capitals & UTs','Ancient Indian History','Indian Government & Civics','World Geography','Science & Technology','Space & Astronomy','Sports','Famous Personalities','Environment & Current Affairs','General Awareness & Culture'],c6hin:['संज्ञा एवं सर्वनाम','विशेषण (तुलना)','क्रिया और वाच्य','काल','उपसर्ग और प्रत्यय','संधि और समास','पर्यायवाची शब्द','विलोम शब्द','मुहावरे और लोकोक्तियां','अपठित गद्यांश एवं वाक्य शुद्धि'],c6eng:['Nouns (Gender, Number, Case)','Pronouns (All Types)','Verbs & Tenses','Modals','Adjectives & Degrees of Comparison','Adverbs & Prepositions','Conjunctions & Clauses','Active & Passive Voice','Synonyms & Antonyms','Reading Comprehension'],c6maths:['Knowing Our Numbers & Whole Numbers','Playing with Numbers','Integers','Fractions','Decimals','Basic Geometrical Ideas & Shapes','Symmetry & Practical Geometry','Mensuration','Ratio, Proportion & Algebra','Data Handling'],c5gk:['India: Geography & States','Indian Constitution & Government','Freedom Struggle & Personalities','Science & Technology','Space & Astronomy','Sports','Environment & Conservation','World Geography & Facts','Culture, Festivals & Heritage','Current Affairs & General Awareness'],c5art:['Colour Theory & Mixing','Shading, Texture & Techniques','Drawing Tools & Materials','Craft Materials & Recycled Art','Origami & Paper Craft','Object & Still Life Drawing','Nature & Landscape Art','Festival & Cultural Art','Portrait, Cartoon & Composition','Art Appreciation & Famous Artists'],c5comp:['Computer Systems & Generations','Operating Systems','Input, Output & Storage Devices','MS Word','MS Excel Basics','MS PowerPoint Basics','Internet & Email','Cyber Safety & Digital Citizenship','Coding & Scratch Basics','Emerging Tech: AI, Robots & Fun Facts'],c5evs:['Our Senses & Body','Digestion & Nutrition','Plants: Seeds & Germination','Water Conservation','Air & Science Experiments','Community, Transport & Communication','Natural Disasters & Safety','Space','Blood, Health & Germs','Magnets & Fun Science Facts'],c5hin:['संज्ञा और सर्वनाम','क्रिया और वाच्य','विशेषण (तुलना)','समास','मुहावरे और लोकोक्तियाँ','विलोम शब्द','पर्यायवाची शब्द','अनेकार्थी शब्द','वाक्य शुद्धि एवं विराम चिह्न','अपठित गद्यांश'],c5eng:['Nouns & Pronouns (Advanced)','Verbs & Perfect Tenses','Adjectives & Adverbs (Degrees)','Prepositions & Conjunctions','Active & Passive Voice','Direct & Indirect Speech','Synonyms & Antonyms','Sentence Types & Punctuation','Vocabulary & Word Formation','Reading Comprehension'],c5maths:['Large Numbers & Operations','Fractions','Decimals','HCF & LCM','Percentage & Profit-Loss','Perimeter, Area & Volume','Geometry (Angles & Shapes)','Time, Speed & Distance','Data Handling (Average & Graphs)','Patterns, Symmetry & Money'],c4comp:['Computer Basics & Generations','Input & Output Devices','Storage Devices','MS Paint','Word Processing','Typing Skills','Internet Basics','Internet Safety & Digital Citizenship','Coding Basics','AI Awareness & Fun Facts'],c4gk:['India, States & Capitals','National Symbols','Science Facts','Space','Sports','Famous Personalities','Environment & Nature','World Facts','Culture & Festivals','General Awareness'],c4art:['Colour Theory','Shading & Painting Techniques','Drawing Tools & Materials','Craft Materials & Techniques','Origami','Object Drawing','Nature Art','Festival Art','Portrait, Cartoon & Composition','Creative Thinking & Famous Art'],c4evs:['Family & Relationships','Plants','Animals (Habitats & Adaptations)','Food & Nutrition','Water','Air & Weather','Our Body (Systems)','Travel, Communication & Maps','States of India & Natural Resources','Environment, Pollution & Safety'],c4hin:['संज्ञा','सर्वनाम','विशेषण (तुलना)','क्रिया और काल','विलोम शब्द','पर्यायवाची शब्द','मुहावरे','संधि','वाक्य निर्माण एवं विराम चिह्न','अपठित गद्यांश'],c4eng:['Nouns (Abstract, Material, Collective)','Pronouns (Relative & Reflexive)','Verbs & Tenses','Adjectives & Adverbs','Articles & Prepositions','Conjunctions','Synonyms','Antonyms','Sentence Formation & Punctuation','Reading Comprehension'],c4maths:['Large Numbers & Roman Numerals','Addition & Subtraction','Multiplication','Division','Factors & Multiples','Fractions','Decimals','Measurement, Perimeter & Area','Time, Calendar & Money','Geometry, Symmetry & Data Handling'],c3maths:['Numbers to 1000','Place Value','Addition','Subtraction','Multiplication','Division','Fractions','Money','Measurement & Time','Geometry, Patterns & Data'],c3comp:['Computer Parts & Hardware','Software Basics','The Mouse','The Keyboard','MS Paint','Typing Skills','Internet Basics','Uses of Computers & Internet','Computer Safety & Care','Digital Etiquette & Fun Facts'],c3gk:['India & States','National Symbols','Animals & Birds','Science Facts','Space','Sports','Famous Personalities','Nature','World Facts','General Awareness'],c3art:['Colour Theory','Shapes & Patterns','Drawing Tools & Techniques','Shading & Texture','Craft Materials & Techniques','Object Drawing','Nature Drawing','Festival Art','Creative Thinking & Composition','Famous Art & Artists'],c3evs:['Family & Community','Food & Nutrition','Water','Plants','Animals & Insects','Birds','Our Body & Health','Travel & Communication','Maps & Directions','Weather, Seasons & Safety'],c3hin:['संज्ञा','सर्वनाम','क्रिया (काल)','विशेषण','विलोम शब्द','पर्यायवाची शब्द','मुहावरे','वाक्य एवं विराम चिह्न','गद्यांश','कविता एवं भाषा ज्ञान'],c3eng:['Nouns','Pronouns','Verbs & Tenses','Adjectives','Articles & Prepositions','Synonyms','Antonyms','Sentence Formation & Punctuation','Vocabulary & Word Building','Reading Comprehension'],c2maths:['Numbers','Place Value','Addition','Subtraction','Multiplication','Division','Shapes & Patterns','Measurement','Time & Calendar','Money & Data'],c2eng:['Vowels & Consonants','Nouns','Pronouns','Verbs','Adjectives','Opposite Words','Synonyms','Articles & Sentences','Reading Comprehension','Rhyming Words'],c2hin:['स्वर','व्यंजन','मात्रा','दो अक्षर शब्द','तीन अक्षर शब्द','वाक्य निर्माण','लिंग और वचन','विलोम शब्द','चित्र पहचान','कहानी पढ़ना'],c2evs:['My Family','My Body','My School','Plants','Animals & Birds','Food & Water','Air & Environment','Transport','Community Helpers','Seasons & Weather'],c2gk:['India Basics','National Symbols','Animals','Birds','Science Facts','Space','Sports','Famous Personalities','Nature','General Awareness'],c2art:['Primary & Secondary Colours','Shapes We Draw','Drawing Tools & Materials','Colour Mixing','Warm & Cool Colours','Craft Materials','Object Drawing','Nature Drawing','Art Techniques','Fun Art Facts'],c2comp:['Parts of a Computer','Input Devices','Output Devices','The Mouse','The Keyboard','The Monitor','Uses of a Computer','MS Paint Basics','Computer Safety & Care','Fun Computer Facts']};
 if(window.NCERT_CHAPTERS){for(var _nk in NCERT_CHAPTERS){CHAPTERS[_nk]=NCERT_CHAPTERS[_nk];}}
-function gpHideAllScreens(){document.getElementById('homeScreen').style.display='none';document.getElementById('quizArea').classList.remove('show');document.getElementById('levelComplete').classList.remove('show');document.getElementById('resultScreen').classList.remove('show');document.getElementById('gameoverScreen').classList.remove('show');document.getElementById('journeyScreen').style.display='none';document.getElementById('parentScreen').style.display='none';var _pm=document.getElementById('premiumScreen');if(_pm)_pm.style.display='none';var _n1=document.getElementById('nurseryHome');if(_n1)_n1.style.display='none';var _n2=document.getElementById('nurseryLevels');if(_n2)_n2.style.display='none';var _n3=document.getElementById('nurseryPlay');if(_n3)_n3.style.display='none';var _c1=document.getElementById('class1Home');if(_c1)_c1.style.display='none';var _c2=document.getElementById('class2Home');if(_c2)_c2.style.display='none';var _c3=document.getElementById('class3Home');if(_c3)_c3.style.display='none';var _c4=document.getElementById('class4Home');if(_c4)_c4.style.display='none';var _c4wh=document.getElementById('c4writeHome');if(_c4wh)_c4wh.style.display='none';var _c4wm=document.getElementById('c4writeMaths');if(_c4wm)_c4wm.style.display='none';var _c4we=document.getElementById('c4writeEng');if(_c4we)_c4we.style.display='none';var _c4wh=document.getElementById('c4writeHin');if(_c4wh)_c4wh.style.display='none';var _c4wv=document.getElementById('c4writeEvs');if(_c4wv)_c4wv.style.display='none';var _c4wg=document.getElementById('c4writeGk');if(_c4wg)_c4wg.style.display='none';var _c4wcp=document.getElementById('c4writeComp');if(_c4wcp)_c4wcp.style.display='none';var _c4wa=document.getElementById('c4writeArt');if(_c4wa)_c4wa.style.display='none';var _cwg=document.getElementById('c3writeGk');if(_cwg)_cwg.style.display='none';var _cwc=document.getElementById('c3writeComp');if(_cwc)_cwc.style.display='none';var _cwa=document.getElementById('c3writeArt');if(_cwa)_cwa.style.display='none';var _cwh=document.getElementById('c3writeHome');if(_cwh)_cwh.style.display='none';var _cwe=document.getElementById('c3writeEng');if(_cwe)_cwe.style.display='none';var _cwh2=document.getElementById('c3writeHin');if(_cwh2)_cwh2.style.display='none';var _cwv=document.getElementById('c3writeEvs');if(_cwv)_cwv.style.display='none';var _cwm=document.getElementById('c3writeMaths');if(_cwm)_cwm.style.display='none';var _c5=document.getElementById('class5Home');if(_c5)_c5.style.display='none';var _c6=document.getElementById('class6Home');if(_c6)_c6.style.display='none';var _c7=document.getElementById('class7Home');if(_c7)_c7.style.display='none';var _c8=document.getElementById('class8Home');if(_c8)_c8.style.display='none';var _c9=document.getElementById('class9Home');if(_c9)_c9.style.display='none';var _c10=document.getElementById('class10Home');if(_c10)_c10.style.display='none';var _c7wh=document.getElementById('c7writeHome');if(_c7wh)_c7wh.style.display='none';var _c7wm=document.getElementById('c7writeMaths');if(_c7wm)_c7wm.style.display='none';var _c7we=document.getElementById('c7writeEng');if(_c7we)_c7we.style.display='none';var _c7wh=document.getElementById('c7writeHin');if(_c7wh)_c7wh.style.display='none';var _c7wv=document.getElementById('c7writeEvs');if(_c7wv)_c7wv.style.display='none';var _hub=document.getElementById('chapterHubScreen');if(_hub)_hub.style.display='none';var _sl=document.getElementById('stageLearnScreen');if(_sl)_sl.style.display='none';var _sp=document.getElementById('stagePracticeScreen');if(_sp)_sp.style.display='none';var _sr=document.getElementById('stageRevisionScreen');if(_sr)_sr.style.display='none';var _ss=document.getElementById('stageSummaryScreen');if(_ss)_ss.style.display='none';var _st=document.getElementById('stageTestScreen');if(_st)_st.style.display='none';var _c7wg=document.getElementById('c7writeGk');if(_c7wg)_c7wg.style.display='none';var _c7wcp=document.getElementById('c7writeComp');if(_c7wcp)_c7wcp.style.display='none';var _c6wh=document.getElementById('c6writeHome');if(_c6wh)_c6wh.style.display='none';var _c6wm=document.getElementById('c6writeMaths');if(_c6wm)_c6wm.style.display='none';var _c6we=document.getElementById('c6writeEng');if(_c6we)_c6we.style.display='none';var _c6wh=document.getElementById('c6writeHin');if(_c6wh)_c6wh.style.display='none';var _c6wv=document.getElementById('c6writeEvs');if(_c6wv)_c6wv.style.display='none';var _c6wg=document.getElementById('c6writeGk');if(_c6wg)_c6wg.style.display='none';var _c6wcp=document.getElementById('c6writeComp');if(_c6wcp)_c6wcp.style.display='none';var _c6wa=document.getElementById('c6writeArt');if(_c6wa)_c6wa.style.display='none';var _c5wh=document.getElementById('c5writeHome');if(_c5wh)_c5wh.style.display='none';var _c5wm=document.getElementById('c5writeMaths');if(_c5wm)_c5wm.style.display='none';var _c5we=document.getElementById('c5writeEng');if(_c5we)_c5we.style.display='none';var _c5wh=document.getElementById('c5writeHin');if(_c5wh)_c5wh.style.display='none';var _c5wv2=document.getElementById('c5writeEvs');if(_c5wv2)_c5wv2.style.display='none';var _c5wg2=document.getElementById('c5writeGk');if(_c5wg2)_c5wg2.style.display='none';var _c5wcp2=document.getElementById('c5writeComp');if(_c5wcp2)_c5wcp2.style.display='none';var _c5wa2=document.getElementById('c5writeArt');if(_c5wa2)_c5wa2.style.display='none';var _mxs=document.getElementById('mixedStageScreen');if(_mxs)_mxs.style.display='none';var _mps=document.getElementById('mapStageScreen');if(_mps)_mps.style.display='none';var _ans=document.getElementById('analyticsScreen');if(_ans)_ans.style.display='none';var _wes=document.getElementById('weeklyExamScreen');if(_wes)_wes.style.display='none';['mockSetupScreen','mockExamScreen','mockResultScreen'].forEach(function(_id){var _e=document.getElementById(_id);if(_e)_e.style.display='none';});var _wrs=document.getElementById('weeklyResultScreen');if(_wrs)_wrs.style.display='none';var _wcs=document.getElementById('weeklyCertScreen');if(_wcs)_wcs.style.display='none';var _ats=document.getElementById('aiTutorScreen');if(_ats)_ats.style.display='none';var _dhs=document.getElementById('doubtHistoryScreen');if(_dhs)_dhs.style.display='none';var _wgs=document.getElementById('worksheetGenScreen');if(_wgs)_wgs.style.display='none';var _wvs=document.getElementById('worksheetViewScreen');if(_wvs)_wvs.style.display='none';var _whs=document.getElementById('worksheetHistoryScreen');if(_whs)_whs.style.display='none';var _oss=document.getElementById('olympiadSelectScreen');if(_oss)_oss.style.display='none';var _ots=document.getElementById('olympiadTestScreen');if(_ots)_ots.style.display='none';var _ors=document.getElementById('olympiadResultScreen');if(_ors)_ors.style.display='none';var _ocs=document.getElementById('olympiadCertScreen');if(_ocs)_ocs.style.display='none';var _ohs=document.getElementById('olympiadHistoryScreen');if(_ohs)_ohs.style.display='none';var _bghs=document.getElementById('brainGymHubScreen');if(_bghs)_bghs.style.display='none';var _bgps=document.getElementById('brainGymPlayScreen');if(_bgps)_bgps.style.display='none';var _bgrs=document.getElementById('brainGymResultScreen');if(_bgrs)_bgrs.style.display='none';var _nhs=document.getElementById('nutritionHomeScreen');if(_nhs)_nhs.style.display='none';var _nps=document.getElementById('nutritionProfileScreen');if(_nps)_nps.style.display='none';var _nms=document.getElementById('nutritionMealScreen');if(_nms)_nms.style.display='none';var _ngs=document.getElementById('nutritionGuideScreen');if(_ngs)_ngs.style.display='none';var _nhbs=document.getElementById('nutritionHabitsScreen');if(_nhbs)_nhbs.style.display='none';}
+function gpHideAllScreens(){document.getElementById('homeScreen').style.display='none';document.getElementById('quizArea').classList.remove('show');document.getElementById('levelComplete').classList.remove('show');document.getElementById('resultScreen').classList.remove('show');document.getElementById('gameoverScreen').classList.remove('show');document.getElementById('journeyScreen').style.display='none';document.getElementById('parentScreen').style.display='none';var _pm=document.getElementById('premiumScreen');if(_pm)_pm.style.display='none';var _n1=document.getElementById('nurseryHome');if(_n1)_n1.style.display='none';var _n2=document.getElementById('nurseryLevels');if(_n2)_n2.style.display='none';var _n3=document.getElementById('nurseryPlay');if(_n3)_n3.style.display='none';var _c1=document.getElementById('class1Home');if(_c1)_c1.style.display='none';var _c2=document.getElementById('class2Home');if(_c2)_c2.style.display='none';var _c3=document.getElementById('class3Home');if(_c3)_c3.style.display='none';var _c4=document.getElementById('class4Home');if(_c4)_c4.style.display='none';var _c4wh=document.getElementById('c4writeHome');if(_c4wh)_c4wh.style.display='none';var _c4wm=document.getElementById('c4writeMaths');if(_c4wm)_c4wm.style.display='none';var _c4we=document.getElementById('c4writeEng');if(_c4we)_c4we.style.display='none';var _c4wh=document.getElementById('c4writeHin');if(_c4wh)_c4wh.style.display='none';var _c4wv=document.getElementById('c4writeEvs');if(_c4wv)_c4wv.style.display='none';var _c4wg=document.getElementById('c4writeGk');if(_c4wg)_c4wg.style.display='none';var _c4wcp=document.getElementById('c4writeComp');if(_c4wcp)_c4wcp.style.display='none';var _c4wa=document.getElementById('c4writeArt');if(_c4wa)_c4wa.style.display='none';var _cwg=document.getElementById('c3writeGk');if(_cwg)_cwg.style.display='none';var _cwc=document.getElementById('c3writeComp');if(_cwc)_cwc.style.display='none';var _cwa=document.getElementById('c3writeArt');if(_cwa)_cwa.style.display='none';var _cwh=document.getElementById('c3writeHome');if(_cwh)_cwh.style.display='none';var _cwe=document.getElementById('c3writeEng');if(_cwe)_cwe.style.display='none';var _cwh2=document.getElementById('c3writeHin');if(_cwh2)_cwh2.style.display='none';var _cwv=document.getElementById('c3writeEvs');if(_cwv)_cwv.style.display='none';var _cwm=document.getElementById('c3writeMaths');if(_cwm)_cwm.style.display='none';var _c5=document.getElementById('class5Home');if(_c5)_c5.style.display='none';var _c6=document.getElementById('class6Home');if(_c6)_c6.style.display='none';var _c7=document.getElementById('class7Home');if(_c7)_c7.style.display='none';var _c8=document.getElementById('class8Home');if(_c8)_c8.style.display='none';var _c9=document.getElementById('class9Home');if(_c9)_c9.style.display='none';var _c10=document.getElementById('class10Home');if(_c10)_c10.style.display='none';var _c7wh=document.getElementById('c7writeHome');if(_c7wh)_c7wh.style.display='none';var _c7wm=document.getElementById('c7writeMaths');if(_c7wm)_c7wm.style.display='none';var _c7we=document.getElementById('c7writeEng');if(_c7we)_c7we.style.display='none';var _c7wh=document.getElementById('c7writeHin');if(_c7wh)_c7wh.style.display='none';var _c7wv=document.getElementById('c7writeEvs');if(_c7wv)_c7wv.style.display='none';var _hub=document.getElementById('chapterHubScreen');if(_hub)_hub.style.display='none';var _sl=document.getElementById('stageLearnScreen');if(_sl)_sl.style.display='none';var _sp=document.getElementById('stagePracticeScreen');if(_sp)_sp.style.display='none';var _sr=document.getElementById('stageRevisionScreen');if(_sr)_sr.style.display='none';var _ss=document.getElementById('stageSummaryScreen');if(_ss)_ss.style.display='none';var _st=document.getElementById('stageTestScreen');if(_st)_st.style.display='none';var _c7wg=document.getElementById('c7writeGk');if(_c7wg)_c7wg.style.display='none';var _c7wcp=document.getElementById('c7writeComp');if(_c7wcp)_c7wcp.style.display='none';var _c6wh=document.getElementById('c6writeHome');if(_c6wh)_c6wh.style.display='none';var _c6wm=document.getElementById('c6writeMaths');if(_c6wm)_c6wm.style.display='none';var _c6we=document.getElementById('c6writeEng');if(_c6we)_c6we.style.display='none';var _c6wh=document.getElementById('c6writeHin');if(_c6wh)_c6wh.style.display='none';var _c6wv=document.getElementById('c6writeEvs');if(_c6wv)_c6wv.style.display='none';var _c6wg=document.getElementById('c6writeGk');if(_c6wg)_c6wg.style.display='none';var _c6wcp=document.getElementById('c6writeComp');if(_c6wcp)_c6wcp.style.display='none';var _c6wa=document.getElementById('c6writeArt');if(_c6wa)_c6wa.style.display='none';var _c5wh=document.getElementById('c5writeHome');if(_c5wh)_c5wh.style.display='none';var _c5wm=document.getElementById('c5writeMaths');if(_c5wm)_c5wm.style.display='none';var _c5we=document.getElementById('c5writeEng');if(_c5we)_c5we.style.display='none';var _c5wh=document.getElementById('c5writeHin');if(_c5wh)_c5wh.style.display='none';var _c5wv2=document.getElementById('c5writeEvs');if(_c5wv2)_c5wv2.style.display='none';var _c5wg2=document.getElementById('c5writeGk');if(_c5wg2)_c5wg2.style.display='none';var _c5wcp2=document.getElementById('c5writeComp');if(_c5wcp2)_c5wcp2.style.display='none';var _c5wa2=document.getElementById('c5writeArt');if(_c5wa2)_c5wa2.style.display='none';var _mxs=document.getElementById('mixedStageScreen');if(_mxs)_mxs.style.display='none';var _mps=document.getElementById('mapStageScreen');if(_mps)_mps.style.display='none';var _ans=document.getElementById('analyticsScreen');if(_ans)_ans.style.display='none';var _wes=document.getElementById('weeklyExamScreen');if(_wes)_wes.style.display='none';['mockSetupScreen','mockExamScreen','mockResultScreen','wrScreen'].forEach(function(_id){var _e=document.getElementById(_id);if(_e)_e.style.display='none';});var _wrs=document.getElementById('weeklyResultScreen');if(_wrs)_wrs.style.display='none';var _wcs=document.getElementById('weeklyCertScreen');if(_wcs)_wcs.style.display='none';var _ats=document.getElementById('aiTutorScreen');if(_ats)_ats.style.display='none';var _dhs=document.getElementById('doubtHistoryScreen');if(_dhs)_dhs.style.display='none';var _wgs=document.getElementById('worksheetGenScreen');if(_wgs)_wgs.style.display='none';var _wvs=document.getElementById('worksheetViewScreen');if(_wvs)_wvs.style.display='none';var _whs=document.getElementById('worksheetHistoryScreen');if(_whs)_whs.style.display='none';var _oss=document.getElementById('olympiadSelectScreen');if(_oss)_oss.style.display='none';var _ots=document.getElementById('olympiadTestScreen');if(_ots)_ots.style.display='none';var _ors=document.getElementById('olympiadResultScreen');if(_ors)_ors.style.display='none';var _ocs=document.getElementById('olympiadCertScreen');if(_ocs)_ocs.style.display='none';var _ohs=document.getElementById('olympiadHistoryScreen');if(_ohs)_ohs.style.display='none';var _bghs=document.getElementById('brainGymHubScreen');if(_bghs)_bghs.style.display='none';var _bgps=document.getElementById('brainGymPlayScreen');if(_bgps)_bgps.style.display='none';var _bgrs=document.getElementById('brainGymResultScreen');if(_bgrs)_bgrs.style.display='none';var _nhs=document.getElementById('nutritionHomeScreen');if(_nhs)_nhs.style.display='none';var _nps=document.getElementById('nutritionProfileScreen');if(_nps)_nps.style.display='none';var _nms=document.getElementById('nutritionMealScreen');if(_nms)_nms.style.display='none';var _ngs=document.getElementById('nutritionGuideScreen');if(_ngs)_ngs.style.display='none';var _nhbs=document.getElementById('nutritionHabitsScreen');if(_nhbs)_nhbs.style.display='none';}
 
 function gpJourney(sec){if(!allData[sec])return;gpHideAllScreens();var scr=document.getElementById('journeyScreen');scr.style.display='block';document.getElementById('jTitle').textContent=(SUBLABEL[sec]||sec);var prog=gpProg()[sec]||{};var mx=maxLvOf(sec);var map=document.getElementById('jMap');map.innerHTML='';for(var l=0;l<mx;l++){var done=(prog[l]||0)>0;var unlocked=(l===0)||((prog[l-1]||0)>0);var stars=prog[l]||0;var starStr=done?('\u2605'.repeat(stars)+'\u2606'.repeat(3-stars)):'';var cls=done?'done':(unlocked?'play':'lock');var cir=done?'done':(unlocked?'play':'lock');var icon=unlocked?(''+(l+1)):'\uD83D\uDD12';var node=document.createElement('div');node.className='j-node '+cls;node.innerHTML='<div class="j-circle '+cir+'">'+icon+'</div><div class="j-info"><div class="j-lvl-name">Level '+(l+1)+' &bull; '+((typeof CHAPTERS!=='undefined'&&CHAPTERS[sec])?CHAPTERS[sec][l]:LVLNAME[l])+'</div><div class="j-lvl-stars">'+starStr+'</div></div>'+(unlocked?'<div style="font-family:Anton;color:#FF6F00;font-size:13px;">'+(done?'REPLAY':'PLAY')+' \u25B6</div>':'');if(unlocked){(function(lv){node.onclick=function(){gpStartLevel(sec,lv);};})(l);}if((sec==='c6sst'||sec==='c6evs'||sec==='c7sst'||sec==='c7evs'||sec==='c5eng'||sec==='c5maths'||sec==='c5hin'||sec==='c5evs'||sec==='c5comp'||sec==='c5gk'||sec==='c5art'||sec==='c4maths'||sec==='c4eng'||sec==='c4hin'||sec==='c4evs'||sec==='c4gk'||sec==='c4art'||sec==='c4comp'||sec==='c6maths'||sec==='c7maths'||sec==='c6eng'||sec==='c7eng'||sec==='c6hin'||sec==='c7hin'||sec==='c6gk'||sec==='c7gk'||sec==='c6art'||sec==='c7art'||sec==='c6comp'||sec==='c7comp'||sec==='c6san'||sec==='c7san'||sec.indexOf('c8')===0||sec.indexOf('c9')===0||sec.indexOf('c10')===0)&&unlocked){(function(se,li){node.innerHTML+='<div class="j-hub-link" onclick="event.stopPropagation();openChapterHub(\''+se+'\','+li+');">\u2B50 NEW: Full Chapter Guide</div>';})(sec,l);}map.appendChild(node);if(l<mx-1){var c=document.createElement('div');c.className='j-connect';map.appendChild(c);}}}
 function gpStartLevel(sec,l){startSection(sec,l);}
@@ -4954,17 +4965,33 @@ return {classKey:classKey,questions:selected,startTime:Date.now()};
 }
 
 
-/* ===== Board Mock Test (MCQ, timed, palette, chapter report) ===== */
+/* ===== Board Mock Test + Test Series + Likhit Abhyas (written, AI-checked) ===== */
 var MOCK_MODES={quick:{n:20,min:20,label:'Quick Test',sub:'20 sawaal • 20 minute'},half:{n:40,min:40,label:'Half Paper',sub:'40 sawaal • 40 minute'},full:{n:50,min:60,label:'Full Paper',sub:'50 sawaal • 60 minute'}};
-var _mock=null,_mockSetup={ck:null,sec:'all',mode:'quick'},_mockTimer=null;
+var MOCK_SERIES=10;
+var _mock=null,_mockSetup={ck:null,sec:'all',mode:'quick',paper:0,tab:'mcq',wsec:null,wch:0},_mockTimer=null,_wr=null;
 function mockLS(k,v){try{if(v===undefined){return JSON.parse(localStorage.getItem(k)||'null');}if(v===null){localStorage.removeItem(k);}else{localStorage.setItem(k,JSON.stringify(v));}}catch(e){return null;}}
 function mockSubjects(ck){return (CLASS_SUBJECTS[ck]||[]).filter(function(k){return allData[k]&&allData[k].length;});}
 function mockSubLabel(sec){return sec==='all'?'Sabhi Subjects':String(SUBLABEL[sec]||sec).replace(/\s*\(C\d+\)/,'');}
-function mockChName(sec,idx){var n=(window.NCERT_CHAPTERS&&NCERT_CHAPTERS[sec]&&NCERT_CHAPTERS[sec][idx])||(typeof CHAPTERS!=='undefined'&&CHAPTERS[sec]&&CHAPTERS[sec][idx]);return n||('Chapter '+(idx+1));}
+function mockModeLabel(r){return r.mode==='hw'?('Teacher ka paper'):(((MOCK_MODES[r.mode]||{}).label||'')+(r.paper?(' • Series P'+r.paper):''));}
+function mockChName(sec,idx){if(idx<0)return 'Teacher ka paper';var n=(window.NCERT_CHAPTERS&&NCERT_CHAPTERS[sec]&&NCERT_CHAPTERS[sec][idx])||(typeof CHAPTERS!=='undefined'&&CHAPTERS[sec]&&CHAPTERS[sec][idx]);return n||('Chapter '+(idx+1));}
 function mockFmt(ms){ms=Math.max(0,ms);var t=Math.floor(ms/1000),m=Math.floor(t/60),s=t%60;return (m<10?'0':'')+m+':'+(s<10?'0':'')+s;}
 function mockGrade(p){return p>=91?'A1':p>=81?'A2':p>=71?'B1':p>=61?'B2':p>=51?'C1':p>=41?'C2':p>=33?'D':'E';}
 function mockShow(id){gpHideAllScreens();document.getElementById(id).style.display='block';window.scrollTo(0,0);}
 function mockBack(){mockStopTimer();var ck=(_mockSetup&&_mockSetup.ck)||'c10';var m=/^c(\d+)$/.exec(ck);if(m&&typeof gpOpenSenior==='function'&&SENIOR_SECS[m[1]]){gpOpenSenior(+m[1]);}else{goHome();}}
+
+/* --- Test Series: same paper for everyone (teacher.html has an identical copy of these 3 functions) --- */
+function gpSeedRnd(str){var h=2166136261>>>0;for(var i=0;i<str.length;i++){h^=str.charCodeAt(i);h=Math.imul(h,16777619)>>>0;}var a=h||1;return function(){a=(a+0x6D2B79F5)>>>0;var t=a;t=Math.imul(t^(t>>>15),t|1);t^=t+Math.imul(t^(t>>>7),t|61);return ((t^(t>>>14))>>>0)/4294967296;};}
+function gpSeedShuffle(arr,rnd){var a=arr.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(rnd()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}return a;}
+function gpSeriesPaper(secs,n,paperNo,bank){
+  secs=secs.filter(function(s){return (bank(s)||[]).length;}).slice().sort();if(!secs.length)return [];
+  var base=gpSeedRnd('GPSERIES|'+secs.join(','));
+  var lists=secs.map(function(sc){var chs=(bank(sc)||[]).map(function(chQs,idx){return gpSeedShuffle((chQs||[]).map(function(q){return {sec:sc,idx:idx,q:q};}),base);}).filter(function(b){return b.length;});chs=gpSeedShuffle(chs,base);var L=[],r=0,any=true;while(any){any=false;for(var i=0;i<chs.length;i++){if(chs[i][r]){L.push(chs[i][r]);any=true;}}r++;}return L;});
+  var S=secs.length,out=[];
+  secs.forEach(function(sc,si){var q=Math.floor(n/S)+(si<n%S?1:0),L=lists[si];if(!L.length)return;var st=((paperNo-1)*q)%L.length;for(var j=0;j<q&&j<L.length;j++){out.push(L[(st+j)%L.length]);}});
+  var rnd=gpSeedRnd('GPPAPER|'+secs.join(',')+'|'+n+'|'+paperNo);out=gpSeedShuffle(out,rnd);
+  return out.map(function(it){var q=it.q,idxs=[];for(var i=0;i<q.o.length&&i<6;i++)idxs.push(i);var sh=gpSeedShuffle(idxs,rnd);return {sec:it.sec,idx:it.idx,q:{q:q.q,o:sh.map(function(i){return q.o[i];}),a:sh.indexOf(q.a)}};});
+}
+
 function mockBuild(ck,sec,mode){
   var secs=gpShuffle(sec==='all'?mockSubjects(ck):[sec]);var N=MOCK_MODES[mode].n;
   var recent=mockLS('gp_mock_recent_'+ck)||[];
@@ -4975,37 +5002,56 @@ function mockBuild(ck,sec,mode){
   mockLS('gp_mock_recent_'+ck,out.map(function(it){return it.q.q;}).concat(recent).slice(0,300));
   return out;
 }
-function openMockTest(ck){
+function openMockTest(ck,tab){
   if(typeof gpRequirePremium==='function'&&!gpRequirePremium('Board Mock Test is a Premium feature.'))return;
-  _mockSetup.ck=ck;if(_mockSetup.sec!=='all'&&mockSubjects(ck).indexOf(_mockSetup.sec)<0)_mockSetup.sec='all';
+  _mockSetup.ck=ck;if(tab)_mockSetup.tab=tab;if(_mockSetup.sec!=='all'&&mockSubjects(ck).indexOf(_mockSetup.sec)<0)_mockSetup.sec='all';
   var act=mockLS('gp_mock_active');
   if(act&&act.ck===ck&&Date.now()>=act.end){_mock=act;mockFinalSubmit(true);return;}
   mockShow('mockSetupScreen');mockRenderSetup();
 }
 function mockPick(k,v){_mockSetup[k]=v;mockRenderSetup();}
+function mockSeriesKey(ck,sec,mode,p){return ck+'|'+sec+'|'+mode+'|'+p;}
 function mockRenderSetup(){
   var ck=_mockSetup.ck,subs=mockSubjects(ck),act=mockLS('gp_mock_active'),h='';
+  h+='<div class="mk-tabs"><div class="'+(_mockSetup.tab==='mcq'?'on':'')+'" onclick="mockPick(\'tab\',\'mcq\')">🎯 MCQ Test</div><div class="'+(_mockSetup.tab==='wr'?'on':'')+'" onclick="mockPick(\'tab\',\'wr\')">✍️ Likhit Abhyas</div></div>';
+  if(_mockSetup.tab==='wr'){document.getElementById('mockSetupContainer').innerHTML=h+wrSetupHTML(ck);return;}
   if(act&&act.ck===ck&&Date.now()<act.end){
     var done=Object.keys(act.ans).length;
-    h+='<div class="mk-card" style="border:2px solid #1565C0;"><div class="mk-h">⏳ Adhoora test</div><div style="font-size:12.5px;color:#444;">'+esc(mockSubLabel(act.sec))+' &bull; '+esc(MOCK_MODES[act.mode].label)+' &bull; '+done+'/'+act.qs.length+' answered &bull; '+mockFmt(act.end-Date.now())+' baaki</div><button class="mk-btn red" onclick="mockResume()">TEST JAARI RAKHO ▶</button><button class="mk-btn grey" onclick="mockDiscard()">Chhod do, naya shuru karo</button></div>';
+    h+='<div class="mk-card" style="border:2px solid #1565C0;"><div class="mk-h">⏳ Adhoora test</div><div style="font-size:12.5px;color:#444;">'+esc(act.title||mockSubLabel(act.sec))+' &bull; '+esc(mockModeLabel(act))+' &bull; '+done+'/'+act.qs.length+' answered &bull; '+mockFmt(act.end-Date.now())+' baaki</div><button class="mk-btn red" onclick="mockResume()">TEST JAARI RAKHO ▶</button>'+(act.hw?'':'<button class="mk-btn grey" onclick="mockDiscard()">Chhod do, naya shuru karo</button>')+'</div>';
   }
   h+='<div class="mk-card"><div class="mk-h">1. Subject chuno</div><div class="mk-chips">';
   ['all'].concat(subs).forEach(function(sc){h+='<div class="mk-chip'+(_mockSetup.sec===sc?' on':'')+'" onclick="mockPick(\'sec\',\''+sc+'\')">'+esc(mockSubLabel(sc))+'</div>';});
-  h+='</div></div><div class="mk-card"><div class="mk-h">2. Paper chuno</div>';
+  h+='</div></div><div class="mk-card"><div class="mk-h">2. Paper ka size</div>';
   Object.keys(MOCK_MODES).forEach(function(m){var md=MOCK_MODES[m];h+='<div class="mk-mode'+(_mockSetup.mode===m?' on':'')+'" onclick="mockPick(\'mode\',\''+m+'\')"><b>'+md.label+'</b><span>'+md.sub+'</span></div>';});
-  h+='</div><div class="mk-card"><div class="mk-h">📋 Niyam (Instructions)</div><ul class="mk-rules"><li>Har sahi jawab = 1 mark. Galat par minus nahi.</li><li>Timer khatam hote hi test apne aap submit ho jayega.</li><li>Kisi bhi sawaal par wapas ja sakte ho aur jawab badal sakte ho.</li><li>Shaq ho toh ⭐ <b>Mark for Review</b> karo, baad mein dekho.</li><li>App band ho jaye toh progress save rehta hai, par timer chalta rehta hai.</li><li>Ye MCQ practice test hai. Asli board paper mein likhne wale sawaal bhi hote hain, unki practice NCERT se karte raho.</li></ul>';
+  var ser=mockLS('gp_mock_series')||{};
+  h+='</div><div class="mk-card"><div class="mk-h">3. Paper chuno</div><div class="mk-chips"><div class="mk-chip'+(!_mockSetup.paper?' on':'')+'" onclick="mockPick(\'paper\',0)">🎲 Naya random paper</div></div>';
+  h+='<div style="font-size:11.5px;color:#666;margin:10px 0 4px;font-weight:700;">📚 Test Series (har bachche ko same paper, teacher bhi yahi assign kar sakte hain)</div><div class="mk-series">';
+  for(var p=1;p<=MOCK_SERIES;p++){var best=ser[mockSeriesKey(ck,_mockSetup.sec,_mockSetup.mode,p)];h+='<div class="'+(_mockSetup.paper===p?'on ':'')+(best!==undefined?'done':'')+'" onclick="mockPick(\'paper\','+p+')"><b>P'+p+'</b><span>'+(best!==undefined?best+'%':'—')+'</span></div>';}
+  h+='</div></div>';
+  h+='<div class="mk-card"><div class="mk-h">📋 Niyam (Instructions)</div><ul class="mk-rules"><li>Har sahi jawab = 1 mark. Galat par minus nahi.</li><li>Timer khatam hote hi test apne aap submit ho jayega.</li><li>Kisi bhi sawaal par wapas ja sakte ho aur jawab badal sakte ho.</li><li>Shaq ho toh ⭐ <b>Mark for Review</b> karo, baad mein dekho.</li><li>App band ho jaye toh progress save rehta hai, par timer chalta rehta hai.</li><li>Likhne wale sawaalon ki practice ke liye upar <b>✍️ Likhit Abhyas</b> kholo.</li></ul>';
   h+='<button class="mk-btn red" onclick="mockStart()">🎯 TEST SHURU KARO</button></div>';
   var hist=(mockLS('gp_mock_hist')||[]).filter(function(x){return x.ck===ck;}).slice(0,8);
-  if(hist.length){h+='<div class="mk-card"><div class="mk-h">📈 Pichhle tests</div>';hist.forEach(function(x){var d=new Date(x.t);h+='<div class="mk-hist"><span>'+d.getDate()+'/'+(d.getMonth()+1)+' &bull; '+esc(mockSubLabel(x.sec))+' &bull; '+esc(MOCK_MODES[x.mode]?MOCK_MODES[x.mode].label:'')+'</span><b>'+x.c+'/'+x.n+' ('+x.p+'%) '+mockGrade(x.p)+'</b></div>';});h+='</div>';}
+  if(hist.length){h+='<div class="mk-card"><div class="mk-h">📈 Pichhle tests</div>';hist.forEach(function(x){var d=new Date(x.t);h+='<div class="mk-hist"><span>'+d.getDate()+'/'+(d.getMonth()+1)+' &bull; '+esc(mockSubLabel(x.sec))+' &bull; '+esc(mockModeLabel(x))+'</span><b>'+x.c+'/'+x.n+' ('+x.p+'%) '+mockGrade(x.p)+'</b></div>';});h+='</div>';}
   document.getElementById('mockSetupContainer').innerHTML=h;
 }
 function mockDiscard(){if(!confirm('Adhoora test hata dein?'))return;mockLS('gp_mock_active',null);mockRenderSetup();}
 function mockStart(){
-  var act=mockLS('gp_mock_active');if(act&&act.ck===_mockSetup.ck&&Date.now()<act.end&&!confirm('Adhoora test hat jayega. Naya test shuru karein?'))return;
-  var qs=mockBuild(_mockSetup.ck,_mockSetup.sec,_mockSetup.mode);
+  var act=mockLS('gp_mock_active');if(act&&Date.now()<act.end){if(act.hw){gpToast('Pehle teacher ka adhoora test poora karo.');return;}if(!confirm('Adhoora test hat jayega. Naya test shuru karein?'))return;}
+  var ck=_mockSetup.ck,sec=_mockSetup.sec,mode=_mockSetup.mode,p=_mockSetup.paper||0;
+  var qs=p?gpSeriesPaper(sec==='all'?mockSubjects(ck):[sec],MOCK_MODES[mode].n,p,function(s){return allData[s];}):mockBuild(ck,sec,mode);
   if(qs.length<5){gpToast('Is subject mein abhi kaafi sawaal nahi hain.');return;}
-  var now=Date.now();_mock={ck:_mockSetup.ck,sec:_mockSetup.sec,mode:_mockSetup.mode,qs:qs,ans:{},mark:{},seen:{0:1},qi:0,start:now,end:now+MOCK_MODES[_mockSetup.mode].min*60000,pal:false,confirm:false};
-  mockSave();mockShow('mockExamScreen');mockRender();mockStartTimer();
+  mockBegin({ck:ck,sec:sec,mode:mode,paper:p,qs:qs,min:MOCK_MODES[mode].min});
+}
+function mockBegin(o){var now=Date.now();_mock={ck:o.ck,sec:o.sec,mode:o.mode,paper:o.paper||0,hw:o.hw||null,title:o.title||'',qs:o.qs,ans:{},mark:{},seen:{0:1},qi:0,start:now,end:now+o.min*60000,pal:false,confirm:false};mockSave();mockShow('mockExamScreen');mockRender();mockStartTimer();}
+/* Teacher-assigned timed paper (homework whose title starts with "⏱<min>m ") */
+function gpMockFromHw(h){
+  var mm=/^⏱(\d+)m\s/.exec(h.t||'');var min=mm?Math.max(5,Math.min(180,+mm[1])):30;
+  var act=mockLS('gp_mock_active');if(act&&act.hw===h.id&&Date.now()<act.end){_mockSetup.ck=act.ck;mockResume();return;}
+  var ck=(/^c(\d+)/.exec(h.sec||'')||[])[0]||'c10';_mockSetup.ck=ck;
+  var qs=(h.qs||[]).map(function(q){return {sec:h.sec||'all',idx:-1,q:{q:String(q.q||''),o:(q.o||[]).slice(0,6),a:+q.a}};});
+  if(!qs.length){gpToast('Is paper mein sawaal nahi mile.');return;}
+  if(!confirm('"'+String(h.t).replace(/^⏱\d+m\s*/,'')+'"\n'+qs.length+' sawaal, '+min+' minute. Timer abhi shuru hoga. Shuru karein?'))return;
+  mockBegin({ck:ck,sec:h.sec||'all',mode:'hw',hw:h.id,title:String(h.t).replace(/^⏱\d+m\s*/,''),qs:qs,min:min});
 }
 function mockResume(){_mock=mockLS('gp_mock_active');if(!_mock)return;_mock.confirm=false;mockShow('mockExamScreen');mockRender();mockStartTimer();}
 function mockSave(){if(_mock)mockLS('gp_mock_active',_mock);}
@@ -5020,16 +5066,17 @@ function mockTick(){
 function mockRender(){
   var m=_mock,it=m.qs[m.qi],n=m.qs.length,done=Object.keys(m.ans).length,h='';
   h+='<div class="mk-top"><button class="home-btn-back" onclick="mockExit()">&#8592; EXIT</button><span class="mk-qmeta">'+done+'/'+n+' answered</span><span class="mk-timer" id="mkTimer">⏱ '+mockFmt(m.end-Date.now())+'</span></div>';
+  if(m.title)h+='<div class="mk-qmeta" style="color:#B71C1C;">📌 '+esc(m.title)+'</div>';
   if(m.confirm){
     var mk=Object.keys(m.mark).filter(function(k){return m.mark[k];}).length;
     h+='<div class="mk-card"><div class="mk-h">Submit karne se pehle dekh lo</div><div class="mk-stat"><div><b>'+done+'</b><span>Answered</span></div><div><b>'+(n-done)+'</b><span>Not answered</span></div><div><b>'+mk+'</b><span>Marked</span></div></div>';
     h+='<button class="mk-btn grey" onclick="mockConfirm(false)">◀ Wapas test par jao</button><button class="mk-btn red" onclick="mockFinalSubmit(false)">✅ FINAL SUBMIT</button></div>';
     document.getElementById('mockExamContainer').innerHTML=h;return;
   }
-  h+='<div class="mk-qmeta">Question '+(m.qi+1)+' of '+n+' &bull; '+esc(mockSubLabel(it.sec))+(m.mark[m.qi]?' &bull; <span style="color:#6A1B9A;">⭐ Marked</span>':'')+'</div>';
+  h+='<div class="mk-qmeta">Question '+(m.qi+1)+' of '+n+(it.idx>=0?' &bull; '+esc(mockSubLabel(it.sec)):'')+(m.mark[m.qi]?' &bull; <span style="color:#6A1B9A;">⭐ Marked</span>':'')+'</div>';
   h+='<div class="we-progress-bar" style="margin-top:6px;"><div class="we-progress-fill" style="width:'+Math.round(done/n*100)+'%;"></div></div>';
   h+='<div class="mk-q">'+esc(it.q.q)+'</div>';
-  it.q.o.forEach(function(op,oi){h+='<div class="mk-opt'+(m.ans[m.qi]===oi?' sel':'')+'" onclick="mockAnswer('+oi+')"><i>'+'ABCD'.charAt(oi)+'</i><span>'+esc(op)+'</span></div>';});
+  it.q.o.forEach(function(op,oi){h+='<div class="mk-opt'+(m.ans[m.qi]===oi?' sel':'')+'" onclick="mockAnswer('+oi+')"><i>'+'ABCDEF'.charAt(oi)+'</i><span>'+esc(op)+'</span></div>';});
   if(m.ans[m.qi]!==undefined)h+='<div style="text-align:right;"><span style="font-size:11.5px;color:#C62828;font-weight:700;cursor:pointer;" onclick="mockClear()">✖ Jawab hatao</span></div>';
   h+='<div class="mk-nav"><button style="background:#ECEFF1;color:#37474F;" onclick="mockGo('+(m.qi-1)+')"'+(m.qi===0?' disabled':'')+'>◀ Prev</button><button style="background:#F3E5F5;color:#6A1B9A;" onclick="mockMark()">'+(m.mark[m.qi]?'⭐ Unmark':'⭐ Mark')+'</button><button style="background:#1565C0;color:#fff;" onclick="mockGo('+(m.qi+1)+')">'+(m.qi+1<n?'Save & Next ▶':'Review ▶')+'</button></div>';
   h+='<div class="mk-card"><div class="mk-h" style="cursor:pointer;margin:0;" onclick="mockTogglePal()">📋 Question Palette '+(m.pal?'▲':'▼')+'</div>';
@@ -5046,36 +5093,146 @@ function mockConfirm(on){_mock.confirm=on;mockRender();window.scrollTo(0,0);}
 function mockExit(){if(confirm('Test se bahar jaana hai? Progress save rahega, par timer chalta rahega.')){mockSave();mockBack();}}
 function mockFinalSubmit(auto){
   mockStopTimer();var m=_mock;if(!m)return;var n=m.qs.length,c=0,w=0,by={},bs={};
-  m.qs.forEach(function(it,i){var a=m.ans[i],ok=(a===it.q.a);if(a!==undefined){if(ok)c++;else w++;try{gpLogAttempt(it.sec,it.idx,'mcq',ok,0);}catch(e){}}
+  m.qs.forEach(function(it,i){var a=m.ans[i],ok=(a===it.q.a);if(a!==undefined){if(ok)c++;else w++;if(it.idx>=0){try{gpLogAttempt(it.sec,it.idx,'mcq',ok,0);}catch(e){}}}
     var k=it.sec+'|'+it.idx;by[k]=by[k]||{sec:it.sec,idx:it.idx,t:0,c:0};by[k].t++;if(ok)by[k].c++;
     bs[it.sec]=bs[it.sec]||{t:0,c:0};bs[it.sec].t++;if(ok)bs[it.sec].c++;});
   var p=Math.round(c/n*100),dur=Math.min(Date.now(),m.end)-m.start;
-  var res={ck:m.ck,sec:m.sec,mode:m.mode,n:n,c:c,w:w,p:p,dur:dur,t:Date.now(),qs:m.qs,ans:m.ans,by:by,bs:bs,auto:!!auto};
-  var hist=mockLS('gp_mock_hist')||[];hist.unshift({ck:m.ck,sec:m.sec,mode:m.mode,n:n,c:c,p:p,t:res.t});mockLS('gp_mock_hist',hist.slice(0,30));
+  var res={ck:m.ck,sec:m.sec,mode:m.mode,paper:m.paper||0,hw:m.hw||null,title:m.title||'',n:n,c:c,w:w,p:p,dur:dur,t:Date.now(),qs:m.qs,ans:m.ans,by:by,bs:bs,auto:!!auto};
+  var hist=mockLS('gp_mock_hist')||[];hist.unshift({ck:m.ck,sec:m.sec,mode:m.mode,paper:m.paper||0,title:m.title||'',n:n,c:c,p:p,t:res.t});mockLS('gp_mock_hist',hist.slice(0,40));
+  if(m.paper){var ser=mockLS('gp_mock_series')||{},sk=mockSeriesKey(m.ck,m.sec,m.mode,m.paper);ser[sk]=Math.max(ser[sk]||0,p);mockLS('gp_mock_series',ser);}
+  if(m.hw&&window.gpClass&&gpClass.hwSubmit){try{gpClass.hwSubmit(m.hw,c,n,m.qs.map(function(_,i){return m.ans[i]===undefined?null:m.ans[i];}));}catch(e){}}
+  try{if(typeof addXP==='function')addXP(c*2);}catch(e){}
   mockLS('gp_mock_active',null);mockLS('gp_mock_last',res);_mock=null;_mockSetup.ck=res.ck;
-  mockShow('mockResultScreen');mockRenderResult(res,false);
+  gpTestSync();
+  mockShow('mockResultScreen');window._mkRv=false;mockRenderResult(res,false);
   if(auto)gpToast('⏰ Time khatam! Test apne aap submit ho gaya.');
 }
 function mockRenderResult(r,showRv){
   var g=mockGrade(r.p),col=r.p>=71?'#2E7D32':r.p>=51?'#F9A825':r.p>=33?'#EF6C00':'#C62828',h='';
   var best=(mockLS('gp_mock_hist')||[]).filter(function(x){return x.ck===r.ck&&x.sec===r.sec;}).reduce(function(b,x){return Math.max(b,x.p);},0);
-  h+='<div class="mk-card"><div class="mk-big"><div style="font-size:12px;color:#666;font-weight:700;">'+esc(mockSubLabel(r.sec))+' &bull; '+esc(MOCK_MODES[r.mode].label)+'</div><div class="sc">'+r.c+' / '+r.n+'</div><div class="gr" style="background:'+col+';">'+r.p+'% &bull; Grade '+g+'</div></div>';
+  h+='<div class="mk-card"><div class="mk-big"><div style="font-size:12px;color:#666;font-weight:700;">'+esc(r.title||mockSubLabel(r.sec))+' &bull; '+esc(mockModeLabel(r))+'</div><div class="sc">'+r.c+' / '+r.n+'</div><div class="gr" style="background:'+col+';">'+r.p+'% &bull; Grade '+g+'</div></div>';
   h+='<div class="mk-stat" style="margin-top:10px;"><div><b style="color:#2E7D32;">'+r.c+'</b><span>Sahi</span></div><div><b style="color:#C62828;">'+r.w+'</b><span>Galat</span></div><div><b style="color:#757575;">'+(r.n-r.c-r.w)+'</b><span>Chhoda</span></div></div>';
   h+='<div style="font-size:12px;color:#555;text-align:center;margin-top:8px;">⏱ Samay: '+mockFmt(r.dur)+' &bull; 🏆 Best: '+best+'%</div>';
+  if(r.hw)h+='<div style="font-size:12px;color:#1E8E5A;text-align:center;margin-top:6px;font-weight:800;">📤 Result teacher ko bheja gaya</div>';
   h+='<div style="font-size:12.5px;color:#333;text-align:center;margin-top:8px;font-weight:700;">'+(r.p>=91?'Shandaar! Board ke liye bilkul taiyaar 🎉':r.p>=71?'Bahut achha! Kamzor chapters thoda aur pakke karo 💪':r.p>=51?'Theek hai. Neeche wale chapters dobara padho 📘':'Mehnat aur chahiye. Chapter-wise revision se shuru karo 🌱')+'</div></div>';
   var subs=Object.keys(r.bs||{});
-  if(subs.length>1){h+='<div class="mk-card"><div class="mk-h">📚 Subject-wise</div>';subs.forEach(function(sc){var x=r.bs[sc],pp=Math.round(x.c/x.t*100);h+='<div class="mk-row"><div class="nm"><span>'+esc(mockSubLabel(sc))+'</span><span>'+x.c+'/'+x.t+'</span></div><div class="mk-bar"><i style="width:'+pp+'%;background:'+(pp>=70?'#2E7D32':pp>=40?'#F9A825':'#C62828')+';"></i></div></div>';});h+='</div>';}
-  var chs=Object.keys(r.by||{}).map(function(k){return r.by[k];}).sort(function(a,b){return a.c/a.t-b.c/b.t;});
-  h+='<div class="mk-card"><div class="mk-h">🎯 Chapter-wise (kamzor pehle)</div>';
+  if(subs.length>1){h+='<div class="mk-card"><div class="mk-h">📚 Subject-wise</div>';subs.forEach(function(sc){var x=r.bs[sc],pp=Math.round(x.c/x.t*100);h+='<div class="mk-row"><div class="nm"><span>'+esc(mockSubLabel(sc))+'</span><span>'+x.c+'/'+x.t+'</span></div><div class="mk-bar"><i style="width:'+Math.max(pp,2)+'%;background:'+(pp>=70?'#2E7D32':pp>=40?'#F9A825':'#C62828')+';"></i></div></div>';});h+='</div>';}
+  var chs=Object.keys(r.by||{}).map(function(k){return r.by[k];}).filter(function(x){return x.idx>=0;}).sort(function(a,b){return a.c/a.t-b.c/b.t;});
+  if(chs.length){h+='<div class="mk-card"><div class="mk-h">🎯 Chapter-wise (kamzor pehle)</div>';
   var links=0;chs.forEach(function(x){var pp=Math.round(x.c/x.t*100),lk=(pp<60&&links<5);if(lk)links++;h+='<div class="mk-row"><div class="nm"><span>'+(subs.length>1?esc(mockSubLabel(x.sec))+': ':'')+esc(mockChName(x.sec,x.idx))+'</span><span>'+x.c+'/'+x.t+'</span></div><div class="mk-bar"><i style="width:'+Math.max(pp,2)+'%;background:'+(pp>=70?'#2E7D32':pp>=40?'#F9A825':'#C62828')+';"></i></div>'+(lk?'<div style="text-align:right;margin-top:3px;"><span style="font-size:11.5px;color:#1565C0;font-weight:800;cursor:pointer;" onclick="mockOpenCh(\''+x.sec+'\','+x.idx+')">📘 Ye chapter dobara padho →</span></div>':'')+'</div>';});
-  h+='</div>';
+  h+='</div>';}
   h+='<div class="mk-card"><div class="mk-h" style="cursor:pointer;margin:0;" onclick="mockToggleRv()">📝 Sabhi jawab dekho '+(showRv?'▲':'▼')+'</div>';
   if(showRv){r.qs.forEach(function(it,i){var a=r.ans[i],ok=a===it.q.a;h+='<div class="mk-rv '+(a===undefined?'na':ok?'ok':'no')+'"><b>Q'+(i+1)+'.</b> '+esc(it.q.q)+'<br>'+(a===undefined?'<span style="color:#757575;">Aapne chhoda</span>':'Aapka jawab: <b style="color:'+(ok?'#2E7D32':'#C62828')+';">'+esc(it.q.o[a])+'</b>')+(ok?' ✅':'<br>Sahi jawab: <b style="color:#2E7D32;">'+esc(it.q.o[it.q.a])+'</b>')+'</div>';});}
-  h+='</div><button class="mk-btn red" onclick="openMockTest(\''+r.ck+'\')">🔁 NAYA TEST DO</button>';
+  h+='</div><button class="mk-btn red" onclick="openMockTest(\''+r.ck+'\',\'mcq\')">🔁 NAYA TEST DO</button><button class="mk-btn ghost" onclick="openMockTest(\''+r.ck+'\',\'wr\')">✍️ LIKHIT ABHYAS KARO</button>';
   document.getElementById('mockResultContainer').innerHTML=h;
 }
 function mockOpenCh(sec,idx){try{if(typeof openChapterHub==='function'){openChapterHub(sec,idx);return;}}catch(e){}gpJourney(sec);}
 function mockToggleRv(){var r=mockLS('gp_mock_last');if(!r)return;window._mkRv=!window._mkRv;mockRenderResult(r,window._mkRv);}
+
+/* --- Likhit Abhyas: short written answers, checked by Arjun Sir (AI) against GyaanPe's own verified notes --- */
+function wrIsHindi(sec){return /(hin|san)$/.test(sec);}
+function wrChapters(sec){var out=[];(allData[sec]||[]).forEach(function(_,i){var L=(typeof CH_LEARN_NCERT!=='undefined')&&CH_LEARN_NCERT[sec+'_'+i];if(L&&L.learn&&L.learn.length)out.push(i);});return out;}
+function wrBank(sec,idx){
+  var L=CH_LEARN_NCERT[sec+'_'+idx]||{},hi=wrIsHindi(sec),qs=[];
+  ((L.revision&&L.revision.terms)||[]).forEach(function(t){if(t&&t[0]&&t[1])qs.push({q:hi?('"'+t[0]+'" ka arth / paribhasha likhiye.'):('Define / explain: "'+t[0]+'".'),model:String(t[1]),max:2});});
+  (L.learn||[]).forEach(function(c){if(c&&c.title&&c.text)qs.push({q:hi?('"'+c.title+'" ke baare mein 2-3 panktiyon mein likhiye.'):('Explain "'+c.title+'" in 2-3 lines.'),model:String(c.text)+(c.example?(' Example: '+c.example):''),max:3});});
+  if(L.summary)qs.push({q:hi?'Is paath ka saar 3-4 panktiyon mein likhiye.':'Write the main idea of this chapter in 3-4 lines.',model:String(L.summary),max:4});
+  return qs;
+}
+function wrSetupHTML(ck){
+  var subs=mockSubjects(ck).filter(function(s){return wrChapters(s).length;}),h='';
+  if(!subs.length)return '<div class="mk-card">Is class mein abhi likhit abhyas uplabdh nahi hai.</div>';
+  if(subs.indexOf(_mockSetup.wsec)<0){_mockSetup.wsec=subs[0];_mockSetup.wch=wrChapters(subs[0])[0];}
+  var chs=wrChapters(_mockSetup.wsec);if(chs.indexOf(_mockSetup.wch)<0)_mockSetup.wch=chs[0];
+  h+='<div class="mk-card"><div class="mk-h">✍️ Likhit Abhyas kya hai?</div><div style="font-size:12.5px;color:#444;line-height:1.55;">Board paper ke chhote sawaalon jaisa: aap 2–4 line ka jawab <b>khud likhte ho</b>, aur <b>Arjun Sir</b> use GyaanPe ke notes se milakar <b>marks aur sudhaar</b> batate hain. Har session mein 3 sawaal.</div></div>';
+  h+='<div class="mk-card"><div class="mk-h">1. Subject</div><div class="mk-chips">';
+  subs.forEach(function(sc){h+='<div class="mk-chip'+(_mockSetup.wsec===sc?' on':'')+'" onclick="_mockSetup.wch=-1;mockPick(\'wsec\',\''+sc+'\')">'+esc(mockSubLabel(sc))+'</div>';});
+  h+='</div></div><div class="mk-card"><div class="mk-h">2. Chapter</div><select class="mk-sel" onchange="_mockSetup.wch=+this.value">';
+  chs.forEach(function(i){h+='<option value="'+i+'"'+(i===_mockSetup.wch?' selected':'')+'>'+(i+1)+'. '+esc(mockChName(_mockSetup.wsec,i))+'</option>';});
+  h+='</select><button class="mk-btn red" onclick="wrStart()">✍️ LIKHNA SHURU KARO</button><div style="font-size:11px;color:#888;margin-top:8px;">AI kabhi-kabhi galti kar sakta hai. Marks practice ke liye hain, school ke final marks nahi.</div></div>';
+  var hist=(mockLS('gp_wr_hist')||[]).filter(function(x){return x.ck===ck;}).slice(0,6);
+  if(hist.length){h+='<div class="mk-card"><div class="mk-h">📈 Pichhla likhit abhyas</div>';hist.forEach(function(x){var d=new Date(x.t);h+='<div class="mk-hist"><span>'+d.getDate()+'/'+(d.getMonth()+1)+' &bull; '+esc(mockSubLabel(x.sec))+': '+esc(mockChName(x.sec,x.idx))+'</span><b>'+x.got+'/'+x.max+'</b></div>';});h+='</div>';}
+  return h;
+}
+function wrStart(){
+  var sec=_mockSetup.wsec,idx=_mockSetup.wch,bank=gpShuffle(wrBank(sec,idx));
+  var pick=[],two=bank.filter(function(q){return q.max===2;}),three=bank.filter(function(q){return q.max>=3;});
+  if(two[0])pick.push(two[0]);pick=pick.concat(three.slice(0,3-pick.length));if(pick.length<3)pick=pick.concat(two.slice(1,1+(3-pick.length)));
+  if(!pick.length){gpToast('Is chapter mein sawaal nahi mile.');return;}
+  _wr={ck:_mockSetup.ck,sec:sec,idx:idx,qs:pick,i:0,res:{},busy:false};
+  mockShow('wrScreen');wrRender();
+}
+function wrRender(){
+  var w=_wr,q=w.qs[w.i],r=w.res[w.i],h='';
+  h+='<div class="mk-qmeta">'+esc(mockSubLabel(w.sec))+' &bull; '+esc(mockChName(w.sec,w.idx))+'</div>';
+  h+='<div class="mk-qmeta" style="margin-top:4px;">Sawaal '+(w.i+1)+' / '+w.qs.length+' &bull; <b style="color:#B71C1C;">['+q.max+' marks]</b></div>';
+  h+='<div class="mk-q">'+esc(q.q)+'</div>';
+  if(!r){
+    h+='<textarea id="wrAns" class="mk-ta" maxlength="700" placeholder="'+(wrIsHindi(w.sec)?'Apna jawab yahan likhiye...':'Write your answer here...')+'" oninput="document.getElementById(\'wrCnt\').textContent=this.value.length+\'/700\'">'+esc(w.draft||'')+'</textarea><div style="text-align:right;font-size:11px;color:#888;" id="wrCnt">'+((w.draft||'').length)+'/700</div>';
+    h+='<button class="mk-btn red" id="wrBtn" onclick="wrCheck()"'+(w.busy?' disabled':'')+'>'+(w.busy?'⏳ Arjun Sir check kar rahe hain...':'👨‍🏫 ARJUN SIR SE CHECK KARAO')+'</button>';
+    h+='<button class="mk-btn grey" onclick="wrSkip()">Ye sawaal chhodo ▶</button>';
+  }else{
+    var col=r.marks>=q.max*0.75?'#2E7D32':r.marks>=q.max*0.4?'#F9A825':'#C62828';
+    h+='<div class="mk-card"><div style="font-size:12px;color:#666;font-weight:700;">Aapka jawab</div><div style="font-size:13px;color:#333;white-space:pre-wrap;margin-top:4px;">'+esc(r.ans||'(chhoda)')+'</div></div>';
+    h+='<div class="mk-card" style="border:2px solid '+col+';"><div style="display:flex;justify-content:space-between;align-items:center;"><b style="color:#1A237E;">👨‍🏫 Arjun Sir</b><span class="mk-marks" style="background:'+col+';">'+r.marks+' / '+q.max+'</span></div>';
+    if(r.fb)h+='<div style="font-size:13px;color:#333;margin-top:8px;line-height:1.55;">'+esc(r.fb)+'</div>';
+    if(r.miss&&r.miss.length){h+='<div style="font-size:12px;color:#B71C1C;font-weight:800;margin-top:8px;">Ye points chhoot gaye:</div><ul class="mk-rules">';r.miss.forEach(function(x){h+='<li>'+esc(x)+'</li>';});h+='</ul>';}
+    h+='</div><div class="mk-card" style="background:#F1F8E9;"><div style="font-size:12px;color:#2E7D32;font-weight:800;">📗 GyaanPe notes (model answer)</div><div style="font-size:13px;color:#333;margin-top:4px;line-height:1.55;">'+esc(q.model)+'</div></div>';
+    h+='<button class="mk-btn red" onclick="wrNext()">'+(w.i+1<w.qs.length?'AGLA SAWAAL ▶':'RESULT DEKHO ▶')+'</button>';
+  }
+  document.getElementById('wrContainer').innerHTML=h;
+}
+function wrSkip(){_wr.res[_wr.i]={ans:'',marks:0,fb:'Sawaal chhod diya.',miss:[]};_wr.draft='';wrRender();}
+function wrNext(){if(_wr.i+1<_wr.qs.length){_wr.i++;_wr.draft='';wrRender();window.scrollTo(0,0);}else wrFinish();}
+function wrCheck(){
+  var w=_wr,q=w.qs[w.i],ta=document.getElementById('wrAns'),ans=(ta&&ta.value||'').trim();w.draft=ans;
+  if(ans.length<8){gpToast('Thoda aur likho (kam se kam ek poora vaakya).');return;}
+  w.busy=true;wrRender();
+  var cls=(/^c(\d+)/.exec(w.sec)||[])[1]||'';
+  fetch(AI_TUTOR_WORKER_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({mode:'grade',message:ans,userId:gpTutorUserId(),lang:wrIsHindi(w.sec)?'hi':'en',grade:{q:q.q,model:q.model,max:q.max,subj:mockSubLabel(w.sec),cls:cls},subToken:gpSubToken(),gpCode:gpCodeAuth()})})
+  .then(function(r){return r.json();}).then(function(d){
+    w.busy=false;
+    if(d.error==='limit_reached'){gpToast(d.reply||'Aaj ki limit poori ho gayi.');wrRender();return;}
+    if(d.error){gpToast('Arjun Sir abhi busy hain. Thodi der baad try karo.');wrRender();return;}
+    var o=null;try{o=JSON.parse(String(d.reply||'').replace(/```json/gi,'').replace(/```/g,'').trim());}catch(e){}
+    if(!o||typeof o.marks!=='number'){gpToast('Check nahi ho paaya. Dobara try karo.');wrRender();return;}
+    var mk=Math.max(0,Math.min(q.max,Math.round(o.marks*2)/2));
+    w.res[w.i]={ans:ans,marks:mk,fb:String(o.feedback||'').slice(0,500),miss:(Array.isArray(o.missing)?o.missing:[]).slice(0,4).map(function(x){return String(x).slice(0,160);})};
+    wrRender();
+  }).catch(function(){w.busy=false;gpToast('Internet check karke dobara try karo.');wrRender();});
+}
+function wrFinish(){
+  var w=_wr,got=0,max=0;w.qs.forEach(function(q,i){max+=q.max;got+=((w.res[i]||{}).marks||0);});
+  var hist=mockLS('gp_wr_hist')||[];hist.unshift({ck:w.ck,sec:w.sec,idx:w.idx,got:got,max:max,t:Date.now()});mockLS('gp_wr_hist',hist.slice(0,40));
+  try{if(typeof addXP==='function')addXP(Math.round(got*3));}catch(e){}
+  gpTestSync();
+  var p=Math.round(got/Math.max(1,max)*100),h='<div class="mk-card"><div class="mk-big"><div style="font-size:12px;color:#666;font-weight:700;">'+esc(mockSubLabel(w.sec))+': '+esc(mockChName(w.sec,w.idx))+'</div><div class="sc">'+got+' / '+max+'</div><div class="gr" style="background:'+(p>=70?'#2E7D32':p>=40?'#F9A825':'#C62828')+';">'+p+'%</div></div>';
+  h+='<div style="font-size:12.5px;color:#333;text-align:center;margin-top:8px;font-weight:700;">'+(p>=80?'Bahut badhiya likha! 🎉':p>=50?'Achha prayas! Chhoote points yaad kar lo 💪':'Notes ek baar padho, phir dobara likho 🌱')+'</div></div>';
+  h+='<button class="mk-btn red" onclick="wrStart()">🔁 ISI CHAPTER KE NAYE SAWAAL</button><button class="mk-btn ghost" onclick="openMockTest(\''+w.ck+'\',\'wr\')">Doosra chapter chuno</button>';
+  document.getElementById('wrContainer').innerHTML=h;
+}
+
+/* --- Results for parents (Parent Dashboard) and teachers (class sync) --- */
+function gpTestReportHTML(){
+  var mh=mockLS('gp_mock_hist')||[],wh=mockLS('gp_wr_hist')||[];if(!mh.length&&!wh.length)return '';
+  var h='<div class="mk-card" id="gpTestReport" style="text-align:left;"><div class="mk-h">📊 Test Series Report</div>';
+  if(mh.length){var avg=Math.round(mh.slice(0,10).reduce(function(t,x){return t+x.p;},0)/Math.min(10,mh.length)),best=mh.reduce(function(b,x){return Math.max(b,x.p);},0);
+    h+='<div class="mk-stat"><div><b>'+mh.length+'</b><span>Tests diye</span></div><div><b>'+avg+'%</b><span>Average (last 10)</span></div><div><b>'+best+'%</b><span>Best</span></div></div>';
+    h+='<div style="font-size:12px;font-weight:800;color:#333;margin:10px 0 2px;">Pichhle MCQ tests</div>';
+    mh.slice(0,5).forEach(function(x){var d=new Date(x.t);h+='<div class="mk-hist"><span>'+d.getDate()+'/'+(d.getMonth()+1)+' &bull; '+esc(x.title||mockSubLabel(x.sec))+' ('+esc(String(x.ck||'').replace('c','Class '))+')</span><b>'+x.p+'% '+mockGrade(x.p)+'</b></div>';});}
+  if(wh.length){var g=0,m=0;wh.slice(0,10).forEach(function(x){g+=x.got;m+=x.max;});
+    h+='<div style="font-size:12px;font-weight:800;color:#333;margin:12px 0 2px;">✍️ Likhit Abhyas (Arjun Sir ke marks)</div><div style="font-size:12px;color:#555;">Last '+Math.min(10,wh.length)+' sessions: <b>'+g+'/'+m+'</b> ('+Math.round(g/Math.max(1,m)*100)+'%)</div>';
+    wh.slice(0,3).forEach(function(x){var d=new Date(x.t);h+='<div class="mk-hist"><span>'+d.getDate()+'/'+(d.getMonth()+1)+' &bull; '+esc(mockSubLabel(x.sec))+': '+esc(mockChName(x.sec,x.idx))+'</span><b>'+x.got+'/'+x.max+'</b></div>';});}
+  return h+'</div>';
+}
+try{(function(){var orig=window.gpParent;if(typeof orig!=='function')return;window.gpParent=function(){var r=orig.apply(this,arguments);try{var b=document.getElementById('parentBody');if(b){var old=document.getElementById('gpTestReport');if(old)old.parentNode.removeChild(old);var html=gpTestReportHTML();if(html){var d=document.createElement('div');d.innerHTML=html;b.insertBefore(d.firstChild,b.firstChild);}}}catch(e){}return r;};})();}catch(e){}
+function gpTestSync(){
+  try{var j=JSON.parse(localStorage.getItem('gp_class')||'null'),uid=localStorage.getItem('gp_uid');if(!j||!j.code||!uid)return;
+    var mh=(mockLS('gp_mock_hist')||[]).slice(0,10).map(function(x){return {s:String(x.sec),c:String(x.ck),m:String(x.mode),sp:+x.paper||0,tt:String(x.title||'').slice(0,60),p:+x.p,k:+x.c,n:+x.n,t:+x.t};});
+    var wh=(mockLS('gp_wr_hist')||[]).slice(0,10).map(function(x){return {s:String(x.sec),ch:String(mockChName(x.sec,x.idx)).slice(0,60),g:+x.got,x:+x.max,t:+x.t};});
+    fetch('https://zapzone-98727-default-rtdb.firebaseio.com/gyaanpeClasses/'+encodeURIComponent(j.code)+'/mk/'+encodeURIComponent(uid)+'.json',{method:'PUT',headers:{'Content-Type':'application/json'},keepalive:true,body:JSON.stringify({n:String(j.name||'').slice(0,30),r:mh,w:wh,last:Date.now(),v:1})}).catch(function(){});
+  }catch(e){}
+}
 
 var _weeklyState={classKey:null,questions:[],qi:0,answers:{},startTime:0};
 
@@ -16445,14 +16602,23 @@ body.gp-web #premiumScreen .pass-badge{display:none !important;}
     mount.innerHTML = '<div class="gphw-card"><h4>&#128218; Teacher ka homework'+(pending?(' ('+pending+' baaki)'):'')+'</h4>'+
       show.map(function(h){
         var d = done[h.id], late = h.due && now > h.due;
-        return '<button type="button" class="gphw-item" data-hwid="'+esc(h.id)+'"><span><b>'+esc(h.t)+'</b><small>'+(h.n||h.qs.length)+' sawaal'+(h.due?(', last date '+esc(hwDate(h.due))+(late&&!d?' (der ho gayi)':'')):'')+'</small></span>'+
+        return '<button type="button" class="gphw-item" data-hwid="'+esc(h.id)+'"><span><b>'+esc(String(h.t||'').replace(/^\u23f1(\d+)m\s*/,'\u23f1 $1 min \u2022 '))+'</b><small>'+(h.n||h.qs.length)+' sawaal'+(h.due?(', last date '+esc(hwDate(h.due))+(late&&!d?' (der ho gayi)':'')):'')+'</small></span>'+
           (d ? '<span class="gphw-go" style="background:#1E8E5A">&#10003; '+d.s+'/'+d.t+'</span>' : '<span class="gphw-go">Shuru karo</span>')+'</button>';
       }).join('')+'</div>';
     Array.prototype.forEach.call(mount.querySelectorAll('[data-hwid]'), function(b){
       b.onclick = function(){ var id = b.getAttribute('data-hwid'); var h = hwList.filter(function(x){ return x.id === id; })[0]; if(h && !hwDone()[id]) startHw(h); else if(typeof gpToast === 'function') gpToast('Yeh homework ho chuka hai'); };
     });
   }
+  function hwSubmit(id, score, total, ans){
+    var j = joined(), rec = { n:(j&&j.name)||'', s:score, t:total, at:Date.now(), ans:ans };
+    hwSetDone(id, { s:score, t:total, at:rec.at });
+    renderHwCard();
+    if(!j) return Promise.resolve(false);
+    return fetch(DB+j.code+'/hwsub/'+id+'/'+uid()+'.json', { method:'PUT', body:JSON.stringify(rec), headers:{'Content-Type':'application/json'} })
+      .then(function(r){ return r.ok; }).catch(function(){ return false; });
+  }
   function startHw(h){
+    if(/^\u23f1\d+m\s/.test(h.t||'') && typeof window.gpMockFromHw === 'function'){ close(); window.gpMockFromHw(h); return; }
     var i = 0, score = 0, ans = [], locked = false;
     function show(){
       var q = h.qs[i];
@@ -16516,7 +16682,7 @@ body.gp-web #premiumScreen .pass-badge{display:none !important;}
   }
   window.gpTeacherOpen = teacherOpen;
 
-  window.gpClass = { open: showJoin, push: push };
+  window.gpClass = { open: showJoin, push: push, hwSubmit: hwSubmit };
 })();
 </script>
 </body>

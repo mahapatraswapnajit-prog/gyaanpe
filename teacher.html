@@ -174,8 +174,15 @@
     </div>
 
     <h2>Homework</h2>
-    <div class="row" style="margin-bottom:10px"><button class="btn" id="hwNew" type="button">+ Naya homework</button></div>
+    <div class="row" style="margin-bottom:10px"><button class="btn" id="hwNew" type="button">+ Naya homework</button><button class="btn sec" id="mkNew" type="button">&#127919; Mock Test / Test Series paper (Class 8&ndash;10)</button></div>
     <div id="hwList"><p class="muted">Abhi koi homework nahi.</p></div>
+
+    <h2>Mock Test &amp; Likhit Abhyas</h2>
+    <p class="muted" style="margin-top:-4px">Bachche app mein jo practice test aur likhe-jawab abhyas karte hain, unke result yahan dikhte hain. Aapke assign kiye timed paper ka result Homework mein dikhta hai.</p>
+    <div class="wrap"><table style="min-width:0">
+      <thead><tr><th>Naam</th><th>Tests</th><th>Avg (last 10)</th><th>Last test</th><th>Likhit abhyas</th></tr></thead>
+      <tbody id="mkRows"><tr><td colspan="5" class="muted">Abhi data nahi hai.</td></tr></tbody>
+    </table></div>
 
     <h2>Bachche</h2>
     <div class="row" style="margin-bottom:10px">
@@ -385,7 +392,7 @@ var CONFIG = {
   function loadStudents(){
     $('cRows').innerHTML = '<tr><td colspan="8" class="muted">Loading…</td></tr>';
     db.ref('gyaanpeClasses/'+cur.code+'/students').once('value').then(function(s){
-      students = s.val() || {}; render();
+      students = s.val() || {}; render(); mkLoad();
     }).catch(function(){ $('cRows').innerHTML = '<tr><td colspan="8" class="msg err">Data load nahi hua.</td></tr>'; });
   }
 
@@ -404,7 +411,7 @@ var CONFIG = {
   }
   function subj(s){
     s = String(s||'');
-    var m = s.match(/^c(\d)(.*)$/), cls = m ? 'Class '+m[1]+' ' : '', k = (m ? m[2] : s).toLowerCase();
+    var m = s.match(/^c(\d+)(.*)$/), cls = m ? 'Class '+m[1]+' ' : '', k = (m ? m[2] : s).toLowerCase();
     var map = { maths:'Maths', math:'Maths', eng:'English', english:'English', hin:'Hindi', hindi:'Hindi', evs:'EVS', sci:'Science', science:'Science',
                 sst:'Social Science', social:'Social Science', gk:'GK', comp:'Computer', computer:'Computer', art:'Art', poetry:'Poetry' };
     return cls + (map[k] || (k.charAt(0).toUpperCase() + k.slice(1)));
@@ -479,6 +486,7 @@ var CONFIG = {
       '<h2>Subjects</h2><ul class="list">'+(sb || '<li class="muted">Abhi data nahi hai.</li>')+'</ul>'+
       '<div class="grid2"><div><h2>Weak topics</h2><ul class="list">'+(w || '<li class="muted">Koi weak topic nahi.</li>')+'</ul></div>'+
       '<div><h2>Strong topics</h2><ul class="list">'+(g || '<li class="muted">Abhi data nahi hai.</li>')+'</ul></div></div>'+
+      mkStudentHTML(id)+
       '<div class="row" style="margin-top:20px"><button class="btn danger" id="rmStudent" type="button">Class se hatayein</button></div>';
     $('ov').classList.add('show');
     $('ovClose').onclick = closeOv; $('ovClose').focus();
@@ -488,6 +496,13 @@ var CONFIG = {
     };
   }
   function closeOv(){ $('ov').classList.remove('show'); }
+  function mkStudentHTML(id){
+    var x = (typeof mkData === 'object' && mkData && mkData[id]) || null; if (!x) return '';
+    var r = arr(x.r), w = arr(x.w); if (!r.length && !w.length) return '';
+    var h = '<h2>Mock tests</h2><ul class="list">' + (r.map(function(y){ return '<li><span>'+esc(y.tt || subj(y.s))+'<br><span class="muted">'+ago(y.t)+(y.sp?(', Series P'+y.sp):'')+'</span></span><b>'+(+y.k||0)+'/'+(+y.n||0)+' '+accPill(+y.p||0,1)+'</b></li>'; }).join('') || '<li class="muted">Koi test nahi.</li>') + '</ul>';
+    if (w.length) h += '<h2>Likhit abhyas (AI se check)</h2><ul class="list">' + w.map(function(y){ return '<li><span>'+esc(subj(y.s))+': '+esc(y.ch)+'<br><span class="muted">'+ago(y.t)+'</span></span><b>'+(+y.g||0)+'/'+(+y.x||0)+'</b></li>'; }).join('') + '</ul>';
+    return h;
+  }
 
   /* ================= HOMEWORK ================= */
   var M = window.HW_META || { CH:{}, SL:{} }, bankReady = null, hwCache = {};
@@ -506,7 +521,7 @@ var CONFIG = {
     if (cl === '1') return C1;
     return Object.keys(M.SL).filter(function(k){ return k.indexOf('c'+cl) === 0; });
   }
-  function subName(k){ return String(M.SL[k] || subj(k)).replace(/\s*\(C\d\)\s*$/, '').replace(/^./, function(c){ return c.toUpperCase(); }); }
+  function subName(k){ return String(M.SL[k] || subj(k)).replace(/\s*\(C\d+\)\s*$/, '').replace(/^./, function(c){ return c.toUpperCase(); }); }
   function chapters(k){ var b = window[k+'Q'] || []; var names = M.CH[k] || []; return b.map(function(_, i){ return names[i] || ('Level ' + (i+1)); }); }
   function shuffle(a){ a = a.slice(); for (var i=a.length-1;i>0;i--){ var j = Math.floor(Math.random()*(i+1)); var t=a[i]; a[i]=a[j]; a[j]=t; } return a; }
   function qText(q){ var t = q.q || ''; if (q.vis && q.vis.t){ try { t += ' ' + String.fromCodePoint(parseInt(q.vis.t,16)).repeat(Math.min(+q.vis.n||1, 20)); } catch(e){} } return t; }
@@ -568,7 +583,7 @@ var CONFIG = {
     };
     $('hwCls').onchange = fillSub; $('hwSub').onchange = fillCh; $('hwCh').onchange = function(){ makeDraft(true); };
     $('hwN').onchange = function(){ makeDraft(false); }; $('hwShuffle').onclick = function(){ makeDraft(false); };
-    var guess = String((cur.info && cur.info.name) || '').match(/[1-7]/); if (guess) $('hwCls').value = guess[0];
+    var guess = String((cur.info && cur.info.name) || '').match(/10|[1-9]/); if (guess) $('hwCls').value = guess[0];
     fillSub();
     $('hwPrint').onclick = function(){ printHw({ t:$('hwT').value.trim() || 'Homework', due:dueTs(), qs:draft.qs }, $('hwKey').checked); };
     $('hwAssign').onclick = function(){
@@ -624,6 +639,90 @@ var CONFIG = {
   }
   $('ov').onclick = function(e){ if (e.target === $('ov')) closeOv(); };
   document.addEventListener('keydown', function(e){ if (e.key === 'Escape') closeOv(); });
+
+
+  /* ================= MOCK TEST / TEST SERIES ================= */
+  /* Same three functions as in the app (index.html), so a paper number gives the same questions everywhere. */
+  function gpSeedRnd(str){var h=2166136261>>>0;for(var i=0;i<str.length;i++){h^=str.charCodeAt(i);h=Math.imul(h,16777619)>>>0;}var a=h||1;return function(){a=(a+0x6D2B79F5)>>>0;var t=a;t=Math.imul(t^(t>>>15),t|1);t^=t+Math.imul(t^(t>>>7),t|61);return ((t^(t>>>14))>>>0)/4294967296;};}
+  function gpSeedShuffle(arr,rnd){var a=arr.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(rnd()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}return a;}
+  function gpSeriesPaper(secs,n,paperNo,bank){
+    secs=secs.filter(function(s){return (bank(s)||[]).length;}).slice().sort();if(!secs.length)return [];
+    var base=gpSeedRnd('GPSERIES|'+secs.join(','));
+    var lists=secs.map(function(sc){var chs=(bank(sc)||[]).map(function(chQs,idx){return gpSeedShuffle((chQs||[]).map(function(q){return {sec:sc,idx:idx,q:q};}),base);}).filter(function(b){return b.length;});chs=gpSeedShuffle(chs,base);var L=[],r=0,any=true;while(any){any=false;for(var i=0;i<chs.length;i++){if(chs[i][r]){L.push(chs[i][r]);any=true;}}r++;}return L;});
+    var S=secs.length,out=[];
+    secs.forEach(function(sc,si){var q=Math.floor(n/S)+(si<n%S?1:0),L=lists[si];if(!L.length)return;var st=((paperNo-1)*q)%L.length;for(var j=0;j<q&&j<L.length;j++){out.push(L[(st+j)%L.length]);}});
+    var rnd=gpSeedRnd('GPPAPER|'+secs.join(',')+'|'+n+'|'+paperNo);out=gpSeedShuffle(out,rnd);
+    return out.map(function(it){var q=it.q,idxs=[];for(var i=0;i<q.o.length&&i<6;i++)idxs.push(i);var sh=gpSeedShuffle(idxs,rnd);return {sec:it.sec,idx:it.idx,q:{q:q.q,o:sh.map(function(i){return q.o[i];}),a:sh.indexOf(q.a)}};});
+  }
+  var MK_SIZES = { quick:{n:20,min:20,l:'Quick (20 sawaal, 20 min)'}, half:{n:40,min:40,l:'Half paper (40 sawaal, 40 min)'}, full:{n:50,min:60,l:'Full paper (50 sawaal, 60 min)'} };
+  var mkDraft = null, mkData = {};
+  $('mkNew').onclick = function(){
+    $('ovBox').innerHTML = '<h1 id="sName">Mock Test paper</h1><p class="muted" id="hwLoad">Question bank load ho raha hai…</p>';
+    $('ov').classList.add('show');
+    loadBank().then(mkForm).catch(function(){ $('hwLoad').textContent = 'Question bank load nahi hua. Internet check karke dobara try karein.'; });
+  };
+  function mkForm(){
+    var due = new Date(Date.now() + 3*86400000).toISOString().slice(0,10);
+    $('ovBox').innerHTML =
+      '<div class="row" style="justify-content:space-between"><h1 id="sName" style="margin:0">&#127919; Mock Test paper</h1><button class="btn ghost" id="hwClose" type="button">Band karein</button></div>'+
+      '<p class="muted">Test Series ka har paper (P1&ndash;P10) sab ke liye same hota hai. Bachche app mein timer ke saath dete hain, result aapko Homework list mein milega. Print karke class mein bhi de sakte hain.</p>'+
+      '<div class="grid2">'+
+        '<div><label for="mkCls">Class</label><select id="mkCls"><option value="10">Class 10 (Board)</option><option value="9">Class 9</option><option value="8">Class 8</option></select></div>'+
+        '<div><label for="mkSub">Subject</label><select id="mkSub"></select></div>'+
+        '<div><label for="mkSize">Paper</label><select id="mkSize">'+Object.keys(MK_SIZES).map(function(k){ return '<option value="'+k+'">'+MK_SIZES[k].l+'</option>'; }).join('')+'</select></div>'+
+        '<div><label for="mkP">Test Series paper</label><select id="mkP">'+[1,2,3,4,5,6,7,8,9,10].map(function(n){ return '<option value="'+n+'">P'+n+'</option>'; }).join('')+'</select></div>'+
+        '<div><label for="mkDue">Last date</label><input type="text" id="mkDue" value="'+due+'" placeholder="YYYY-MM-DD"></div>'+
+      '</div>'+
+      '<div class="row" style="justify-content:space-between;margin-top:14px"><b id="mkTitle"></b></div>'+
+      '<div class="qprev" id="mkPrev"></div>'+
+      '<label style="display:flex;gap:8px;align-items:center;font-weight:700"><input type="checkbox" id="mkKey" checked style="width:18px;height:18px"> PDF mein answer key bhi (alag page pe)</label>'+
+      '<div class="row" style="margin-top:14px"><button class="btn" id="mkAssign" type="button">App mein assign karein</button><button class="btn sec" id="mkPrint" type="button">Print / PDF</button></div>'+
+      '<p class="msg" id="mkMsg" role="status" aria-live="polite"></p>';
+    try { $('mkDue').type = 'date'; } catch(e){}
+    $('hwClose').onclick = closeOv;
+    var subsOf = function(cl){ return subjectsFor(cl).filter(function(k){ return (window[k+'Q']||[]).length; }); };
+    var fillSub = function(){ var cl = $('mkCls').value; $('mkSub').innerHTML = '<option value="all">Sabhi subjects</option>' + subsOf(cl).map(function(k){ return '<option value="'+k+'">'+esc(subName(k))+'</option>'; }).join(''); make(); };
+    var make = function(){
+      var cl = $('mkCls').value, sec = $('mkSub').value, sz = MK_SIZES[$('mkSize').value], p = +$('mkP').value;
+      var secs = sec === 'all' ? subsOf(cl) : [sec];
+      var qs = gpSeriesPaper(secs, sz.n, p, function(k){ return window[k+'Q']; }).map(function(it){ return { q:String(it.q.q), o:it.q.o.slice(0,6), a:it.q.a }; });
+      var name = (sec === 'all' ? 'Sabhi subjects' : subName(sec));
+      mkDraft = { sec: sec === 'all' ? ('c'+cl+'all') : sec, cl:cl, p:p, min:sz.min, qs:qs,
+                  t: ('⏱' + sz.min + 'm Mock P' + p + ': Class ' + cl + ' ' + name).slice(0,60) };
+      $('mkTitle').textContent = mkDraft.t.replace(/^⏱\d+m\s*/, '') + ' — ' + qs.length + ' sawaal, ' + sz.min + ' min';
+      $('mkPrev').innerHTML = '<ol>' + qs.map(function(q){ return '<li>'+esc(q.q)+'<div class="opt">'+q.o.map(function(o,i){ return '('+'ABCDEF'[i]+') '+esc(o); }).join(' &nbsp; ')+'</div></li>'; }).join('') + '</ol>';
+    };
+    $('mkCls').onchange = fillSub; $('mkSub').onchange = make; $('mkSize').onchange = make; $('mkP').onchange = make;
+    var guess = String((cur.info && cur.info.name) || '').match(/10|9|8/); if (guess) $('mkCls').value = guess[0];
+    fillSub();
+    var dueOf = function(){ var v = ($('mkDue') && $('mkDue').value) || ''; var d = new Date(v + 'T23:59:00'); return isNaN(d) ? Date.now() + 3*86400000 : d.getTime(); };
+    $('mkPrint').onclick = function(){ printHw({ t: mkDraft.t.replace(/^⏱\d+m\s*/, '') + ' (' + mkDraft.min + ' min)', due: dueOf(), qs: mkDraft.qs }, $('mkKey').checked); };
+    $('mkAssign').onclick = function(){
+      var m = $('mkMsg');
+      if (!mkDraft || mkDraft.qs.length < 5) { m.className='msg err'; m.textContent='Is subject mein kaafi sawaal nahi mile.'; return; }
+      this.disabled = true;
+      var ref = db.ref('gyaanpeClasses/'+cur.code+'/hw').push();
+      ref.set({ t:mkDraft.t, sec:mkDraft.sec, ch:0, chn:'Test Series P'+mkDraft.p, n:mkDraft.qs.length, qs:mkDraft.qs, due:dueOf(), created:Date.now() })
+        .then(function(){ closeOv(); hwLoadList(); })
+        .catch(function(){ m.className='msg err'; m.textContent='Assign nahi hua. Dobara try karein.'; $('mkAssign').disabled = false; });
+    };
+  }
+  function mkLoad(){
+    if (!cur) return;
+    db.ref('gyaanpeClasses/'+cur.code+'/mk').once('value').then(function(s){ mkData = s.val() || {}; mkRender(); })
+      .catch(function(){ mkData = {}; $('mkRows').innerHTML = '<tr><td colspan="5" class="muted">Mock test results abhi load nahi ho rahe (database rule baaki hai).</td></tr>'; });
+  }
+  function mkRender(){
+    var ids = Object.keys(students).sort(function(a,b){ return String(students[a].n||'').localeCompare(String(students[b].n||'')); });
+    var rows = ids.map(function(u){
+      var x = mkData[u] || {}, r = arr(x.r), w = arr(x.w);
+      var avg = r.length ? Math.round(r.reduce(function(t,y){ return t + (+y.p||0); }, 0) / r.length) : null;
+      var g = 0, mx = 0; w.forEach(function(y){ g += +y.g||0; mx += +y.x||0; });
+      var last = r[0];
+      return '<tr><td><b>'+esc(students[u].n)+'</b></td><td>'+r.length+'</td><td>'+(avg===null?'—':accPill(avg,1))+'</td><td>'+(last?(esc(subj(last.s))+' '+(+last.p||0)+'%<br><span class="muted">'+ago(last.t)+'</span>'):'—')+'</td><td>'+(mx?(g+'/'+mx+' ('+Math.round(g/mx*100)+'%)'):'—')+'</td></tr>';
+    }).join('');
+    $('mkRows').innerHTML = rows || '<tr><td colspan="5" class="muted">Class mein abhi koi bachcha nahi.</td></tr>';
+  }
 
   $('delClass').onclick = function(){
     if (!confirm('Poori class aur saare bachchon ka data delete ho jayega. Pakka?')) return;

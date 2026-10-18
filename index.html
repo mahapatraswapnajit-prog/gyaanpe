@@ -2432,6 +2432,7 @@ var LC=[{n:"LEVEL 1 - VERY EASY",b:"L1",lc:"lc1",br:"br1",p:"prog1",icon:"L1"},{
 <script src="data-questions-1.js"></script>
 <script src="data-questions-2.js"></script>
 <script src="data-ncert.js"></script>
+<script src="data-qbank.js" defer></script>
 <script>
 var allData={c7maths:c7mathsQ,c7sst:c7sstQ,c7eng:c7engQ,c7hin:c7hinQ,c7evs:c7evsQ,c7gk:c7gkQ,c7art:c7artQ,c7comp:c7compQ,c6sst:c6sstQ,c6maths:c6mathsQ,c6eng:c6engQ,c6hin:c6hinQ,c6evs:c6evsQ,c6gk:c6gkQ,c6art:c6artQ,c6comp:c6compQ,c5maths:c5mathsQ,c5eng:c5engQ,c5hin:c5hinQ,c5evs:c5evsQ,c5gk:c5gkQ,c5art:c5artQ,c5comp:c5compQ,c4maths:c4mathsQ,c4eng:c4engQ,c4hin:c4hinQ,c4evs:c4evsQ,c4gk:c4gkQ,c4art:c4artQ,c4comp:c4compQ,c3maths:c3mathsQ,c3eng:c3engQ,c3hin:c3hinQ,c3evs:c3evsQ,c3gk:c3gkQ,c3art:c3artQ,c3comp:c3compQ,c2maths:c2mathsQ,c2eng:c2engQ,c2hin:c2hinQ,c2evs:c2evsQ,c2gk:c2gkQ,c2art:c2artQ,c2comp:c2compQ,english:englishQ,maths:mathsQ,evs:evsQ,hindi:hindiQ,poetry:poetryQ,gk:gkQ,art:artQ};
 var C8_SECS=['c8maths','c8evs','c8sst','c8eng','c8hin','c8san'];var C9_SECS=['c9maths','c9evs','c9sst','c9eng','c9hin','c9san'];var C10_SECS=['c10maths','c10evs','c10sst','c10eng','c10hin','c10san'];C8_SECS.concat(C9_SECS,C10_SECS,['c6san','c7san']).forEach(function(k){if(window[k+'Q'])allData[k]=window[k+'Q'];});
@@ -4992,10 +4993,12 @@ function gpSeriesPaper(secs,n,paperNo,bank){
   return out.map(function(it){var q=it.q,idxs=[];for(var i=0;i<q.o.length&&i<6;i++)idxs.push(i);var sh=gpSeedShuffle(idxs,rnd);return {sec:it.sec,idx:it.idx,q:{q:q.q,o:sh.map(function(i){return q.o[i];}),a:sh.indexOf(q.a)}};});
 }
 
+/* Core chapter questions + extra board-pattern bank (data-qbank.js), per chapter. */
+function gpQAll(sec){var b=allData[sec]||[];var x=window.GP_QX&&window.GP_QX[sec];if(!x)return b;return b.map(function(c,i){return x[i]?c.concat(x[i]):c;});}
 function mockBuild(ck,sec,mode){
   var secs=gpShuffle(sec==='all'?mockSubjects(ck):[sec]);var N=MOCK_MODES[mode].n;
   var recent=mockLS('gp_mock_recent_'+ck)||[];
-  var lists=secs.map(function(sc){var buckets=gpShuffle((allData[sc]||[]).map(function(chQs,idx){var b=gpShuffle(chQs.map(function(q){return {sec:sc,idx:idx,q:q};}));b.sort(function(x,y){return (recent.indexOf(x.q.q)>-1)-(recent.indexOf(y.q.q)>-1);});return b;}).filter(function(b){return b.length;}));
+  var lists=secs.map(function(sc){var buckets=gpShuffle(gpQAll(sc).map(function(chQs,idx){var b=gpShuffle(chQs.map(function(q){return {sec:sc,idx:idx,q:q};}));b.sort(function(x,y){return (recent.indexOf(x.q.q)>-1)-(recent.indexOf(y.q.q)>-1);});return b;}).filter(function(b){return b.length;}));
     var L=[],r=0,any=true;while(any){any=false;buckets.forEach(function(b){if(b[r]){L.push(b[r]);any=true;}});r++;}return L;});
   var out=[],k=0,any2=true;while(out.length<N&&any2){any2=false;for(var i=0;i<lists.length&&out.length<N;i++){if(lists[i][k]){out.push(lists[i][k]);any2=true;}}k++;}
   out=gpShuffle(out).map(function(it){return {sec:it.sec,idx:it.idx,q:gpShuffleMCQOptions(it.q)};});
@@ -5038,7 +5041,7 @@ function mockDiscard(){if(!confirm('Adhoora test hata dein?'))return;mockLS('gp_
 function mockStart(){
   var act=mockLS('gp_mock_active');if(act&&Date.now()<act.end){if(act.hw){gpToast('Pehle teacher ka adhoora test poora karo.');return;}if(!confirm('Adhoora test hat jayega. Naya test shuru karein?'))return;}
   var ck=_mockSetup.ck,sec=_mockSetup.sec,mode=_mockSetup.mode,p=_mockSetup.paper||0;
-  var qs=p?gpSeriesPaper(sec==='all'?mockSubjects(ck):[sec],MOCK_MODES[mode].n,p,function(s){return allData[s];}):mockBuild(ck,sec,mode);
+  var qs=p?gpSeriesPaper(sec==='all'?mockSubjects(ck):[sec],MOCK_MODES[mode].n,p,gpQAll):mockBuild(ck,sec,mode);
   if(qs.length<5){gpToast('Is subject mein abhi kaafi sawaal nahi hain.');return;}
   mockBegin({ck:ck,sec:sec,mode:mode,paper:p,qs:qs,min:MOCK_MODES[mode].min});
 }
@@ -12743,7 +12746,7 @@ gpMarkStage(sec,idx,'learn');}
 
 var _pracState={};
 function openStagePractice(sec,idx){gpHideAllScreens();document.getElementById('stagePracticeScreen').style.display='block';
-_pracState={sec:sec,idx:idx,answers:{},qs:allData[sec][idx]};
+_pracState={sec:sec,idx:idx,answers:{},qs:gpQAll(sec)[idx]};
 renderPractice();}
 function renderPractice(){var qs=_pracState.qs;var sec=_pracState.sec;var idx=_pracState.idx;
 var answeredCount=Object.keys(_pracState.answers).length;

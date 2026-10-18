@@ -510,10 +510,10 @@ var CONFIG = {
   var C1 = ['english','maths','evs','hindi','gk','poetry','art'];
   function loadBank(){
     if (bankReady) return bankReady;
-    var files = ['data-questions-1.js','data-questions-2.js','data-ncert.js'];
+    var files = ['data-questions-1.js','data-questions-2.js','data-ncert.js','data-qbank.js'];
     var load = function(src){ return new Promise(function(res, rej){ var sc = document.createElement('script'); sc.src = src; sc.onload = res; sc.onerror = rej; document.head.appendChild(sc); }); };
     /* one after another: data-ncert.js replaces some arrays from the files before it */
-    bankReady = files.reduce(function(p, f){ return p.then(function(){ return load(f); }); }, Promise.resolve())
+    bankReady = files.reduce(function(p, f){ return p.then(function(){ return f === 'data-qbank.js' ? load(f).catch(function(){}) : load(f); }); }, Promise.resolve())
       .then(function(){ if (window.NCERT_CHAPTERS) for (var k in NCERT_CHAPTERS) M.CH[k] = NCERT_CHAPTERS[k]; })
       .catch(function(e){ bankReady = null; throw e; });
     return bankReady;
@@ -526,7 +526,7 @@ var CONFIG = {
   function chapters(k){ var b = window[k+'Q'] || []; var names = M.CH[k] || []; return b.map(function(_, i){ return names[i] || ('Level ' + (i+1)); }); }
   function shuffle(a){ a = a.slice(); for (var i=a.length-1;i>0;i--){ var j = Math.floor(Math.random()*(i+1)); var t=a[i]; a[i]=a[j]; a[j]=t; } return a; }
   function qText(q){ var t = q.q || ''; if (q.vis && q.vis.t){ try { t += ' ' + String.fromCodePoint(parseInt(q.vis.t,16)).repeat(Math.min(+q.vis.n||1, 20)); } catch(e){} } return t; }
-  function pickQs(k, ch, n){ var lvl = (window[k+'Q'] || [])[ch] || []; return shuffle(lvl).slice(0, n).map(function(q){ return { q:qText(q), o:q.o.slice(0,6), a:q.a }; }); }
+  function pickQs(k, ch, n){ var lvl = ((window[k+'Q'] || [])[ch] || []).concat(((window.GP_QX && window.GP_QX[k]) || [])[ch] || []); return shuffle(lvl).slice(0, n).map(function(q){ return { q:qText(q), o:q.o.slice(0,6), a:q.a }; }); }
   function dateStr(ts){ return ts ? new Date(ts).toLocaleDateString('en-IN', { day:'numeric', month:'short' }) : ''; }
 
   function hwLoadList(){
@@ -686,7 +686,7 @@ var CONFIG = {
     var make = function(){
       var cl = $('mkCls').value, sec = $('mkSub').value, sz = MK_SIZES[$('mkSize').value], p = +$('mkP').value;
       var secs = sec === 'all' ? subsOf(cl) : [sec];
-      var qs = gpSeriesPaper(secs, sz.n, p, function(k){ return window[k+'Q']; }).map(function(it){ return { q:String(it.q.q), o:it.q.o.slice(0,6), a:it.q.a }; });
+      var qs = gpSeriesPaper(secs, sz.n, p, function(k){ var b = window[k+'Q'], x = window.GP_QX && window.GP_QX[k]; return (b && x) ? b.map(function(c, i){ return x[i] ? c.concat(x[i]) : c; }) : b; }).map(function(it){ return { q:String(it.q.q), o:it.q.o.slice(0,6), a:it.q.a }; });
       var name = (sec === 'all' ? 'Sabhi subjects' : subName(sec));
       mkDraft = { sec: sec === 'all' ? ('c'+cl+'all') : sec, cl:cl, p:p, min:sz.min, qs:qs,
                   t: ('⏱' + sz.min + 'm Mock P' + p + ': Class ' + cl + ' ' + name).slice(0,60) };

@@ -6,7 +6,7 @@
 <title>GyaanPe – Loved by Kids, Trusted by Parents</title><link rel="manifest" href="manifest.json">
  <link rel="icon" href="GyaanPe_Logo_Final.png">
  <meta name="theme-color" content="#1A237E">
-<meta name="description" content="GyaanPe - Nursery se Class 7 tak ke bacchon ke liye CBSE learning app. Lessons, quiz, videos, kahaniyan aur 30-day courses. Loved by Kids, Trusted by Parents.">
+<meta name="description" content="GyaanPe - Nursery se Class 10 tak ke bacchon ke liye CBSE/NCERT learning app. Lessons, quiz, videos, kahaniyan aur 30-day courses. Loved by Kids, Trusted by Parents.">
 <meta name="apple-mobile-web-app-capable" content="yes">
  <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -1042,6 +1042,31 @@ transform:scale(0.96);filter:brightness(0.97);
 .gpst-note{text-align:center;font-size:11px;font-weight:700;color:#999;margin-top:12px;}
  #gpToast{position:fixed;left:50%;bottom:80px;transform:translateX(-50%) translateY(20px);background:#1A237E;color:#fff;padding:13px 20px;border-radius:14px;font-family:'Nunito',sans-serif;font-size:14px;font-weight:800;box-shadow:0 8px 24px rgba(0,0,0,.25);z-index:100001;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;max-width:88%;text-align:center;}
 #gpToast.on{opacity:1;transform:translateX(-50%) translateY(0);}
+
+/* ===== Simple home (class picker first) ===== */
+.gp-start{background:#fff;border-radius:22px;padding:16px 14px 14px;box-shadow:0 8px 30px rgba(0,0,0,.10);border-top:6px solid #FF6F00;margin:4px 0 14px;text-align:center;}
+.gp-start-hi{font-size:14px;font-weight:700;color:#37474F;line-height:1.45;}
+.gp-start-hi b{color:#1A237E;}
+.gp-start-h{font-family:'Anton',sans-serif;font-size:20px;color:#E65100;margin:12px 0 4px;letter-spacing:.3px;}
+.gp-cg-lbl{font-size:11px;font-weight:800;color:#78909C;text-transform:uppercase;letter-spacing:.8px;margin:10px 2px 6px;text-align:left;}
+.gp-class-grid{display:grid;gap:8px;}
+.gp-cg3{grid-template-columns:repeat(3,minmax(0,1fr));}
+.gp-cg5{grid-template-columns:repeat(5,minmax(0,1fr));}
+.gp-class-grid .class-chip{min-width:0;padding:12px 2px 10px;}
+.gp-class-grid .class-chip .cc-n{font-size:22px;line-height:1.1;}
+.gp-cg3 .class-chip .cc-n{font-size:24px;}
+.gp-start-steps{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:4px 6px;margin-top:14px;font-size:11.5px;font-weight:800;color:#455A64;}
+.gp-start-steps span{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:#FF6F00;color:#fff;font-size:10px;}
+.gp-start-steps i{font-style:normal;color:#B0BEC5;}
+.gp-sec-h{font-family:'Anton',sans-serif;font-size:16px;color:#1A237E;text-align:left;margin:18px 4px 8px;letter-spacing:.3px;}
+.gp-tools{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;}
+.gp-tools-4{grid-template-columns:repeat(4,minmax(0,1fr));}
+.gp-tools-4 button{font-size:11.5px;padding:12px 4px;}
+.gp-tools button{background:#fff;border:0;border-radius:14px;padding:12px 6px;font-family:'Nunito',sans-serif;font-weight:800;font-size:12px;color:#1A237E;box-shadow:0 4px 12px rgba(0,0,0,.08);display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;min-height:76px;justify-content:center;touch-action:manipulation;}
+.gp-tools button span{font-size:24px;line-height:1;}
+.gp-tools button:active{transform:scale(.97);}
+.home-screen .goal-card,.home-screen .why-card{display:none;}
+@media (max-width:360px){.gp-class-grid .class-chip .cc-n{font-size:18px;}.gp-tools button{font-size:11px;}}
 </style>
 <script>
 var GPC_FB = 'https://zapzone-98727-default-rtdb.firebaseio.com';
@@ -1683,15 +1708,26 @@ function gpToast(msg){
 <div class="header"><div class="logo-text">Gyaan<span>Pe</span></div><div class="tagline"><span class="tag-k">Loved by Kids</span> <span class="tag-h">&#10084;&#65039;</span> <span class="tag-p">Trusted by Parents</span></div></div>
 <div id="heroImageWrap" style="display:none;margin:0 0 14px 0;border-radius:18px;overflow:hidden;box-shadow:0 6px 18px rgba(0,0,0,0.12);"><img src="gyaanpe-hero.jpg" alt="GyaanPe - Loved by Kids, Trusted by Parents" style="width:100%;display:block;" loading="lazy"></div>
 <div class="home-screen" id="homeScreen">
- <div id="gpvHomeMount"></div>
- <div class="gpgs-wrap">
+<div class="gp-start" id="gpStart"><div class="gp-start-hi">Nursery se Class 10 tak &mdash; NCERT ke har chapter ki <b>padhai, practice aur test</b>, ek hi app mein.</div><div class="gp-start-h">&#128071; Apni class chuniye</div><div class="gp-cg-lbl">Chhote bachche (3&ndash;6 saal)</div><div class="gp-class-grid gp-cg3"><div class="class-chip nursery" onclick="openNursery()"><div class="cc-n">&#127752;</div><span class="cc-tag">NURSERY FREE</span></div><div class="class-chip lkg" onclick="openLKG()"><div class="cc-n">&#128218;</div><span class="cc-tag">LKG FREE</span></div><div class="class-chip ukg" onclick="openUKG()"><div class="cc-n">&#127891;</div><span class="cc-tag">UKG FREE</span></div></div><div class="gp-cg-lbl">School &bull; Class 1 se 10</div><div class="gp-class-grid gp-cg5"><div class="class-chip c1" onclick="openClass1()"><div class="cc-n">1</div><span class="cc-tag">FREE</span></div><div class="class-chip c2" onclick="openClass2()"><div class="cc-n">2</div><span class="cc-tag">&#11088; NEW</span></div><div class="class-chip c3" onclick="openClass3()"><div class="cc-n">3</div><span class="cc-tag">&#11088; NEW</span></div><div class="class-chip c4" onclick="openClass4()"><div class="cc-n">4</div><span class="cc-tag">&#11088; NEW</span></div><div class="class-chip c5" onclick="openClass5()"><div class="cc-n">5</div><span class="cc-tag">&#11088; NEW</span></div><div class="class-chip c6" onclick="openClass6()"><div class="cc-n">6</div><span class="cc-tag">&#11088; NEW</span></div><div class="class-chip c7" onclick="openClass7()"><div class="cc-n">7</div><span class="cc-tag">&#11088; NEW</span></div><div class="class-chip c8" onclick="openClass8()"><div class="cc-n">8</div><span class="cc-tag">&#11088; NEW</span></div><div class="class-chip c9" onclick="openClass9()"><div class="cc-n">9</div><span class="cc-tag">&#11088; NEW</span></div><div class="class-chip c10" onclick="openClass10()"><div class="cc-n">10</div><span class="cc-tag">&#127942; BOARD</span></div></div><div class="gp-start-steps"><span>1</span>Class chuno<i>&rarr;</i><span>2</span>Subject &amp; chapter<i>&rarr;</i><span>3</span>Padho &bull; Practice &bull; Test</div></div>
+<div class="gpgs-wrap">
   <input class="gpgs-input" id="gpgsInput" type="search" placeholder="&#128269; Dhundho... subject, kitab, course"
          oninput="gpgsRun()">
   <button class="gpgs-x" id="gpgsX" onclick="gpgsClear()">&#10005;</button>
   <div class="gpgs-res" id="gpgsRes"></div>
 </div>
+
+<div class="continue-card" id="gpContinue" onclick="gpResume()">
+<div class="cc-t">&#9654;&#65039; Continue Learning</div>
+<div class="cc-s" id="gpContinueSub"></div>
+</div>
 <div id="gpsmMount"></div>
  <div class="gppr-card" id="gpprCard"></div>
+<div class="gp-sec-h">&#10024; Aur kya karein?</div>
+<div class="gp-tools gp-tools-4"><button type="button" onclick="openAITutor()"><span>&#129302;</span>AI Tutor</button><button type="button" onclick="gpHomeQuiz()"><span>&#11088;</span>Aaj ka Quiz</button><button type="button" onclick="openStoriesHome()"><span>&#128214;</span>Kahaniyan</button><button type="button" onclick="gpvOpenPage()"><span>&#127916;</span>Videos</button><button type="button" onclick="openBrainGymHub()"><span>&#129504;</span>Brain Gym</button><button type="button" onclick="openWorksheetGen()"><span>&#128221;</span>Worksheet</button><button type="button" onclick="openOlympiadMode()"><span>&#127942;</span>Olympiad</button><button type="button" onclick="gpsOpen()"><span>&#127891;</span>30-Day Courses</button></div>
+<div class="gp-sec-h">&#128106; Progress, Parents &amp; Teachers</div>
+<div class="gp-tools"><button type="button" onclick="gpParent()"><span>&#128104;&#8205;&#128105;&#8205;&#128103;</span>Parent Dashboard</button><button type="button" onclick="gpTeacherOpen()"><span>&#127979;</span>Teacher Dashboard</button><button type="button" onclick="gppcOpen()"><span>&#128218;</span>Parents Corner</button><button type="button" onclick="gpOpenAnalytics()"><span>&#128202;</span>Meri Progress</button><button type="button" onclick="gpqbOpen()"><span>&#128278;</span>Save kiye sawaal</button><button type="button" onclick="gpfqOpen()"><span>&#10067;</span>Help &amp; FAQ</button></div>
+<div class="gp-sec-h">&#127881; Mera din &amp; rewards</div>
+ <div id="gpvHomeMount"></div>
  <div id="gplHomeMount"></div>
 <div class="home-top anim-card">
 <div class="gp-teachers-banner" id="gpTeachersBanner" style="margin:0 0 14px;border-radius:16px;overflow:hidden;box-shadow:0 6px 18px rgba(0,0,0,0.12);">
@@ -1739,31 +1775,9 @@ function gpToast(msg){
 <button onclick="acceptChallenge()" style="background:#FF6F00;color:white;border:none;border-radius:10px;padding:10px 20px;font-family:'Anton',sans-serif;font-size:14px;">ACCEPT CHALLENGE &#8594;</button>
 </div>
 <div class="achieve-card" id="achieveCard"><div class="achieve-left"><span class="achieve-emo" id="achieveEmo">&#127942;</span><div><div class="achieve-title" id="achieveTitle">Start Learning!</div><div class="achieve-sub" id="achieveSub">Complete a level to unlock your first badge</div></div></div><button class="achieve-view" onclick="document.getElementById('badgeStrip').scrollIntoView({behavior:'smooth',block:'center'});">VIEW ALL</button></div>
-<div class="continue-card" id="gpContinue" onclick="gpResume()">
-<div class="cc-t">&#9654;&#65039; Continue Learning</div>
-<div class="cc-s" id="gpContinueSub"></div>
-</div>
 <div class="fact-card">
 <div class="fact-title">&#128161; DID YOU KNOW?</div>
 <div class="fact-text" id="gpFact">Loading...</div>
-</div>
-<div class="class-title">Choose Your Class</div>
-<div class="class-row">
-<div class="class-chip nursery" onclick="openNursery()"><div class="cc-n">&#127752;</div><span class="cc-tag">NURSERY FREE</span></div>
-<div class="class-chip lkg" onclick="openLKG()"><div class="cc-n">&#128218;</div><span class="cc-tag">LKG FREE</span></div>
-<div class="class-chip ukg" onclick="openUKG()"><div class="cc-n">&#127891;</div><span class="cc-tag">UKG FREE</span></div>
-<div class="class-chip c1" onclick="openClass1()"><div class="cc-n">1</div><span class="cc-tag">FREE</span></div>
-<div class="class-chip c2" onclick="openClass2()"><div class="cc-n">2</div><span class="cc-tag">&#11088; NEW</span></div>
-<div class="class-chip c3" onclick="openClass3()"><div class="cc-n">3</div><span class="cc-tag">&#11088; NEW</span></div>
-<div class="class-chip c4" onclick="openClass4()"><div class="cc-n">4</div><span class="cc-tag">&#11088; NEW</span></div>
-<div class="class-chip c5" onclick="openClass5()"><div class="cc-n">5</div><span class="cc-tag">&#11088; NEW</span></div>
-<div class="class-chip c6" onclick="openClass6()"><div class="cc-n">6</div><span class="cc-tag">&#11088; NEW</span></div>
-<div class="class-chip c7" onclick="openClass7()"><div class="cc-n">7</div><span class="cc-tag">&#11088; NEW</span></div>
-</div>
-<div class="class-title">Senior &bull; Class 8&ndash;10</div>
-<div class="class-row">
-<div class="class-chip c8" onclick="openClass8()"><div class="cc-n">8</div><span class="cc-tag">&#11088; NEW</span></div>
-<div class="class-chip c9" onclick="openClass9()"><div class="cc-n">9</div><span class="cc-tag">&#11088; NEW</span></div><div class="class-chip c10" onclick="openClass10()"><div class="cc-n">10</div><span class="cc-tag">&#127942; BOARD</span></div>
 </div>
 <div class="premium-banner-card" onclick="gpOpenPremium()"><div class="pbc-title">&#11088; GO PREMIUM</div><div class="pbc-sub">7-Day Free Trial &bull; Unlock the full AI-powered experience!</div><div class="pbc-features"><span>&#129302; Unlimited AI Tutor</span><span>&#128172; Unlimited Doubt Solver</span><span>&#128221; Unlimited Worksheets</span><span>&#127942; Olympiad Mode</span><span>&#129504; Brain Gym Premium</span><span>&#127908; Voice AI (Coming Soon)</span></div><button class="pbc-btn">Start 7-Day Free Trial &#8594;</button></div>
 <div class="why-card"><div class="why-title">&#10084;&#65039; WHY KIDS LOVE GYAANPE</div><div class="why-grid">
@@ -1775,16 +1789,6 @@ function gpToast(msg){
 <div class="badge-title">MY ACHIEVEMENTS</div>
 <div class="badge-strip" id="badgeStrip"></div>
 <div class="quote-card"><div class="quote-text" id="gpQuote">Loading...</div></div>
-<button class="parent-open-btn" onclick="gpParent()">&#128104;&#8205;&#128105;&#8205;&#128103; PARENT DASHBOARD</button>
-<button class="parent-open-btn" onclick="gppcOpen()">&#128218; PARENTS CORNER</button>
-<button class="parent-open-btn" style="background:#FFF3E0;color:#E65100;" onclick="gpTeacherOpen()">&#127979; TEACHER DASHBOARD</button>
-<button class="parent-open-btn" onclick="gpqbOpen()">&#128278; SAVE KIYE SAWAAL</button>
-<button class="parent-open-btn" onclick="gpfqOpen()">&#10067; HELP &amp; FAQ</button>
-<button class="parent-open-btn" style="background:#F3E5F5;color:#6A1B9A;" onclick="gpOpenAnalytics()">&#128202; MY PROGRESS</button>
-<button class="parent-open-btn" style="background:#1A237E;color:#fff;" onclick="openAITutor()">🤖 ASK GYAAN BUDDY (AI TUTOR)</button>
-<button class="parent-open-btn" style="background:#00695C;color:#fff;" onclick="openWorksheetGen()">📝 AI WORKSHEET GENERATOR</button>
-<button class="parent-open-btn" style="background:#C62828;color:#fff;" onclick="openOlympiadMode()">🏆 OLYMPIAD MODE</button>
-<button class="parent-open-btn" style="background:#7E57C2;color:#fff;" onclick="openBrainGymHub()">🧠 BRAIN GYM</button>
 </div></div>
 <div class="jscreen" id="nurseryHome">
 <div class="j-head"><button class="home-btn-back" onclick="goHome()">&#8592; HOME</button><span class="j-title" id="nTierTitle">&#127752; Nursery</span><span style="width:60px;"></span></div>
@@ -16688,6 +16692,13 @@ body.gp-web #premiumScreen .pass-badge{display:none !important;}
 
   window.gpClass = { open: showJoin, push: push, hwSubmit: hwSubmit };
 })();
+</script>
+<script>
+function gpHomeQuiz(){try{openDailyQuiz();}catch(e){}
+ var b=document.getElementById('dailyQuizBox'),c=document.getElementById('dailyQuizCard');
+ var t=(b&&b.style.display!=='none')?b:((c&&c.style.display!=='none')?c:null);
+ if(t){t.scrollIntoView({behavior:'smooth',block:'center'});}
+ else if(typeof gpToast==='function'){gpToast("Aaj ka Quiz ho gaya! Kal naya sawaal aayega.");}}
 </script>
 </body>
 </html>

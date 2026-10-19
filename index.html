@@ -7607,12 +7607,8 @@ function renderParentBrainGymStats() {
    This config exists so the DISPLAYED price text can be
    changed in one place without touching HTML.
 
-   isPremium() is currently a STUB (always false) since no real
-   payment verification exists yet. A hidden developer toggle
-   (gpDevSetPremium) lets you preview the premium experience.
-   DO NOT ship this as "real" premium gating — wire isPremium()
-   to actual verified Google Play Billing purchase state before
-   launch, ideally checked against a backend, not localStorage.
+   isPremium() trusts only: access codes checked by gyaanpe-pay,
+   and Play purchases verified by the gyaanpe-verify Worker.
    ============================================================ */
 
 var PREMIUM_CONFIG = {
@@ -7629,15 +7625,12 @@ var PREMIUM_CONFIG = {
   premiumClasses: ["c5", "c6", "c7", "c8", "c9", "c10"],
 };
 
-function gpDevSetPremium(on, secret) {
-  if (secret !== "gyaanpe2026dev") { console.warn("Not authorized."); return; }
-  localStorage.setItem("gp_dev_premium", on ? "1" : "0");
-  gpToast(on ? "Developer preview: Premium ON (not a real purchase)" : "Developer preview: Premium OFF");
-}
+/* The old developer toggle (gpDevSetPremium + 'gp_dev_premium') was removed:
+   its password sat in this public file, so anyone could unlock Premium free.
+   To preview Premium, redeem a real access code instead. Clear any leftover flag. */
+try { localStorage.removeItem("gp_dev_premium"); } catch(e){}
 
 function isPremium() {
-  /* Developer preview toggle (local only, never a real purchase) */
-  try { if (localStorage.getItem("gp_dev_premium") === "1") return true; } catch(e){}
   /* Access-code Premium (web / school codes), checked by gyaanpe-pay */
   try { if (window.gpCodes && gpCodes.premiumOk()) return true; } catch(e){}
   /* Server-verified gate. Falls back to the old check only if the

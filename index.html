@@ -2,6 +2,55 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<script>
+/* One-time move of saved progress from the old app address (github.io) to gyaanpe.com.
+   Runs only on the first Play-app (TWA) launch at gyaanpe.com, and only once.
+   Purchases are NOT copied: Play purchases restore themselves on launch and
+   access codes are re-checked by gyaanpe-pay, so nothing here can grant Premium.
+   A one-time nonce kept in this tab's sessionStorage means a crafted link cannot
+   push data in. Old address must keep serving this index.html (do not redirect it). */
+(function(){
+  var de=document.documentElement;
+  try{
+    var OLD='https://mahapatraswapnajit-prog.github.io/gyaanpe/', NEW='https://gyaanpe.com/';
+    var h=location.hostname, ls=window.localStorage, ss=window.sessionStorage;
+    var SKIP=/^(gp_premium|gp_verify|gpcv_|gp_st_cache_|gp_mig)/;
+    var q=new URLSearchParams(location.search);
+    /* A) old address, asked by gyaanpe.com: send the saved data back */
+    if(h==='mahapatraswapnajit-prog.github.io' && q.get('gpexport')){
+      var n=String(q.get('gpexport')).replace(/[^a-z0-9]/gi,'').slice(0,40), d={};
+      for(var i=0;i<ls.length;i++){ var k=ls.key(i), v=ls.getItem(k); if(SKIP.test(k) || (v && v.length>200000)) continue; d[k]=v; }
+      de.style.visibility='hidden';
+      location.replace(NEW+'#gpimport='+n+'.'+encodeURIComponent(btoa(unescape(encodeURIComponent(JSON.stringify(d))))));
+      return;
+    }
+    if(h!=='gyaanpe.com' && h!=='www.gyaanpe.com') return;
+    /* B) gyaanpe.com, coming back with the data */
+    var m=location.hash.match(/^#gpimport=([a-z0-9]+)\.(.*)$/i);
+    if(m){
+      history.replaceState(null,'',location.pathname+location.search);
+      if(m[1]===ss.getItem('gp_mig_nonce')){
+        ss.removeItem('gp_mig_nonce');
+        var data=JSON.parse(decodeURIComponent(escape(atob(decodeURIComponent(m[2])))));
+        for(var k2 in data){ if(Object.prototype.hasOwnProperty.call(data,k2) && !SKIP.test(k2)) ls.setItem(k2,String(data[k2])); }
+        ls.setItem('gp_twa','1'); ls.setItem('gp_migrated','1');
+      }
+      return;
+    }
+    /* C) first Play-app launch at gyaanpe.com: fetch the old data once */
+    if(ls.getItem('gp_migrated')) return;
+    if(String(document.referrer||'').indexOf('android-app://com.gyaanpe.kidslearning')!==0) return;
+    if(navigator.onLine===false) return;
+    var tries=+(ls.getItem('gp_mig_tries')||0);
+    if(tries>=2){ ls.setItem('gp_migrated','1'); return; }
+    ls.setItem('gp_mig_tries',String(tries+1));
+    var nonce=Math.random().toString(36).slice(2)+Date.now().toString(36);
+    ss.setItem('gp_mig_nonce',nonce);
+    de.style.visibility='hidden';
+    location.replace(OLD+'?gpexport='+nonce);
+  }catch(e){ try{ de.style.visibility=''; }catch(_){} }
+})();
+</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>GyaanPe – Loved by Kids, Trusted by Parents</title><link rel="manifest" href="manifest.json">
  <link rel="icon" href="GyaanPe_Logo_Final.png">

@@ -16784,6 +16784,123 @@ function gpHomeQuiz(){try{openDailyQuiz();}catch(e){}
 })();
 </script>
 <script>
+/* ============ Daily reminder (Web Push) ============
+   The gyaanpe-push Worker sends an empty push at about 6 pm IST and sw.js
+   shows the text. We ask only after the child has finished something
+   (a level, a test, Aaj ka Quiz), at most once in 3 days, with our own
+   card first, so the browser's permission prompt is never a surprise. */
+(function(){
+  var PUSH = 'https://gyaanpe-push.mahapatraswapnajit.workers.dev';
+  var DAY = 86400000;
+  function g(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
+  function s(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
+  function supported(){
+    return ('serviceWorker' in navigator) && ('PushManager' in window) && ('Notification' in window)
+      && location.protocol === 'https:';
+  }
+  function bytes(b64){
+    b64 = b64.replace(/-/g,'+').replace(/_/g,'/'); while(b64.length % 4) b64 += '=';
+    var r = atob(b64), a = new Uint8Array(r.length);
+    for(var i=0;i<r.length;i++) a[i] = r.charCodeAt(i);
+    return a;
+  }
+  function today(){ var t=new Date(); return t.getFullYear()+'-'+(t.getMonth()+1)+'-'+t.getDate(); }
+
+  /* Note for sw.js: name, streak and the last day the app was opened */
+  function saveMeta(){
+    try{
+      if(!('caches' in window)) return;
+      var p = {}; try{ p = (typeof gpProfile==='function' && gpProfile()) || {}; }catch(e){}
+      var m = { name: p.name || '', streak: parseInt(g('gp_streak')||'0',10) || 0, last: today() };
+      caches.open('gp-meta').then(function(c){
+        return c.put('/__gp_meta', new Response(JSON.stringify(m), { headers: { 'Content-Type': 'application/json' } }));
+      }).catch(function(){});
+    }catch(e){}
+  }
+
+  function subscribe(){
+    return navigator.serviceWorker.ready.then(function(reg){
+      return reg.pushManager.getSubscription().then(function(sub){
+        if(sub) return sub;
+        return fetch(PUSH + '/vapid').then(function(r){ if(!r.ok) throw new Error('vapid'); return r.json(); })
+          .then(function(j){ return reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: bytes(j.key) }); });
+      });
+    }).then(function(sub){
+      var p = {}; try{ p = (typeof gpProfile==='function' && gpProfile()) || {}; }catch(e){}
+      return fetch(PUSH + '/sub', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ endpoint: sub.endpoint, cls: p.cls || '' }) });
+    }).then(function(r){
+      if(r && r.ok){ s('gp_push','1'); s('gp_push_t', String(Date.now())); }
+    });
+  }
+
+  function closeCard(){ var o = document.getElementById('gpPushCard'); if(o) o.remove(); }
+  function showCard(){
+    if(document.getElementById('gpPushCard')) return;
+    s('gp_push_ask', String(Date.now()));
+    var o = document.createElement('div');
+    o.id = 'gpPushCard';
+    o.style.cssText = 'position:fixed;inset:0;background:rgba(10,14,40,.55);display:flex;align-items:center;justify-content:center;z-index:100002;padding:16px;';
+    o.innerHTML =
+      '<div style="background:#fff;border-radius:20px;max-width:360px;width:100%;padding:22px;text-align:center;font-family:Nunito,sans-serif;box-shadow:0 12px 40px rgba(0,0,0,.25);">'
+      + '<div style="font-size:44px;line-height:1;">🔔</div>'
+      + '<h3 style="margin:10px 0 6px;color:#1A237E;font-size:20px;">Roz shaam 6 baje yaad dilayein?</h3>'
+      + '<p style="margin:0 0 16px;color:#555;font-size:14px;line-height:1.5;">Din me sirf ek chhota reminder: aaj ka sawaal aur streak. Phone ki settings se kabhi bhi band kar sakte hain.</p>'
+      + '<button id="gpPushYes" style="width:100%;border:0;border-radius:14px;padding:13px;background:linear-gradient(135deg,#FF6F00,#FFA000);color:#fff;font-weight:800;font-size:16px;cursor:pointer;">Haan, yaad dilao</button>'
+      + '<button id="gpPushNo" style="width:100%;border:0;background:none;color:#888;font-weight:700;font-size:14px;padding:12px 0 2px;cursor:pointer;">Abhi nahi</button>'
+      + '</div>';
+    document.body.appendChild(o);
+    document.getElementById('gpPushNo').onclick = closeCard;
+    document.getElementById('gpPushYes').onclick = function(){
+      closeCard();
+      try{
+        Promise.resolve(Notification.requestPermission()).then(function(res){
+          if(res === 'granted'){
+            saveMeta();
+            subscribe().then(function(){ try{ gpToast('🔔 Reminder chalu! Roz shaam milega.'); }catch(e){} })
+              .catch(function(){ /* retried on next open */ });
+          }
+        });
+      }catch(e){}
+    };
+  }
+
+  function maybeAsk(){
+    try{
+      if(!supported() || Notification.permission !== 'default') return;
+      var last = parseInt(g('gp_push_ask')||'0',10) || 0;
+      if(Date.now() - last < 3*DAY) return;
+      setTimeout(showCard, 1800);
+    }catch(e){}
+  }
+
+  /* After a finished level / test / daily quiz */
+  ['showLevelComplete','testSubmit','dqAnswer','weeklySubmit'].forEach(function(n){
+    try{
+      var o = window[n]; if(typeof o!=='function' || o._gpPush) return;
+      var w = function(){ var r = o.apply(this, arguments); maybeAsk(); return r; };
+      w._gpPush = true; window[n] = w;
+    }catch(e){}
+  });
+
+  /* On open: keep the note fresh; re-register a granted reminder once a week
+     (or right away if an earlier try failed) */
+  if(supported()){
+    saveMeta();
+    document.addEventListener('visibilitychange', function(){ if(document.visibilityState==='hidden') saveMeta(); });
+    try{
+      if(Notification.permission === 'granted'){
+        var t = parseInt(g('gp_push_t')||'0',10) || 0;
+        if(g('gp_push') !== '1' || Date.now() - t > 7*DAY){
+          setTimeout(function(){ subscribe().catch(function(){}); }, 4000);
+        }
+      }
+    }catch(e){}
+  }
+  window.gpPushAsk = showCard;
+})();
+</script>
+<script>
 /* "Kal phir aao" line on the level-complete and final-result screens: once a child
    finishes a level, it shows what tomorrow's login reward (gpDailyReward) will be. */
 (function(){

@@ -16806,6 +16806,78 @@ function gpHomeQuiz(){try{openDailyQuiz();}catch(e){}
 })();
 </script>
 <script>
+/* ============ Pehla mission (first session) ============
+   Right after setup, a new user lands in their own class and is offered
+   one small first task: Maths Chapter 1, 10 questions, +50 bonus XP.
+   Nursery/LKG/UKG just open their class (they have activities, not chapters). */
+(function(){
+  var MAP = {c1:'maths',c2:'c2maths',c3:'c3maths',c4:'c4maths',c5:'c5maths',c6:'c6maths',c7:'c7maths',c8:'c8maths',c9:'c9maths',c10:'c10maths'};
+  function g(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
+  function s(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
+  function close(){ var o=document.getElementById('gpMission'); if(o) o.remove(); }
+  function card(sec, cls){
+    if(document.getElementById('gpMission')) return;
+    var n = String(cls).replace('c','');
+    var ch = ''; try{ ch = (typeof CHAPTERS!=='undefined' && CHAPTERS[sec] && CHAPTERS[sec][0]) || ''; }catch(e){}
+    var o = document.createElement('div');
+    o.id = 'gpMission';
+    o.style.cssText = 'position:fixed;inset:0;background:rgba(10,14,40,.55);display:flex;align-items:center;justify-content:center;z-index:100002;padding:16px;';
+    o.innerHTML =
+      '<div style="background:#fff;border-radius:20px;max-width:360px;width:100%;padding:22px;text-align:center;font-family:Nunito,sans-serif;box-shadow:0 12px 40px rgba(0,0,0,.25);">'
+      + '<div style="font-size:46px;line-height:1;">🎯</div>'
+      + '<h3 style="margin:10px 0 6px;color:#1A237E;font-size:21px;">Pehla mission!</h3>'
+      + '<p style="margin:0 0 6px;color:#444;font-size:15px;line-height:1.5;">Class ' + n + ' Maths, Chapter 1 ke <b>10 sawaal</b> khelo aur <b>+50 bonus XP</b> pao.</p>'
+      + (ch ? '<p style="margin:0 0 16px;color:#888;font-size:12.5px;font-weight:700;">' + String(ch).replace(/[<>&]/g,'') + '</p>' : '<div style="height:10px"></div>')
+      + '<button id="gpMissionGo" style="width:100%;border:0;border-radius:14px;padding:13px;background:linear-gradient(135deg,#FF6F00,#FFA000);color:#fff;font-weight:800;font-size:16px;cursor:pointer;">Shuru karo 🚀</button>'
+      + '<button id="gpMissionLater" style="width:100%;border:0;background:none;color:#888;font-weight:700;font-size:14px;padding:12px 0 2px;cursor:pointer;">Pehle class dekhta hoon</button>'
+      + '</div>';
+    document.body.appendChild(o);
+    document.getElementById('gpMissionLater').onclick = close;
+    document.getElementById('gpMissionGo').onclick = function(){
+      close(); s('gp_mission1','open');
+      try{ gpStartLevel(sec, 0); }catch(e){}
+    };
+  }
+  try{
+    var f = window.gpstFinish;
+    if(typeof f==='function' && !f._gpMission){
+      var w = function(){
+        var wasNew = g('gp_onboarded') !== '1';
+        var r = f.apply(this, arguments);
+        try{
+          if(wasNew && g('gp_onboarded') === '1' && !g('gp_mission1')){
+            var p = (typeof gpProfile==='function' && gpProfile()) || {};
+            try{ if(typeof gpstOpenMyClass==='function') gpstOpenMyClass(); }catch(e){}
+            var sec = MAP[p.cls];
+            if(sec && typeof allData!=='undefined' && allData[sec]){ s('gp_mission1','offered'); setTimeout(function(){ card(sec, p.cls); }, 500); }
+          }
+        }catch(e){}
+        return r;
+      };
+      w._gpMission = true; window.gpstFinish = w;
+    }
+  }catch(e){}
+  /* first finished level after taking the mission -> bonus */
+  try{
+    var o = window.showLevelComplete;
+    if(typeof o==='function' && !o._gpMission){
+      var w2 = function(){
+        var r = o.apply(this, arguments);
+        try{
+          if(g('gp_mission1') === 'open'){
+            s('gp_mission1','done');
+            if(typeof addXP==='function') addXP(50);
+            setTimeout(function(){ try{ gpToast('🎉 Pehla mission poora! +50 bonus XP'); }catch(e){} }, 900);
+          }
+        }catch(e){}
+        return r;
+      };
+      w2._gpMission = true; window.showLevelComplete = w2;
+    }
+  }catch(e){}
+})();
+</script>
+<script>
 /* ============ Daily reminder (Web Push) ============
    The gyaanpe-push Worker sends an empty push at about 6 pm IST and sw.js
    shows the text. We ask only after the child has finished something

@@ -2793,16 +2793,16 @@ function openLKG(){NTIER='lkg';nTierHome();}
 function openUKG(){NTIER='ukg';nTierHome();}
 function openClass1(){gpHideAllScreens();document.getElementById('class1Home').style.display='block';}
 function openClass2(){gpHideAllScreens();var s=document.getElementById('class2Home');s.style.display='block';var p=gpProg()['c2maths']||{};var d=0;for(var l in p){if(p[l]>0)d++;}document.getElementById('c2Stats').innerHTML='Maths Progress: <b>'+(d*10)+'%</b> \u2022 '+d+'/10 chapters';}
-function openClass7(){if(!gpRequirePremium("Class 7 is a Premium feature."))return;gpHideAllScreens();var s=document.getElementById('class7Home');s.style.display='block';var p=gpProg()['c7maths']||{};var d=0;for(var l in p){if(p[l]>0)d++;}document.getElementById('c7Stats').innerHTML='Maths Progress: <b>'+(d*10)+'%</b> \u2022 '+d+'/10 chapters';}
+function openClass7(){gpHideAllScreens();var s=document.getElementById('class7Home');s.style.display='block';var p=gpProg()['c7maths']||{};var d=0;for(var l in p){if(p[l]>0)d++;}document.getElementById('c7Stats').innerHTML='Maths Progress: <b>'+(d*10)+'%</b> \u2022 '+d+'/10 chapters';}
 var SENIOR_SECS={8:['c8maths','c8evs','c8sst','c8eng','c8hin','c8san'],9:['c9maths','c9evs','c9sst','c9eng','c9hin','c9san'],10:['c10maths','c10evs','c10sst','c10eng','c10hin','c10san']};
-function gpOpenSenior(n){if(!gpRequirePremium("Class "+n+" is a Premium feature."))return;gpHideAllScreens();document.getElementById('class'+n+'Home').style.display='block';var prog=gpProg(),tot=0,done=0;SENIOR_SECS[n].forEach(function(k){var card=document.getElementById('c'+n+'card_'+k),sub=document.getElementById('c'+n+'sub_'+k);var cnt=(allData[k]||[]).length;if(!card||!sub)return;if(cnt){card.classList.remove('c8-soon');sub.innerHTML=cnt+' chapters &bull; '+(cnt*10)+' Q';var p=prog[k]||{};tot+=cnt;for(var l in p){if(p[l]>0)done++;}}else{card.classList.add('c8-soon');sub.textContent='Jald aa raha hai';}});document.getElementById('c'+n+'Stats').innerHTML=tot?('Progress: <b>'+Math.round(done/tot*100)+'%</b> • '+done+'/'+tot+' chapters'):'';}
+function gpOpenSenior(n){gpHideAllScreens();document.getElementById('class'+n+'Home').style.display='block';var prog=gpProg(),tot=0,done=0;SENIOR_SECS[n].forEach(function(k){var card=document.getElementById('c'+n+'card_'+k),sub=document.getElementById('c'+n+'sub_'+k);var cnt=(allData[k]||[]).length;if(!card||!sub)return;if(cnt){card.classList.remove('c8-soon');sub.innerHTML=cnt+' chapters &bull; '+(cnt*10)+' Q';var p=prog[k]||{};tot+=cnt;for(var l in p){if(p[l]>0)done++;}}else{card.classList.add('c8-soon');sub.textContent='Jald aa raha hai';}});document.getElementById('c'+n+'Stats').innerHTML=tot?('Progress: <b>'+Math.round(done/tot*100)+'%</b> • '+done+'/'+tot+' chapters'):'';}
 function openClass8(){gpOpenSenior(8);}
 function openClass9(){gpOpenSenior(9);}
 function openClass10(){gpOpenSenior(10);}
 function gpSeniorSub(k){if(!allData[k]){var m=/^c(\d+)/.exec(k);gpToast('Class '+(m?m[1]:'')+' '+(SUBLABEL[k]||'').replace(/\s*\(C\d+\)/,'')+' jald aa raha hai!');return;}gpJourney(k);}
 function gpC8Open(k){gpSeniorSub(k);}
-function openClass6(){if(!gpRequirePremium("Class 6 is a Premium feature."))return;gpHideAllScreens();var s=document.getElementById('class6Home');s.style.display='block';var p=gpProg()['c6maths']||{};var d=0;for(var l in p){if(p[l]>0)d++;}document.getElementById('c6Stats').innerHTML='Maths Progress: <b>'+(d*10)+'%</b> \u2022 '+d+'/10 chapters';}
-function openClass5(){if(!gpRequirePremium("Class 5 is a Premium feature."))return;gpHideAllScreens();var s=document.getElementById('class5Home');s.style.display='block';var p=gpProg()['c5maths']||{};var d=0;for(var l in p){if(p[l]>0)d++;}document.getElementById('c5Stats').innerHTML='Maths Progress: <b>'+(d*10)+'%</b> \u2022 '+d+'/10 chapters';}
+function openClass6(){gpHideAllScreens();var s=document.getElementById('class6Home');s.style.display='block';var p=gpProg()['c6maths']||{};var d=0;for(var l in p){if(p[l]>0)d++;}document.getElementById('c6Stats').innerHTML='Maths Progress: <b>'+(d*10)+'%</b> \u2022 '+d+'/10 chapters';}
+function openClass5(){gpHideAllScreens();var s=document.getElementById('class5Home');s.style.display='block';var p=gpProg()['c5maths']||{};var d=0;for(var l in p){if(p[l]>0)d++;}document.getElementById('c5Stats').innerHTML='Maths Progress: <b>'+(d*10)+'%</b> \u2022 '+d+'/10 chapters';}
 function openClass4(){gpHideAllScreens();var s=document.getElementById('class4Home');s.style.display='block';var p=gpProg()['c4maths']||{};var d=0;for(var l in p){if(p[l]>0)d++;}document.getElementById('c4Stats').innerHTML='Maths Progress: <b>'+(d*10)+'%</b> \u2022 '+d+'/10 chapters';}
 function openClass3(){gpHideAllScreens();var s=document.getElementById('class3Home');s.style.display='block';var p=gpProg()['c3maths']||{};var d=0;for(var l in p){if(p[l]>0)d++;}document.getElementById('c3Stats').innerHTML='Maths Progress: <b>'+(d*10)+'%</b> \u2022 '+d+'/10 chapters';}
 var nModId=null,nLvl=0,nActs=[],nIdx=0,nScore=0,nBusy=false,nCurPrompt='';
@@ -7694,12 +7694,12 @@ function isPremium() {
 
 var PREMIUM_COMPARE_ROWS = [
   ["Nursery \u2013 Class 4", "\u2705", "\u2705"],
-  ["Class 5", "\u274C", "\u2705"],
-  ["Class 6", "\u274C", "\u2705"],
-  ["Class 7", "\u274C", "\u2705"],
-  ["Class 8", "\u274C", "\u2705"],
-  ["Class 9", "\u274C", "\u2705"],
-  ["Class 10", "\u274C", "\u2705"],
+  ["Class 5", "Ch 1", "\u2705"],
+  ["Class 6", "Ch 1", "\u2705"],
+  ["Class 7", "Ch 1", "\u2705"],
+  ["Class 8", "Ch 1", "\u2705"],
+  ["Class 9", "Ch 1", "\u2705"],
+  ["Class 10", "Ch 1", "\u2705"],
   ["AI Tutor", PREMIUM_CONFIG.freeLimits.aiTutor + "/day", "Unlimited"],
   ["AI Doubt Solver", PREMIUM_CONFIG.freeLimits.aiDoubt + "/day", "Unlimited"],
   ["AI Worksheets", PREMIUM_CONFIG.freeLimits.aiWorksheet + "/day", "Unlimited"],
@@ -9728,7 +9728,7 @@ window.stkFreezesLeft=stkFreezesLeft;
           chip.innerHTML = '\u2B50 NEW';
           chip.classList.remove('gp-locked');
         }else{
-          chip.innerHTML = '\uD83D\uDD12 PRO';
+          chip.innerHTML = 'Ch 1 FREE';
           chip.classList.add('gp-locked');
         }
  });
@@ -16367,7 +16367,13 @@ body.gp-web #premiumScreen .pass-badge{display:none !important;}
       w._gpsHooked = true; window.addXP = w;
     }catch(e){}
   })();
-  hook('showFinalResult','quiz'); /* main quizzes finished */
+  /* quizzes finished: every level of the level game, Chapter Test, Mock/Series, Weekly, Olympiad, Aaj ka Quiz */
+  ['showLevelComplete','testSubmit','mockFinalSubmit','weeklySubmit','olySubmit','dqAnswer'].forEach(function(n){ hook(n,'quiz'); });
+  /* practice questions answered (a second tap on the same question is not counted) */
+  (function(){ try{ var o=window.pracSelect; if(typeof o!=='function'||o._gpsHooked) return;
+    var w=function(qi){ try{ if(window._pracState && _pracState.answers && _pracState.answers[qi]===undefined) bump('pq',1); }catch(e){} return o.apply(this,arguments); };
+    w._gpsHooked=true; window.pracSelect=w; }catch(e){} })();
+  hook('gpUpgradePopup','pw');    /* times the Premium popup was shown */
   hook('tutorSend','ai');         /* AI tutor questions */
   hook('stOpenStory','story');    /* stories opened */
   hook('gplOpenBook','book');     /* library books opened */
@@ -16386,6 +16392,7 @@ body.gp-web #premiumScreen .pass-badge{display:none !important;}
       nw: first === day(), mins: mins,
       xp: d.xp||0, act: d.act||0, quiz: d.quiz||0, ai: d.ai||0,
       story: d.story||0, book: d.book||0, flow: d.flow||0, course: d.course||0,
+      pq: d.pq||0, pw: d.pw||0,
       t: Date.now()
     };
   }
@@ -16744,6 +16751,68 @@ function gpHomeQuiz(){try{openDailyQuiz();}catch(e){}
  var t=(b&&b.style.display!=='none')?b:((c&&c.style.display!=='none')?c:null);
  if(t){t.scrollIntoView({behavior:'smooth',block:'center'});}
  else if(typeof gpToast==='function'){gpToast("Aaj ka Quiz ho gaya! Kal naya sawaal aayega.");}}
+</script>
+<script>
+/* Free plan, Class 5-10: chapter 1 of every subject is fully open (learn, practice, test,
+   level game); chapter 2 onwards asks for Premium. Nursery-Class 4 stay fully free.
+   Wraps the chapter entry points so no screen markup changes. */
+(function(){
+  function clsOf(sec){ var m=/^c(\d+)/.exec(String(sec||'')); return m ? parseInt(m[1],10) : 0; }
+  function ok(sec, idx){
+    try{ if(typeof isPremium==='function' && isPremium()) return true; }catch(e){}
+    if(clsOf(sec) < 5) return true;
+    return (parseInt(idx,10)||0) === 0;
+  }
+  function stop(){
+    try{ gpUpgradePopup('Pehla chapter free hai! Chapter 2 se aage Premium me.'); }catch(e){}
+    return false;
+  }
+  window.gpChapterOk = ok;
+  function gate(name, pick){
+    try{
+      var o=window[name]; if(typeof o!=='function' || o._gpGate) return;
+      var w=function(){ var a=pick(arguments); if(!ok(a[0],a[1])) return stop(); return o.apply(this, arguments); };
+      w._gpGate=true; window[name]=w;
+    }catch(e){}
+  }
+  var byArgs=function(a){ return [a[0], a[1]]; };
+  ['openChapterHub','openStageMap','openStageLearn','openStageMixed','openStagePractice',
+   'openStageRevision','openStageSummary','openStageTest','gpStartLevel','startSection'].forEach(function(n){ gate(n, byArgs); });
+  /* level game: next level = next chapter; checked before the level-complete card closes */
+  gate('goNextLevel', function(){ return [window.currentSection, (window.currentLevel||0)+1]; });
+  gate('loadLevel', function(a){ return [window.currentSection, a[0]]; });
+})();
+</script>
+<script>
+/* "Kal phir aao" line on the level-complete and final-result screens: once a child
+   finishes a level, it shows what tomorrow's login reward (gpDailyReward) will be. */
+(function(){
+  function line(){
+    try{
+      var streak=parseInt(localStorage.getItem('gp_streak')||'1',10)||1;
+      var next=streak+1, day=((next-1)%7)+1, coins=day*10+(day===7?50:0);
+      return '🔥 Kal phir aao: '+next+' din ki streak + '+coins+' coins milenge!';
+    }catch(e){ return ''; }
+  }
+  function put(boxId, afterId){
+    var box=document.getElementById(boxId); if(!box) return;
+    var el=document.getElementById(boxId+'Cb');
+    if(!el){
+      el=document.createElement('div'); el.id=boxId+'Cb';
+      el.style.cssText='margin:8px 0 12px;font-weight:800;font-size:14px;color:#FF6F00;text-align:center;';
+      var a=document.getElementById(afterId);
+      if(a && a.parentNode===box) a.insertAdjacentElement('afterend', el); else box.appendChild(el);
+    }
+    el.textContent=line();
+  }
+  try{
+    var o=window.showLevelComplete;
+    if(typeof o==='function' && !o._gpCb){
+      var w=function(){ var r=o.apply(this,arguments); try{ put('levelComplete','lcMsg'); put('resultScreen','resultMsg'); }catch(e){} return r; };
+      w._gpCb=true; window.showLevelComplete=w;
+    }
+  }catch(e){}
+})();
 </script>
 </body>
 </html>

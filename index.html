@@ -7100,16 +7100,16 @@ function renderParentOlympiadStats() {
 var BRAIN_GYM_DAILY_LIMIT = 8;
 
 var BRAIN_GAMES = [
-  { key: "memory_match", name: "Memory Match", icon: "\uD83E\uDDE9", category: "Memory", unlock: { type: "chapterTests", count: 5 }, playable: true },
-  { key: "color_match", name: "Color Match", icon: "\uD83C\uDFA8", category: "Observation", unlock: { type: "xp", count: 100 }, playable: true },
-  { key: "alphabet_puzzle", name: "Alphabet Puzzle", icon: "\uD83D\uDD24", category: "Memory", unlock: { type: "xp", count: 150 }, playable: true },
-  { key: "number_memory", name: "Number Memory", icon: "\uD83D\uDD22", category: "Memory", unlock: { type: "xp", count: 200 }, playable: true },
-  { key: "spot_difference", name: "Spot the Difference", icon: "\uD83D\uDD0D", category: "Observation", unlock: { type: "xp", count: 250 }, playable: true },
-  { key: "shape_puzzle", name: "Shape Puzzle", icon: "\uD83D\uDD37", category: "Logic", unlock: { type: "xp", count: 300 }, playable: true },
-  { key: "find_object", name: "Find the Object", icon: "\uD83C\uDFAF", category: "Observation", unlock: { type: "xp", count: 350 }, playable: true },
+  { key: "memory_match", name: "Memory Match", icon: "\uD83E\uDDE9", category: "Memory", unlock: { type: "xp", count: 0 }, playable: true },
+  { key: "color_match", name: "Color Match", icon: "\uD83C\uDFA8", category: "Observation", unlock: { type: "xp", count: 0 }, playable: true },
+  { key: "alphabet_puzzle", name: "Alphabet Puzzle", icon: "\uD83D\uDD24", category: "Memory", unlock: { type: "xp", count: 50 }, playable: true },
+  { key: "number_memory", name: "Number Memory", icon: "\uD83D\uDD22", category: "Memory", unlock: { type: "xp", count: 100 }, playable: true },
+  { key: "spot_difference", name: "Spot the Difference", icon: "\uD83D\uDD0D", category: "Observation", unlock: { type: "xp", count: 150 }, playable: true },
+  { key: "shape_puzzle", name: "Shape Puzzle", icon: "\uD83D\uDD37", category: "Logic", unlock: { type: "xp", count: 200 }, playable: true },
+  { key: "find_object", name: "Find the Object", icon: "\uD83C\uDFAF", category: "Observation", unlock: { type: "xp", count: 250 }, playable: true },
   { key: "pattern_recognition", name: "Pattern Recognition", icon: "\uD83D\uDD17", category: "Logic", unlock: { type: "xp", count: 500 }, playable: true },
   { key: "sequence_challenge", name: "Sequence Challenge", icon: "\uD83C\uDFB5", category: "Memory", unlock: { type: "streak", count: 7 }, playable: true },
-  { key: "quick_math", name: "Quick Math", icon: "\u2795", category: "Logic", unlock: { type: "weeklyExams", count: 5 }, playable: true },
+  { key: "quick_math", name: "Quick Math", icon: "\u2795", category: "Logic", unlock: { type: "xp", count: 0 }, playable: true },
   { key: "word_builder", name: "Word Builder", icon: "\uD83D\uDCDD", category: "Vocabulary", unlock: { type: "doubts", count: 10 }, playable: true },
   { key: "vocabulary_master", name: "Vocabulary Master", icon: "\uD83D\uDCD6", category: "Vocabulary", unlock: { type: "doubts", count: 15 }, playable: true },
   { key: "logic_puzzle", name: "Logic Puzzle", icon: "\uD83E\uDDE0", category: "Logic", unlock: { type: "worksheets", count: 10 }, playable: true },
@@ -7224,14 +7224,34 @@ function renderBrainGymHub() {
   var el = document.getElementById("brainGymHubArea");
   if (!el) return;
   var used = bgTodayCount();
-  var html = '<div class="bg-limit-note">' + used + "/" + BRAIN_GYM_DAILY_LIMIT + " games played today</div>";
+  var html;
+  if (isPremium()) {
+    html = '<div class="bg-limit-note">\u2728 Unlimited games \u2014 ' + used + " played today</div>";
+  } else {
+    var freeLim = PREMIUM_CONFIG.freeLimits.brainGym;
+    var left = Math.max(0, freeLim - used);
+    html = '<div class="bg-limit-note">' + (left > 0 ? left + " of " + freeLim + " free games left today" : "Today's " + freeLim + " free games are done \u2014 come back tomorrow!") + "</div>";
+  }
+  /* Next unlock teaser: the locked game closest to opening */
+  var nextG = null, nextPct = -1;
+  BRAIN_GAMES.forEach(function (g) {
+    if (!g.playable || g.unlock.type === "monthly" || bgIsUnlocked(g)) return;
+    var pc = Math.min(99, Math.round((bgGetMetric(g.unlock.type) / g.unlock.count) * 100));
+    if (pc > nextPct) { nextPct = pc; nextG = g; }
+  });
+  if (nextG) {
+    var needMore = nextG.unlock.count - bgGetMetric(nextG.unlock.type);
+    html += '<div class="bg-limit-note" style="background:#FFF8E1;color:#5D4037;">\uD83D\uDD13 Next game: <b>' + nextG.icon + " " + esc(nextG.name) + "</b> \u2014 " + needMore + " more " + bgUnlockLabel(nextG.unlock.type) + "</div>";
+  }
 
   if (bgIsSunday() && !bgSundayDoneToday()) {
     html += '<div class="bg-sunday-banner" onclick="bgStartSundayChallenge()"><div class="t">\u2600\uFE0F SUNDAY BRAIN GYM CHALLENGE!</div><div style="font-size:11px;color:#5D4037;margin-top:2px;">Special challenge available today only \u2014 tap to play!</div></div>';
   }
 
   html += '<div class="bg-hub-grid">';
-  BRAIN_GAMES.forEach(function (g) {
+  /* Playable games first, locked ones after (original order kept inside each group) */
+  var bgOrdered = BRAIN_GAMES.filter(function (g) { return bgIsUnlocked(g) && g.playable; }).concat(BRAIN_GAMES.filter(function (g) { return !(bgIsUnlocked(g) && g.playable); }));
+  bgOrdered.forEach(function (g) {
     var unlocked = bgIsUnlocked(g);
     var canPlay = unlocked && g.playable;
     var cls = "bg-game-card" + (canPlay ? " unlocked" : "") + (!g.playable && unlocked ? " bg-soon-card" : "");
@@ -7247,6 +7267,8 @@ function renderBrainGymHub() {
       html += '<div class="bg-progress-label">' + have + "/" + need + " " + bgUnlockLabel(g.unlock.type) + "</div>";
     } else if (!g.playable) {
       html += '<div class="bg-progress-label">Coming Soon</div>';
+    } else if (g.key === "monthly_mega" && !isPremium()) {
+      html += '<div class="bg-progress-label">\u2B50 Premium</div>';
     }
     html += "</div>";
   });

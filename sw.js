@@ -1,4 +1,4 @@
-const CACHE = 'gyaanpe-v62';
+const CACHE = 'gyaanpe-v63';
 
 /* Works on both https://mahapatraswapnajit-prog.github.io/gyaanpe/ and https://gyaanpe.com/ :
    every path is resolved against the folder this sw.js lives in. */
@@ -37,7 +37,8 @@ self.addEventListener('install', e => {
 self.addEventListener('activate', e => {
   e.waitUntil(
     caches.keys()
-      .then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k))))
+      /* 'gp-meta' holds the page's note for reminders (name, streak, last open); keep it */
+      .then(keys => Promise.all(keys.filter(k => k !== CACHE && k !== 'gp-meta').map(k => caches.delete(k))))
       .then(() => self.clients.claim())
   );
 });
@@ -90,4 +91,60 @@ self.addEventListener('fetch', e => {
 /* Lets the page force a waiting worker to take over immediately. */
 self.addEventListener('message', e => {
   if (e.data === 'gp-skip-waiting') self.skipWaiting();
+});
+
+/* ============ Daily reminder (Web Push) ============
+   The gyaanpe-push Worker sends an EMPTY push around 6 pm IST. The text is
+   chosen here from what the page last saved in the 'gp-meta' cache. */
+const GP_MSGS = [
+  ['Aaj ka sawaal ready hai! 🎯', '5 minute do, ek naya chapter seekho aur XP kamao.'],
+  ['Arjun Sir intezaar kar rahe hain 🤖', 'Koi doubt hai? AI Tutor se abhi poochho.'],
+  ['Ek chhota sa quiz? 🧠', '10 sawaal, 5 minute. Dekho kitne sahi hote hain!'],
+  ['Board ki taiyari, thoda roz 📚', 'Aaj ek chapter ka practice karo, kal aasaan lagega.'],
+  ['Coins tumhara intezaar kar rahe hain 🪙', 'App kholo aur aaj ka reward lo.']
+];
+function gpDayStr(d) { return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate(); }
+
+self.addEventListener('push', e => {
+  e.waitUntil((async () => {
+    let m = {};
+    try {
+      const c = await caches.open('gp-meta');
+      const r = await c.match('/__gp_meta');
+      if (r) m = await r.json();
+    } catch (_) {}
+    const now = new Date();
+    const y = new Date(now); y.setDate(now.getDate() - 1);
+    const name = (m.name && m.name !== 'Champ') ? String(m.name).slice(0, 16) : '';
+    const streak = parseInt(m.streak, 10) || 0;
+    let title, body;
+    if (m.last === gpDayStr(now)) {
+      title = 'Shabaash' + (name ? ', ' + name : '') + '! 🌟';
+      body = 'Aaj ki padhai ho gayi. Ek quiz aur khel kar XP badhao?';
+    } else if (m.last === gpDayStr(y) && streak >= 2) {
+      title = '🔥 ' + streak + ' din ki streak khatre me!';
+      body = (name ? name + ', ' : '') + 'aaj 5 minute padho aur streak bachao.';
+    } else {
+      const i = Math.floor(now.getTime() / 864e5) % GP_MSGS.length;
+      title = GP_MSGS[i][0];
+      body = (name ? name + ', ' : '') + GP_MSGS[i][1];
+    }
+    await self.registration.showNotification(title, {
+      body,
+      icon: at('GyaanPe_Logo_Final.png'),
+      tag: 'gp-daily',
+      data: { url: at('./?src=push') }
+    });
+  })());
+});
+
+self.addEventListener('notificationclick', e => {
+  e.notification.close();
+  const url = (e.notification.data && e.notification.data.url) || at('./');
+  e.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(list => {
+      for (const c of list) { if (c.url.indexOf(BASE) === 0 && 'focus' in c) return c.focus(); }
+      return self.clients.openWindow(url);
+    })
+  );
 });

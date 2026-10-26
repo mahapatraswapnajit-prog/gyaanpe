@@ -48,10 +48,10 @@
 
   <h2>Roz ka hisaab (14 din)</h2>
   <div class="wrap"><table>
-    <thead><tr><th>Date</th><th>Active</th><th>New</th><th>Wapas</th><th>Play</th><th>Web</th><th>Premium</th><th>Avg min</th><th>Quiz</th><th>Practice</th><th>AI</th><th>Stories</th><th>Books</th><th>Popup</th><th>XP</th></tr></thead>
+    <thead><tr><th>Date</th><th>Active</th><th>New</th><th>Wapas</th><th>Play</th><th>Web</th><th>Premium</th><th>Avg min</th><th>Quiz</th><th>Practice</th><th>AI</th><th>Stories</th><th>Books</th><th>Popup</th><th>Share</th><th>XP</th></tr></thead>
     <tbody id="rows"></tbody>
   </table></div>
-  <p class="muted">Active = us din app khola. Wapas = Active − New (pehle aa chuke log). Avg min = active users ka average padhai time (sirf jab app screen pe khula ho). Quiz = poora kiya level, Chapter Test, Mock, Weekly, Olympiad ya Aaj ka Quiz. Practice = practice me jawab diye sawaal. Popup = kitne logon ko Premium popup dikha. Quiz/Practice/Popup ki nayi ginti 26 Oct 2026 ke update se shuru hai.</p>
+  <p class="muted">Active = us din app khola. Wapas = Active − New (pehle aa chuke log). Avg min = active users ka average padhai time (sirf jab app screen pe khula ho). Quiz = poora kiya level, Chapter Test, Mock, Weekly, Olympiad ya Aaj ka Quiz. Practice = practice me jawab diye sawaal. Popup = kitne logon ko Premium popup dikha. Share = WhatsApp/doosre tarike se app ya challenge bheja. Quiz/Practice/Popup ki nayi ginti 26 Oct 2026 ke update se shuru hai.</p>
 </main>
 <script>
 (function(){
@@ -74,7 +74,7 @@
       prem: users.filter(function(u){ return u.prem; }).length,
       avgMin: activeMin.length ? Math.round(sum('mins')/activeMin.length) : 0,
       quiz: sum('quiz'), ai: sum('ai'), story: sum('story'), book: sum('book'), xp: sum('xp'),
-      pq: sum('pq'), pw: sum('pw'), pwUsers: users.filter(function(u){ return (+u.pw||0)>0; }).length
+      pq: sum('pq'), pw: sum('pw'), share: sum('share'), pwUsers: users.filter(function(u){ return (+u.pw||0)>0; }).length
     };
   }
 
@@ -87,14 +87,14 @@
       var byDay = {}; res.forEach(function(x){ byDay[x[0]] = x[1]; });
       var t = summarize(byDay[list[0]]);
       el('today').innerHTML = card(t.active,'Active users') + card(t.nw,'New users') + card(t.play+' / '+t.web,'Play / Web')
-        + card(t.prem,'Premium users') + card(t.active-t.nw,'Wapas aaye') + card(t.avgMin,'Avg minutes') + card(t.quiz,'Quizzes') + card(t.pq,'Practice sawaal') + card(t.ai,'AI questions') + card(t.pwUsers,'Premium popup dekha');
+        + card(t.prem,'Premium users') + card(t.active-t.nw,'Wapas aaye') + card(t.avgMin,'Avg minutes') + card(t.quiz,'Quizzes') + card(t.pq,'Practice sawaal') + card(t.ai,'AI questions') + card(t.pwUsers,'Premium popup dekha') + card(t.share,'App share');
 
-      var uniq = {}, nw = 0, srcs = {}, quiz = 0, ai = 0, mins = 0, minUsers = 0, pq = 0, seenDays = {}, pwU = {};
+      var uniq = {}, nw = 0, srcs = {}, quiz = 0, ai = 0, mins = 0, minUsers = 0, pq = 0, seenDays = {}, pwU = {}, shares = 0;
       list.slice(0,7).forEach(function(d){
         var rec = byDay[d]; Object.keys(rec).forEach(function(u){
           var r = rec[u]||{};
           if(!uniq[u]){ uniq[u] = r; var sname = r.src||'direct'; srcs[sname] = (srcs[sname]||0)+1; }
-          if(r.nw) nw++; quiz += +r.quiz||0; ai += +r.ai||0; pq += +r.pq||0;
+          if(r.nw) nw++; quiz += +r.quiz||0; ai += +r.ai||0; pq += +r.pq||0; shares += +r.share||0;
           seenDays[u] = (seenDays[u]||0) + 1; if((+r.pw||0)>0) pwU[u] = 1;
           if((r.mins||0)>0){ mins += +r.mins; minUsers++; }
         });
@@ -109,14 +109,14 @@
       el('week').innerHTML = card(ids.length,'Unique users') + card(nw,'New users') + card(back2,'2+ din aaye')
         + card(d1n ? Math.round(100*d1b/d1n)+'%' : '-', 'Agle din wapas (Day-1)') + card(premNow,'Premium users')
         + card(minUsers?Math.round(mins/minUsers):0,'Avg min / din') + card(quiz,'Quizzes') + card(pq,'Practice sawaal') + card(ai,'AI questions')
-        + card(Object.keys(pwU).length,'Premium popup dekha');
+        + card(Object.keys(pwU).length,'Premium popup dekha') + card(shares,'App share');
 
       var sk = Object.keys(srcs).sort(function(a,b){ return srcs[b]-srcs[a]; });
       el('sources').innerHTML = sk.length ? sk.map(function(k){ return '<span class="pill">'+k.replace(/[<>&]/g,'')+' <b>'+srcs[k]+'</b></span>'; }).join('') : '<span class="muted">Abhi data nahi hai.</span>';
 
       el('rows').innerHTML = list.map(function(d){
         var x = summarize(byDay[d]);
-        return '<tr><td>'+d+'</td><td>'+x.active+'</td><td>'+x.nw+'</td><td>'+(x.active-x.nw)+'</td><td>'+x.play+'</td><td>'+x.web+'</td><td>'+x.prem+'</td><td>'+x.avgMin+'</td><td>'+x.quiz+'</td><td>'+x.pq+'</td><td>'+x.ai+'</td><td>'+x.story+'</td><td>'+x.book+'</td><td>'+x.pwUsers+'</td><td>'+x.xp+'</td></tr>';
+        return '<tr><td>'+d+'</td><td>'+x.active+'</td><td>'+x.nw+'</td><td>'+(x.active-x.nw)+'</td><td>'+x.play+'</td><td>'+x.web+'</td><td>'+x.prem+'</td><td>'+x.avgMin+'</td><td>'+x.quiz+'</td><td>'+x.pq+'</td><td>'+x.ai+'</td><td>'+x.story+'</td><td>'+x.book+'</td><td>'+x.pwUsers+'</td><td>'+x.share+'</td><td>'+x.xp+'</td></tr>';
       }).join('');
       el('status').textContent = 'Updated ' + new Date().toLocaleTimeString('en-IN');
     }).catch(function(){

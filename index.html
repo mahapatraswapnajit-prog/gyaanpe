@@ -1779,6 +1779,7 @@ function gpToast(msg){
 <div class="gp-sec-h">&#128106; Progress, Parents &amp; Teachers</div>
 <div class="gp-tools"><button type="button" onclick="gpParent()"><span>&#128104;&#8205;&#128105;&#8205;&#128103;</span>Parent Dashboard</button><button type="button" onclick="gpTeacherOpen()"><span>&#127979;</span>Teacher Dashboard</button><button type="button" onclick="gppcOpen()"><span>&#128218;</span>Parents Corner</button><button type="button" onclick="gpOpenAnalytics()"><span>&#128202;</span>Meri Progress</button><button type="button" onclick="gpqbOpen()"><span>&#128278;</span>Save kiye sawaal</button><button type="button" onclick="gpfqOpen()"><span>&#10067;</span>Help &amp; FAQ</button></div>
 <button type="button" class="gp-share-bar" onclick="gpShareWhatsApp()">&#128242; Dosto aur parents ko GyaanPe bhejo <small>+30 coins</small></button>
+<button type="button" class="gp-share-bar gp-ref-bar" onclick="gpReferOpen()">&#127873; Refer &amp; Earn <small>dono ko 7 din Premium</small></button>
 <div class="gp-sec-h">&#127881; Mera din &amp; rewards</div>
  <div id="gpvHomeMount"></div>
  <div id="gplHomeMount"></div>
@@ -7708,6 +7709,8 @@ try { localStorage.removeItem("gp_dev_premium"); } catch(e){}
 function isPremium() {
   /* Access-code Premium (web / school codes), checked by gyaanpe-pay */
   try { if (window.gpCodes && gpCodes.premiumOk()) return true; } catch(e){}
+  /* Refer & Earn days (gyaanpe-refer Worker) */
+  try { if (window.gpRefer && gpRefer.premiumOk()) return true; } catch(e){}
   /* Server-verified gate. Falls back to the old check only if the
      verification module has not loaded yet (very early in startup). */
   try {
@@ -13187,7 +13190,7 @@ if ('serviceWorker' in navigator) {
     refreshUI();
   }
 
-  function gpCodePrem(){ try{ return !!(window.gpCodes && gpCodes.premiumOk()); }catch(e){ return false; } }
+  function gpCodePrem(){ try{ return !!((window.gpCodes && gpCodes.premiumOk()) || (window.gpRefer && gpRefer.premiumOk())); }catch(e){ return false; } }
   function refreshUI() {
     var prem = state.premium || gpCodePrem();
     document.documentElement.classList.toggle('gp-premium', prem);
@@ -14991,10 +14994,10 @@ if ('serviceWorker' in navigator) {
 
   var SUPPORT_EMAIL = 'gyaanpe.support@gmail.com';
 
-  /* Referral is NOT built in this app. Per the brief, the FAQ must not
-     claim a reward that does not exist. Flip this to true only after a
-     real, server-verified referral system ships. */
-  var REFERRAL_LIVE = false;
+  /* Referral is live (server-checked by the gyaanpe-refer Worker). The FAQ
+     text below must match the Worker's rules: 7 days for the friend, 7 days
+     for the code owner, at most 10 friends. */
+  var REFERRAL_LIVE = true;   /* live: gyaanpe-refer Worker (7 + 7 days, max 10 friends) */
 
   var CATS = [
     ['start',  '\uD83D\uDE80 Shuruat'],
@@ -15082,7 +15085,7 @@ if ('serviceWorker' in navigator) {
     /* ---- Refer ---- */
     ['refer','Refer & Earn kaise kaam karta hai?',
       REFERRAL_LIVE
-        ? 'Apna referral link doston ko bhejiye. Jab 3 log GyaanPe install karke Premium lein, aapko 1 mahina Premium free milta hai.'
+        ? 'Home par <b>\uD83C\uDF81 Refer &amp; Earn</b> dabaiye aur apna 6 akshar ka code doston ko bhejiye.<br><br>Dost app me aapka code daale to use <b>7 din Premium free</b>. Agle din dost phir app khole to aapko bhi <b>7 din Premium free</b>.<br><br>Zyada se zyada 10 dost (70 din). Ek phone par ek hi dost ka code lagta hai. Premium din pehle se chal rahe Premium ke baad jud jaate hain.'
         : '\uD83C\uDF81 <b>Refer & Earn abhi taiyar ho raha hai.</b><br><br>Filhal app me referral ka koi program nahi hai. Jab shuru hoga, yahan poori jaankari mil jayegi.<br><br>Tab tak agar GyaanPe pasand aaye to doston ko zaroor bataiye - aapki baat hamare liye sabse badi madad hai.',1],
 
     /* ---- Payment ---- */
@@ -17045,6 +17048,392 @@ function gpHomeQuiz(){try{openDailyQuiz();}catch(e){}
       w._gpCb=true; window.showLevelComplete=w;
     }
   }catch(e){}
+})();
+</script>
+<script>
+/* ============ Rate GyaanPe on Play ============
+   Shown only inside the Play app (TWA), to a child who has opened the app on
+   at least 2 different days and finished at least 3 levels. At most 3 times,
+   at least 21 days apart, never again after "Rating dein".
+   Google Play rules: no reward for rating, and every user sees the same two
+   choices (rate / send a suggestion). We never ask "are you happy?" first and
+   never send only happy users to the store. */
+(function(){
+  var PKG = 'com.gyaanpe.kidslearning', DAY = 86400000, MAIL = 'gyaanpe.support@gmail.com';
+  function g(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
+  function s(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
+  function n(k){ return parseInt(g(k)||'0',10) || 0; }
+  function today(){ var t=new Date(); return t.getFullYear()+'-'+(t.getMonth()+1)+'-'+t.getDate(); }
+  function inPlayApp(){
+    try{ return g('gp_twa') === '1' || String(document.referrer||'').indexOf('android-app://') === 0; }catch(e){ return false; }
+  }
+  /* distinct days the app was opened */
+  (function(){ var d = today(); if(g('gp_rate_lastday') !== d){ s('gp_rate_lastday', d); s('gp_rate_days', String(n('gp_rate_days') + 1)); } })();
+
+  function eligible(){
+    if(!inPlayApp()) return false;
+    if(g('gp_rate_done') === '1') return false;
+    if(n('gp_rate_shown') >= 3) return false;
+    if(Date.now() - n('gp_rate_t') < 21*DAY) return false;
+    if(n('gp_rate_days') < 2) return false;
+    if(n('gp_rate_lv') < 3) return false;
+    return true;
+  }
+  function busy(){
+    return !!(document.getElementById('gpPushCard') || document.getElementById('gpMission') ||
+              document.getElementById('gpRateCard') || document.getElementById('gpRefCard'));
+  }
+  function close(){ var o = document.getElementById('gpRateCard'); if(o) o.remove(); }
+  function openStore(){
+    var web = 'https://play.google.com/store/apps/details?id=' + PKG;
+    if(/Android/i.test(navigator.userAgent)){
+      try{
+        window.location.href = 'intent://details?id=' + PKG + '#Intent;scheme=market;package=com.android.vending;S.browser_fallback_url=' + encodeURIComponent(web) + ';end';
+        return;
+      }catch(e){}
+    }
+    try{ window.open(web, '_blank'); }catch(e){}
+  }
+  function suggest(){
+    var cls = ''; try{ var p = (typeof gpProfile==='function' && gpProfile()) || {}; if(p.cls) cls = String(p.cls).replace('c',''); }catch(e){}
+    var body = 'GyaanPe ke liye mera sujhav:\n\n\n' + (cls ? '(Class ' + cls + ')' : '');
+    try{ window.location.href = 'mailto:' + MAIL + '?subject=' + encodeURIComponent('GyaanPe sujhav') + '&body=' + encodeURIComponent(body); }catch(e){}
+  }
+  function show(){
+    if(busy()) return;
+    s('gp_rate_t', String(Date.now()));
+    s('gp_rate_shown', String(n('gp_rate_shown') + 1));
+    var o = document.createElement('div');
+    o.id = 'gpRateCard';
+    o.style.cssText = 'position:fixed;inset:0;background:rgba(10,14,40,.55);display:flex;align-items:center;justify-content:center;z-index:100002;padding:16px;';
+    o.innerHTML =
+      '<div style="background:#fff;border-radius:20px;max-width:360px;width:100%;padding:22px;text-align:center;font-family:Nunito,sans-serif;box-shadow:0 12px 40px rgba(0,0,0,.25);">'
+      + '<div style="font-size:40px;line-height:1;letter-spacing:2px;">⭐⭐⭐⭐⭐</div>'
+      + '<h3 style="margin:12px 0 6px;color:#1A237E;font-size:20px;">GyaanPe ke baare me batayein</h3>'
+      + '<p style="margin:0 0 16px;color:#444;font-size:14.5px;line-height:1.55;">Play Store par aapki rating se doosre parents ko sahi app chunne me madad milti hai. Sirf 10 second lagte hain.</p>'
+      + '<button id="gpRateGo" style="width:100%;border:0;border-radius:14px;padding:13px;background:linear-gradient(135deg,#FF6F00,#FFA000);color:#fff;font-weight:800;font-size:16px;cursor:pointer;">⭐ Play Store par rating dein</button>'
+      + '<button id="gpRateIdea" style="width:100%;border:2px solid #C5CAE9;border-radius:14px;padding:11px;background:#fff;color:#283593;font-weight:800;font-size:14.5px;cursor:pointer;margin-top:9px;">💬 Sujhav bhejein</button>'
+      + '<button id="gpRateLater" style="width:100%;border:0;background:none;color:#888;font-weight:700;font-size:14px;padding:12px 0 2px;cursor:pointer;">Baad me</button>'
+      + '</div>';
+    document.body.appendChild(o);
+    document.getElementById('gpRateLater').onclick = close;
+    document.getElementById('gpRateGo').onclick = function(){ s('gp_rate_done','1'); close(); openStore(); };
+    document.getElementById('gpRateIdea').onclick = function(){ close(); suggest(); };
+  }
+  try{
+    var o = window.showLevelComplete;
+    if(typeof o === 'function' && !o._gpRate){
+      var w = function(){
+        var r = o.apply(this, arguments);
+        try{
+          s('gp_rate_lv', String(n('gp_rate_lv') + 1));
+          if(eligible()) setTimeout(function(){ if(eligible() && !busy()) show(); }, 2600);
+        }catch(e){}
+        return r;
+      };
+      w._gpRate = true; window.showLevelComplete = w;
+    }
+  }catch(e){}
+  window.gpRateAsk = show;
+})();
+</script>
+<!-- ============ REFER & EARN (gyaanpe-refer Worker; no login, device code) ============ -->
+<style>
+.gp-ref-bar{background:linear-gradient(135deg,#6A1B9A,#AB47BC)!important;}
+#gpRefCard .rf-box{background:#fff;border-radius:20px;max-width:380px;width:100%;padding:20px 20px 16px;text-align:center;font-family:Nunito,sans-serif;box-shadow:0 12px 40px rgba(0,0,0,.25);max-height:92vh;overflow:auto;box-sizing:border-box;position:relative;}
+#gpRefCard h3{margin:6px 0 6px;color:#4A148C;font-size:21px;}
+#gpRefCard p{margin:0 0 12px;color:#444;font-size:14px;line-height:1.55;}
+#gpRefCard .rf-code{font-family:Anton,sans-serif;letter-spacing:4px;font-size:30px;color:#4A148C;background:#F3E5F5;border:2px dashed #AB47BC;border-radius:14px;padding:10px;margin:4px 0 12px;user-select:all;}
+#gpRefCard .rf-btn{width:100%;border:0;border-radius:14px;padding:13px;background:#25D366;color:#fff;font-weight:800;font-size:15.5px;cursor:pointer;font-family:inherit;}
+#gpRefCard .rf-btn2{width:100%;border:2px solid #CE93D8;border-radius:14px;padding:10px;background:#fff;color:#6A1B9A;font-weight:800;font-size:14px;cursor:pointer;margin-top:8px;font-family:inherit;}
+#gpRefCard .rf-stat{display:flex;gap:8px;margin:12px 0 4px;}
+#gpRefCard .rf-stat div{flex:1;background:#FAFAFA;border-radius:12px;padding:9px 4px;font-size:12px;color:#666;font-weight:700;}
+#gpRefCard .rf-stat b{display:block;font-size:19px;color:#4A148C;}
+#gpRefCard .rf-in{width:100%;box-sizing:border-box;border:2px solid #CE93D8;border-radius:12px;padding:11px;font-size:18px;text-align:center;letter-spacing:3px;text-transform:uppercase;font-family:inherit;font-weight:800;margin:6px 0 8px;}
+#gpRefCard .rf-sec{border-top:1px solid #EEE;margin-top:14px;padding-top:12px;}
+#gpRefCard .rf-msg{font-size:13px;font-weight:800;min-height:18px;margin-top:4px;}
+#gpRefCard .rf-x{position:absolute;top:10px;right:10px;border:0;background:#F3E5F5;color:#6A1B9A;border-radius:50%;width:30px;height:30px;font-size:16px;cursor:pointer;}
+#gpRefCard .rf-small{font-size:11.5px;color:#888;line-height:1.5;margin-top:10px;}
+</style>
+<script>
+(function(){
+  'use strict';
+  var API = 'https://gyaanpe-refer.mahapatraswapnajit.workers.dev';
+  var PKG = 'com.gyaanpe.kidslearning';
+  var K = 'gp_ref', DAY = 86400000, HOUR = 3600000;
+  function g(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
+  function s(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
+  function dev(){
+    try{ if(typeof gpcUid === 'function') return gpcUid(); }catch(e){}
+    var u = g('gp_uid'); if(!u){ u = 'u' + Date.now() + Math.random().toString(36).slice(2,7); s('gp_uid', u); } return u;
+  }
+  function cache(){ try{ return JSON.parse(g(K) || 'null'); }catch(e){ return null; } }
+  function keep(v){ if(!v || !v.code) return; v.t = Date.now(); s(K, JSON.stringify(v)); }
+  function norm(c){ return String(c||'').toUpperCase().replace(/[^A-Z0-9]/g,'').replace(/^GP/,'').slice(0,6); }
+  function post(path, body){
+    return fetch(API + path, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) })
+      .then(function(r){ return r.json().then(function(j){ if(!r.ok){ j = j || {}; j._status = r.status; throw j; } return j; }); });
+  }
+  /* first time this device saw Refer & Earn (code entry is for new users) */
+  if(!g('gp_ref_first')) s('gp_ref_first', String(Date.now()));
+  function isNewish(){ return Date.now() - (parseInt(g('gp_ref_first')||'0',10) || 0) < 14*DAY; }
+
+  /* gyaanpe.com/?ref=CODE  -> remember the code, claim it after onboarding */
+  try{
+    var q = new URLSearchParams(location.search), rc = norm(q.get('ref'));
+    if(rc.length === 6 && !g('gp_ref_in')) s('gp_ref_in', rc);
+  }catch(e){}
+
+  /* Premium from referral days. A cached answer is trusted for 7 days offline. */
+  function premiumOk(){
+    var c = cache();
+    return !!(c && c.until > Date.now() && Date.now() - (c.t||0) < 7*DAY);
+  }
+  function applyUI(){
+    var prem = false; try{ prem = typeof isPremium === 'function' ? !!isPremium() : premiumOk(); }catch(e){}
+    try{ document.documentElement.classList.toggle('gp-premium', prem); }catch(e){}
+    try{ if(window.gpAds && gpAds.applyPremiumState) gpAds.applyPremiumState(); }catch(e){}
+    try{
+      document.querySelectorAll('[data-premium-only]').forEach(function(el){ el.style.display = prem ? '' : 'none'; });
+      document.querySelectorAll('[data-free-only]').forEach(function(el){ el.style.display = prem ? 'none' : ''; });
+    }catch(e){}
+  }
+  function refresh(force){
+    var c = cache();
+    if(!force && c && Date.now() - (c.t||0) < 12*HOUR) return Promise.resolve(c);
+    return post('/me', { device: dev() }).then(function(v){ var was = premiumOk(); keep(v); if(premiumOk() !== was) applyUI(); return v; });
+  }
+  function confirmVisit(){
+    var c = cache();
+    if(!c || !c.claimed || c.confirmed) return;
+    var d = new Date().toDateString();
+    if(g('gp_ref_conf_day') === d) return;
+    s('gp_ref_conf_day', d);
+    post('/confirm', { device: dev() }).then(function(v){ if(v && v.code) keep(v); }).catch(function(){});
+  }
+  function claim(code){
+    return post('/claim', { device: dev(), code: norm(code) }).then(function(v){
+      keep(v); try{ localStorage.removeItem('gp_ref_in'); }catch(e){}
+      applyUI(); return v;
+    });
+  }
+  function errText(e){
+    var k = e && e.error;
+    if(k === 'code') return 'Ye code sahi nahi hai. Ek baar check kijiye.';
+    if(k === 'self') return 'Apna khud ka code nahi daal sakte.';
+    if(k === 'already') return 'Is phone par pehle hi ek code lag chuka hai.';
+    return 'Internet check karke dobara try kijiye.';
+  }
+  function fmt(t){ try{ return new Date(t).toLocaleDateString('en-IN', { day:'numeric', month:'short' }); }catch(e){ return ''; } }
+
+  function shareMsg(code){
+    var play = 'https://play.google.com/store/apps/details?id=' + PKG + '&referrer=utm_source%3Dreferral%26utm_content%3D' + code;
+    return 'Main apne bachche ke liye GyaanPe use karta/karti hoon - Nursery se Class 10 tak CBSE/NCERT learning app.\n\n'
+      + '🎁 Mera code *' + code + '* daaliye aur *7 din Premium FREE* paiye!\n\n'
+      + '1️⃣ App install kijiye: ' + play + '\n'
+      + '2️⃣ Home par 🎁 Refer & Earn dabaiye aur code daaliye: ' + code + '\n\n'
+      + 'iPhone / laptop: https://gyaanpe.com/?ref=' + code;
+  }
+
+  function close(){ var o = document.getElementById('gpRefCard'); if(o) o.remove(); }
+  function render(v, note){
+    var o = document.getElementById('gpRefCard'); if(!o) return;
+    var box = o.querySelector('.rf-box');
+    var h = '<button class="rf-x" aria-label="Band karein">✕</button>'
+      + '<div style="font-size:42px;line-height:1;">🎁</div>'
+      + '<h3>Refer &amp; Earn</h3>';
+    if(!v){
+      h += '<p>' + (note || 'Aapka code aa raha hai...') + '</p>';
+      if(note) h += '<button class="rf-btn2" id="rfRetry">Dobara try karein</button>';
+      box.innerHTML = h; bind(v); return;
+    }
+    h += '<p>Doston ko GyaanPe bhejiye. Dost aapka code daale to use <b>' + v.fdays + ' din Premium free</b>. '
+      + 'Agle din dost phir app khole to aapko bhi <b>' + v.rdays + ' din Premium free</b>!</p>'
+      + '<div style="font-size:12px;color:#777;font-weight:800;">AAPKA CODE</div>'
+      + '<div class="rf-code">' + v.code + '</div>'
+      + '<button class="rf-btn" id="rfShare">📲 WhatsApp par bhejein</button>'
+      + '<button class="rf-btn2" id="rfCopy">Code copy karein</button>'
+      + '<div class="rf-stat"><div><b>' + v.friends + '/' + v.max + '</b>dost jude</div>'
+      + '<div><b>' + (v.friends * v.rdays) + '</b>din kamaye</div>'
+      + '<div><b>' + (v.until > Date.now() ? fmt(v.until) : '—') + '</b>Premium tak</div></div>';
+    if(!v.claimed && isNewish()){
+      h += '<div class="rf-sec"><div style="font-weight:800;color:#4A148C;">Kisi dost ne code bheja hai?</div>'
+        + '<input class="rf-in" id="rfIn" maxlength="9" placeholder="ABC123" autocomplete="off" value="' + (g('gp_ref_in')||'') + '">'
+        + '<button class="rf-btn2" id="rfClaim" style="margin-top:0">Code lagayein</button>'
+        + '<div class="rf-msg" id="rfMsg"></div></div>';
+    } else if(v.claimed){
+      h += '<div class="rf-small">✅ Aapne dost ka code laga liya hai.</div>';
+    }
+    h += '<div class="rf-small">Ek phone par ek hi dost ka code lagta hai. Zyada se zyada ' + v.max + ' dost = ' + (v.max * v.rdays) + ' din. Premium din pehle se chal rahe Premium ke baad jud jaate hain.</div>';
+    box.innerHTML = h; bind(v);
+  }
+  function bind(v){
+    var o = document.getElementById('gpRefCard'); if(!o) return;
+    var x = o.querySelector('.rf-x'); if(x) x.onclick = close;
+    var rt = document.getElementById('rfRetry'); if(rt) rt.onclick = function(){ load(); };
+    if(!v) return;
+    var sh = document.getElementById('rfShare');
+    if(sh) sh.onclick = function(){ try{ gpShareToWhatsApp(shareMsg(v.code)); }catch(e){ window.open('https://wa.me/?text=' + encodeURIComponent(shareMsg(v.code)), '_blank'); } };
+    var cp = document.getElementById('rfCopy');
+    if(cp) cp.onclick = function(){
+      try{ navigator.clipboard.writeText(v.code).then(function(){ cp.textContent = '✅ Copy ho gaya'; }); }catch(e){ cp.textContent = v.code; }
+    };
+    var cl = document.getElementById('rfClaim');
+    if(cl) cl.onclick = function(){
+      var inp = document.getElementById('rfIn'), msg = document.getElementById('rfMsg');
+      var c = norm(inp && inp.value);
+      if(c.length !== 6){ msg.style.color = '#C62828'; msg.textContent = 'Code 6 akshar ka hota hai.'; return; }
+      cl.disabled = true; msg.style.color = '#666'; msg.textContent = 'Check ho raha hai...';
+      claim(c).then(function(nv){
+        render(nv);
+        try{ gpToast('🎉 ' + nv.fdays + ' din Premium chalu ho gaya!'); }catch(e){}
+      }).catch(function(e){ cl.disabled = false; msg.style.color = '#C62828'; msg.textContent = errText(e); });
+    };
+  }
+  function load(){
+    render(null);
+    refresh(true).then(function(v){ render(v); })
+      .catch(function(){ var c = cache(); if(c && c.code) render(c); else render(null, 'Internet nahi mil raha. Thodi der baad dobara kholiye.'); });
+  }
+  window.gpReferOpen = function(){
+    if(document.getElementById('gpRefCard')) return;
+    var o = document.createElement('div');
+    o.id = 'gpRefCard';
+    o.style.cssText = 'position:fixed;inset:0;background:rgba(10,14,40,.55);display:flex;align-items:center;justify-content:center;z-index:100003;padding:16px;';
+    o.innerHTML = '<div class="rf-box"></div>';
+    o.addEventListener('click', function(e){ if(e.target === o) close(); });
+    document.body.appendChild(o);
+    load();
+  };
+
+  /* Auto-claim a code that came in through gyaanpe.com/?ref=CODE, after onboarding */
+  function autoClaim(){
+    var pend = g('gp_ref_in'); if(!pend || g('gp_onboarded') !== '1') return;
+    var c = cache(); if(c && c.claimed){ try{ localStorage.removeItem('gp_ref_in'); }catch(e){} return; }
+    claim(pend).then(function(v){ try{ gpToast('🎁 Dost ka gift: ' + v.fdays + ' din Premium free!'); }catch(e){} })
+      .catch(function(e){ if(e && (e.error === 'code' || e.error === 'self' || e.error === 'already')){ try{ localStorage.removeItem('gp_ref_in'); }catch(x){} } });
+  }
+
+  window.gpRefer = { premiumOk: premiumOk, refresh: refresh, open: window.gpReferOpen };
+
+  /* On open: refresh at most every 12 h (only if Refer was ever used), confirm a friend's visit, auto-claim */
+  setTimeout(function(){
+    try{
+      if(cache()) refresh(false).catch(function(){});
+      confirmVisit();
+      autoClaim();
+    }catch(e){}
+  }, 3500);
+  /* a code from a link waits until onboarding is finished */
+  var ac = setInterval(function(){ if(!g('gp_ref_in')){ clearInterval(ac); return; } autoClaim(); }, 20000);
+  setTimeout(function(){ clearInterval(ac); }, 10*60000);
+})();
+</script>
+<script>
+/* ============ Weekly report as a picture ============
+   The Parent Dashboard report (gpwrBuild/gpwrText) already has the numbers.
+   This draws the same numbers on a card image so it looks good on WhatsApp,
+   and adds the app link (with the parent's referral code if they have one),
+   so every shared report also brings new parents. */
+(function(){
+  function refCode(){ try{ var c = JSON.parse(localStorage.getItem('gp_ref')||'null'); return c && c.code || ''; }catch(e){ return ''; } }
+  function appLine(){
+    var code = refCode();
+    return '📱 GyaanPe app (CBSE, Nursery–Class 10): https://gyaanpe.com/?src=report' + (code ? '&ref=' + code : '')
+      + (code ? '\n🎁 Code *' + code + '* se 7 din Premium free' : '');
+  }
+  try{
+    var baseText = window.gpwrText;
+    if(typeof baseText === 'function' && !baseText._gpApp){
+      var t = function(){ return baseText.apply(this, arguments) + '\n\n' + appLine(); };
+      t._gpApp = true; window.gpwrText = t;
+    }
+  }catch(e){}
+
+  function rr(x, c, y, w, h, r){ x.beginPath(); x.moveTo(c+r,y); x.arcTo(c+w,y,c+w,y+h,r); x.arcTo(c+w,y+h,c,y+h,r); x.arcTo(c,y+h,c,y,r); x.arcTo(c,y,c+w,y,r); x.closePath(); }
+  function wrap(x, text, cx, y, maxW, lh, maxLines){
+    var words = String(text).split(' '), line = '', n = 0;
+    for(var i=0;i<words.length;i++){
+      var test = line ? line + ' ' + words[i] : words[i];
+      if(x.measureText(test).width > maxW && line){ x.fillText(line, cx, y); y += lh; line = words[i]; if(++n >= maxLines-1) { line = words.slice(i).join(' '); break; } }
+      else line = test;
+    }
+    if(line){ while(x.measureText(line).width > maxW && line.length > 4) line = line.slice(0,-2); x.fillText(line, cx, y); y += lh; }
+    return y;
+  }
+  window.gpwrCanvas = function(){
+    var r = gpwrBuild(), who = gpwrRealName() || 'Mera bachcha';
+    var cls = ''; try{ var p = gpProfile() || {}; if(p.cls) cls = String(p.cls).replace('c',''); }catch(e){}
+    var W = 1080, H = 1350, cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+    var x = cv.getContext('2d'), F = 'Nunito, Arial, sans-serif';
+    x.fillStyle = '#FFF8E7'; x.fillRect(0,0,W,H);
+    var gr = x.createLinearGradient(0,0,W,0); gr.addColorStop(0,'#1A237E'); gr.addColorStop(1,'#3949AB');
+    x.fillStyle = gr; x.fillRect(0,0,W,300);
+    x.fillStyle = '#fff'; x.font = '800 64px ' + F; x.textAlign = 'left';
+    x.fillText('Gyaan', 70, 115); var gw = x.measureText('Gyaan').width; x.fillStyle = '#FFA000'; x.fillText('Pe', 70+gw, 115);
+    x.fillStyle = 'rgba(255,255,255,.9)'; x.font = '700 40px ' + F; x.fillText('Is hafte ki report 📊', 70, 190);
+    x.font = '800 46px ' + F; x.fillStyle = '#fff';
+    x.fillText(who.slice(0,18) + (cls ? '  •  Class ' + cls : ''), 70, 260);
+
+    var tiles = [
+      ['⏱️', r.mins + ' min', 'padhai'],
+      ['📅', r.days + '/7', 'din padhe'],
+      ['✅', r.acc ? r.acc + '%' : '—', 'sahi jawab'],
+      ['🔥', r.streak + ' din', 'streak']
+    ];
+    var tw = 455, th = 190;
+    tiles.forEach(function(t, i){
+      var cx = 70 + (i%2)*(tw+30), cy = 340 + Math.floor(i/2)*(th+30);
+      x.fillStyle = '#fff'; rr(x, cx, cy, tw, th, 28); x.fill();
+      x.strokeStyle = '#E8EAF6'; x.lineWidth = 4; x.stroke();
+      x.textAlign = 'left'; x.font = '60px ' + F; x.fillText(t[0], cx+30, cy+90);
+      x.fillStyle = '#1A237E'; x.font = '800 62px ' + F; x.fillText(t[1], cx+120, cy+95);
+      x.fillStyle = '#777'; x.font = '700 32px ' + F; x.fillText(t[2], cx+122, cy+148);
+    });
+
+    /* 7-day bars */
+    var by = 800, bh = 170, bx = 70, bw = W-140;
+    x.fillStyle = '#fff'; rr(x, bx, by-20, bw, bh+110, 28); x.fill();
+    var mx = 1; r.week.forEach(function(d){ if(d.mins > mx) mx = d.mins; });
+    var days = ['Ra','So','Ma','Bu','Gu','Sh','Sa'];
+    r.week.forEach(function(d, i){
+      var colW = bw/7, hgt = Math.max(6, Math.round((d.mins/mx)*(bh-30)));
+      var cx = bx + i*colW + colW*0.28, w = colW*0.44;
+      x.fillStyle = d.mins > 0 ? '#FF8F00' : '#E0E0E0'; rr(x, cx, by+bh-hgt, w, hgt, 10); x.fill();
+      x.fillStyle = '#888'; x.font = '700 28px ' + F; x.textAlign = 'center';
+      var dd = new Date(d.date + 'T12:00:00'); x.fillText(days[dd.getDay()] || '', cx + w/2, by+bh+45);
+    });
+
+    x.textAlign = 'left'; var y = 1105;
+    x.fillStyle = '#2E7D32'; x.font = '800 34px ' + F;
+    if(r.strong.length){ y = wrap(x, '💪 Mazboot: ' + r.strong.join(', '), 70, y, W-140, 46, 2); }
+    x.fillStyle = '#E65100';
+    if(r.weak.length){ y = wrap(x, '📌 Dhyan chahiye: ' + r.weak.join(', '), 70, y, W-140, 46, 2); }
+    if(!r.strong.length && !r.weak.length){ x.fillStyle = '#555'; y = wrap(x, r.mins ? 'Shabash! Aise hi roz thoda-thoda padhte raho.' : 'Roz 10–15 minute se shuruat kaafi hai.', 70, y, W-140, 46, 2); }
+
+    x.fillStyle = '#1A237E'; x.fillRect(0, H-110, W, 110);
+    x.fillStyle = '#fff'; x.font = '800 36px ' + F; x.textAlign = 'center';
+    var code = refCode();
+    x.fillText(code ? 'gyaanpe.com  •  Code ' + code + ' = 7 din Premium free' : 'gyaanpe.com  •  Play Store: GyaanPe', W/2, H-45);
+    return cv;
+  };
+
+  window.gpwrShare = function(){
+    var text = gpwrText();
+    var done = function(){ try{ gpShareToWhatsApp(text); }catch(e){ window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank'); } };
+    try{
+      var cv = gpwrCanvas();
+      if(!cv.toBlob || !navigator.canShare) return done();
+      cv.toBlob(function(blob){
+        try{
+          var file = new File([blob], 'GyaanPe-report.png', { type:'image/png' });
+          if(blob && navigator.canShare({ files:[file] })){
+            navigator.share({ files:[file], text: text }).catch(function(err){ if(!err || err.name !== 'AbortError') done(); });
+          } else done();
+        }catch(e){ done(); }
+      }, 'image/png');
+    }catch(e){ done(); }
+  };
 })();
 </script>
 </body>

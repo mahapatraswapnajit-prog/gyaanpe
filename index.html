@@ -1115,6 +1115,9 @@ transform:scale(0.96);filter:brightness(0.97);
 .gp-tools button span{font-size:24px;line-height:1;}
 .gp-tools button:active{transform:scale(.97);}
 .home-screen .goal-card,.home-screen .why-card{display:none;}
+.gp-share-bar{display:flex;width:100%;margin-top:10px;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;background:linear-gradient(135deg,#25D366,#128C7E);color:#fff;border:0;border-radius:14px;padding:13px 10px;font-family:'Nunito',sans-serif;font-weight:800;font-size:14px;box-shadow:0 4px 12px rgba(0,0,0,.12);cursor:pointer;}
+.gp-share-bar small{background:rgba(255,255,255,.22);border-radius:999px;padding:2px 8px;font-size:11px;}
+.gp-share-bar:active{transform:scale(.98);}
 @media (max-width:360px){.gp-class-grid .class-chip .cc-n{font-size:18px;}.gp-tools button{font-size:11px;}}
 </style>
 <script>
@@ -1775,6 +1778,7 @@ function gpToast(msg){
 <div class="gp-tools gp-tools-4"><button type="button" onclick="openAITutor()"><span>&#129302;</span>AI Tutor</button><button type="button" onclick="gpHomeQuiz()"><span>&#11088;</span>Aaj ka Quiz</button><button type="button" onclick="openStoriesHome()"><span>&#128214;</span>Kahaniyan</button><button type="button" onclick="gpvOpenPage()"><span>&#127916;</span>Videos</button><button type="button" onclick="openBrainGymHub()"><span>&#129504;</span>Brain Gym</button><button type="button" onclick="openWorksheetGen()"><span>&#128221;</span>Worksheet</button><button type="button" onclick="openOlympiadMode()"><span>&#127942;</span>Olympiad</button><button type="button" onclick="gpsOpen()"><span>&#127891;</span>30-Day Courses</button></div>
 <div class="gp-sec-h">&#128106; Progress, Parents &amp; Teachers</div>
 <div class="gp-tools"><button type="button" onclick="gpParent()"><span>&#128104;&#8205;&#128105;&#8205;&#128103;</span>Parent Dashboard</button><button type="button" onclick="gpTeacherOpen()"><span>&#127979;</span>Teacher Dashboard</button><button type="button" onclick="gppcOpen()"><span>&#128218;</span>Parents Corner</button><button type="button" onclick="gpOpenAnalytics()"><span>&#128202;</span>Meri Progress</button><button type="button" onclick="gpqbOpen()"><span>&#128278;</span>Save kiye sawaal</button><button type="button" onclick="gpfqOpen()"><span>&#10067;</span>Help &amp; FAQ</button></div>
+<button type="button" class="gp-share-bar" onclick="gpShareWhatsApp()">&#128242; Dosto aur parents ko GyaanPe bhejo <small>+30 coins</small></button>
 <div class="gp-sec-h">&#127881; Mera din &amp; rewards</div>
  <div id="gpvHomeMount"></div>
  <div id="gplHomeMount"></div>
@@ -15192,15 +15196,19 @@ if ('serviceWorker' in navigator) {
 <script>
 (function(){
   var PKG  = 'com.gyaanpe.kidslearning';
-  var LINK = 'https://play.google.com/store/apps/details?id=' + PKG;
+  /* referrer tag: Play Console shows these installs under utm_source = share */
+  var LINK = 'https://play.google.com/store/apps/details?id=' + PKG + '&referrer=utm_source%3Dshare%26utm_medium%3Dwhatsapp';
+  var WEB  = 'https://gyaanpe.com/?src=share';
 
   function msg(){
-    return 'Mere bachche ke liye GyaanPe use kar raha hoon - Nursery se Class 7 tak CBSE learning app.\n\n'
+    return 'Mere bachche ke liye GyaanPe use kar raha hoon - Nursery se Class 10 tak CBSE/NCERT learning app.\n\n'
+         + '\u2705 Nursery se Class 4 bilkul FREE, koi ads nahi\n'
+         + '\u2705 Class 5-10: har subject ka pehla chapter free\n'
+         + '\u2705 Class 9-10: har chapter me 30 board-pattern sawaal\n'
          + '\u2705 AI Tutor jo doubt solve karta hai\n'
-         + '\u2705 Lessons, quiz aur practice\n'
-         + '\u2705 Kahaniyan aur kitaabein\n'
-         + '\u2705 Parent dashboard aur screen time control\n\n'
-         + 'Aap bhi try kijiye:\n' + LINK;
+         + '\u2705 Parent dashboard\n\n'
+         + 'Android (Play Store):\n' + LINK + '\n\n'
+         + 'iPhone / laptop:\n' + WEB;
   }
 
   /* wa.me in a TWA opens a Custom Tab showing WhatsApp's web page, which
@@ -15220,12 +15228,25 @@ if ('serviceWorker' in navigator) {
     try{ window.open('https://wa.me/?text=' + enc, '_blank'); }catch(e){}
   };
 
+  /* +30 coins, once a day, for sharing the app */
+  function shareReward(){
+    try{
+      var t=new Date(), d=t.getFullYear()+'-'+(t.getMonth()+1)+'-'+t.getDate();
+      if(localStorage.getItem('gp_share_day')===d) return;
+      localStorage.setItem('gp_share_day', d);
+      if(typeof addCoins==='function') addCoins(30);
+      if(typeof gpToast==='function') gpToast('Shukriya! \uD83D\uDC9A +30 coins mile');
+    }catch(e){}
+  }
+
   window.gpShareWhatsApp = function(){
+    shareReward();
     try{ gpShareToWhatsApp(msg()); }
     catch(e){ gpShareOther(); }
   };
 
   window.gpShareOther = function(){
+    shareReward();
     var t = msg();
     if(navigator.share){
       navigator.share({ title:'GyaanPe', text:t }).catch(function(){});
@@ -16379,6 +16400,7 @@ body.gp-web #premiumScreen .pass-badge{display:none !important;}
   hook('gplOpenBook','book');     /* library books opened */
   hook('gpStageAction','flow');   /* learning-flow steps */
   hook('gpcUnlock','course');     /* course purchased (Play) */
+  hook('gpShareWhatsApp','share'); hook('gpShareOther','share'); hook('sendChallenge','share'); /* app shared */
 
   function record(){
     var d = load(), p = {};
@@ -16392,7 +16414,7 @@ body.gp-web #premiumScreen .pass-badge{display:none !important;}
       nw: first === day(), mins: mins,
       xp: d.xp||0, act: d.act||0, quiz: d.quiz||0, ai: d.ai||0,
       story: d.story||0, book: d.book||0, flow: d.flow||0, course: d.course||0,
-      pq: d.pq||0, pw: d.pw||0,
+      pq: d.pq||0, pw: d.pw||0, share: d.share||0,
       t: Date.now()
     };
   }

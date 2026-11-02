@@ -498,6 +498,7 @@ button,.n-opt,.option-btn,.class-chip,.n-card,.section-btn{touch-action:manipula
 .we-opt{padding:11px 14px;margin:6px 0;border-radius:12px;border:2px solid #EEE;font-size:13px;font-weight:700;cursor:pointer;background:#FAFAFA;}
 .we-opt.correct{border-color:#4CAF50;background:#E8F5E9;color:#1B5E20;}
 .we-opt.wrong{border-color:#E53935;background:#FFEBEE;color:#B71C1C;}
+.we-opt.active{border-color:#3949AB;background:#E8EAF6;color:#1A237E;}
 .we-grade-badge{font-family:'Anton',sans-serif;font-size:38px;color:#6A1B9A;text-align:center;margin:8px 0;}
 .we-cert{background:linear-gradient(135deg,#FFF8E1,#FFECB3);border:6px double #F9A825;border-radius:16px;padding:24px 16px;text-align:center;margin:12px 0;}
 .we-cert-title{font-family:'Anton',sans-serif;font-size:18px;color:#5D4037;margin-bottom:4px;}
@@ -4745,6 +4746,28 @@ a.lastAttempt[chKey]=Date.now();
 gpAnalyticsSave(a);
 }
 
+/* Olympiad answers are not tied to a chapter, so they count only in overall, daily
+   and question-type stats. Earlier builds logged them as a fake "chapter 0" of the
+   class (keys like c4_0), which showed up as a weak topic; the cleanup below removes those. */
+function gpLogOlyAttempt(isCorrect){
+var a=gpAnalyticsGet();
+a.overall.attempted++;if(isCorrect)a.overall.correct++;
+if(!a.byQType.olympiad)a.byQType.olympiad={attempted:0,correct:0};
+a.byQType.olympiad.attempted++;if(isCorrect)a.byQType.olympiad.correct++;
+var today=gpDateStr(new Date());
+if(!a.daily[today])a.daily[today]={attempted:0,correct:0};
+a.daily[today].attempted++;if(isCorrect)a.daily[today].correct++;
+gpAnalyticsSave(a);
+}
+window.addEventListener('load',function(){try{
+if(localStorage.getItem('gp_oly_clean1'))return;
+var a=gpAnalyticsGet(),cls=/^c(10|[1-9])$/,ch=/^c(10|[1-9])_\d+$/;
+Object.keys(a.bySubject||{}).forEach(function(k){if(cls.test(k))delete a.bySubject[k];});
+Object.keys(a.byChapter||{}).forEach(function(k){if(ch.test(k))delete a.byChapter[k];});
+Object.keys(a.lastAttempt||{}).forEach(function(k){if(ch.test(k))delete a.lastAttempt[k];});
+gpAnalyticsSave(a);localStorage.setItem('gp_oly_clean1','1');
+}catch(e){}});
+
 function gpLogSessionEnd(sec,idx,pct){
 var a=gpAnalyticsGet();
 var chKey=sec+'_'+idx;
@@ -6708,7 +6731,12 @@ function renderParentWorksheetStats() {
 }
 
 
-var OLYMPIAD_DAILY_LIMIT = 3;
+/* Free sets per day must match what the tutor worker allows (PREMIUM_CONFIG.freeLimits.olympiad) */
+var OLYMPIAD_DAILY_LIMIT = 1;
+function olyFreeLimit() {
+  try { if (typeof PREMIUM_CONFIG !== "undefined" && PREMIUM_CONFIG.freeLimits && PREMIUM_CONFIG.freeLimits.olympiad) return PREMIUM_CONFIG.freeLimits.olympiad; } catch (e) {}
+  return OLYMPIAD_DAILY_LIMIT;
+}
 var OLYMPIAD_SUBJECTS = [
   { key: "maths", label: "Mathematics", icon: "\u2795" },
   { key: "science", label: "Science", icon: "\uD83D\uDD2C" },
@@ -6752,7 +6780,7 @@ function renderOlympiadSelect() {
   var el = document.getElementById("olympiadSelectArea");
   if (!el) return;
   var used = olyTodayCount();
-  var html = '<div style="font-size:11px;color:#888;text-align:center;margin-bottom:8px;">' + used + "/" + OLYMPIAD_DAILY_LIMIT + " Olympiad sets generated today</div>";
+  var html = isPremium() ? '<div style="font-size:11px;color:#F57F17;text-align:center;margin-bottom:8px;font-weight:800;">\u2B50 Premium: Unlimited Olympiad Sets</div>' : '<div style="font-size:11px;color:#888;text-align:center;margin-bottom:8px;">' + used + "/" + olyFreeLimit() + " free Olympiad set" + (olyFreeLimit() > 1 ? "s" : "") + " used today</div>";
 
   html += '<div class="ws-form-row"><label class="ws-form-label">Class</label><select class="ws-select" onchange="olySetClass(this.value)">';
   Object.keys(CLASS_LABELS).forEach(function (c) {
@@ -6807,8 +6835,8 @@ function olyBuildPrompt() {
 
 function olyGenerate() {
   if (_olyState.generating) return;
-  if (!isPremium() && olyTodayCount() >= OLYMPIAD_DAILY_LIMIT) {
-    gpToast("You've generated " + OLYMPIAD_DAILY_LIMIT + " Olympiad sets today! Come back tomorrow for more.");
+  if (!isPremium() && olyTodayCount() >= olyFreeLimit()) {
+    gpToast("Today's free Olympiad set is done! Come back tomorrow, or go Premium for unlimited sets.");
     return;
   }
   if (!AI_TUTOR_WORKER_URL || AI_TUTOR_WORKER_URL.indexOf("PASTE_YOUR") === 0) {
@@ -6921,8 +6949,7 @@ function renderOlyQuestion() {
       if (oi === q.correct) cls += " correct";
       else if (oi === st.answers[st.qi]) cls += " wrong";
     } else if (st.answers[st.qi] === oi) {
-      cls += " active";
-      cls = "we-opt correct";
+      cls += " active";   /* Mock Test: show the choice, not whether it is right */
     }
     html += '<div class="' + cls + '" onclick="olyAnswer(' + oi + ')">' + esc(opt) + "</div>";
   });
@@ -6937,6 +6964,8 @@ function renderOlyQuestion() {
 }
 
 function olyAnswer(oi) {
+  /* Practice shows the right answer after the first tap, so the choice is locked */
+  if (_olyState.testMode === "practice" && _olyState.answers[_olyState.qi] !== undefined) return;
   _olyState.answers[_olyState.qi] = oi;
   renderOlyQuestion();
 }
@@ -6966,7 +6995,7 @@ function olySubmit() {
 
   st.questions.forEach(function (q, i) {
     var ans = st.answers[i];
-    gpLogAttempt(_olyState.classKey, 0, "olympiad", ans === q.correct, 0);
+    gpLogOlyAttempt(ans === q.correct);
   });
 
   var bestKey = _olyState.classKey + "_" + _olyState.subject;

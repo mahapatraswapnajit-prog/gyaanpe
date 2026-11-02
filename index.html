@@ -16408,6 +16408,15 @@ body.gp-web #premiumScreen .pass-badge{display:none !important;}
     }catch(e){}
   })();
   function isMe(){ return g('gps_me') === '1'; }
+  /* Reminder state: on = subscribed, off = blocked, ask = not asked yet / said "Abhi nahi", na = phone can't do web push */
+  function pushState(){
+    try{
+      if(!('Notification' in window) || !('PushManager' in window)) return 'na';
+      if(Notification.permission === 'denied') return 'off';
+      if(Notification.permission === 'granted') return g('gp_push') === '1' ? 'on' : 'ask';
+      return 'ask';
+    }catch(e){ return 'na'; }
+  }
   function source(){ return g('gps_src') || 'direct'; }
 
   var KEY = function(){ return 'gps_day_'+day(); };
@@ -16469,6 +16478,7 @@ body.gp-web #premiumScreen .pass-badge{display:none !important;}
       xp: d.xp||0, act: d.act||0, quiz: d.quiz||0, ai: d.ai||0,
       story: d.story||0, book: d.book||0, flow: d.flow||0, course: d.course||0,
       pq: d.pq||0, pw: d.pw||0, share: d.share||0,
+      pu: pushState(), lv: parseInt(g('gp_rate_lv')||'0',10) || 0,
       t: Date.now()
     };
   }

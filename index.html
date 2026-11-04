@@ -1444,7 +1444,7 @@ function gpsRenderGrid(){
     shown.forEach(function(c){
       var live = GPS_LIVE.indexOf(c.id) > -1;
       var s = gpcState(c.id);
-      var tag = gpcOwned(c.id, s) ? 'MERA' : (live ? c.price : 'COMING SOON');
+      var tag = gpcOwned(c.id, s) ? '\u2713 AAPKA' : (live ? c.price : 'COMING SOON');
       var click = live ? 'gpcOpen(\'' + c.id + '\')' : 'gpToast(\'' + gpcEsc(c.title).replace(/'/g,"\\'") + ' jaldi aa raha hai!\')';
       h += '<div class="gps-card' + (live ? '' : ' soon') + '" style="background:' + c.color + '" onclick="' + click + '">' +
            '<span class="gps-tag">' + tag + '</span>' +

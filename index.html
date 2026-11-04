@@ -16452,7 +16452,7 @@ body.gp-web #premiumScreen .pass-badge{display:none !important;}
     }catch(e){}
   })();
   /* quizzes finished: every level of the level game, Chapter Test, Mock/Series, Weekly, Olympiad, Aaj ka Quiz */
-  ['showLevelComplete','testSubmit','mockFinalSubmit','weeklySubmit','olySubmit','dqAnswer'].forEach(function(n){ hook(n,'quiz'); });
+  ['showLevelComplete','testSubmit','mockFinalSubmit','weeklySubmit','olySubmit','dqAnswer','nDone'].forEach(function(n){ hook(n,'quiz'); });
   /* practice questions answered (a second tap on the same question is not counted) */
   (function(){ try{ var o=window.pracSelect; if(typeof o!=='function'||o._gpsHooked) return;
     var w=function(qi){ try{ if(window._pracState && _pracState.answers && _pracState.answers[qi]===undefined) bump('pq',1); }catch(e){} return o.apply(this,arguments); };
@@ -16876,13 +16876,23 @@ function gpHomeQuiz(){try{openDailyQuiz();}catch(e){}
    Nursery/LKG/UKG just open their class (they have activities, not chapters). */
 (function(){
   var MAP = {c1:'maths',c2:'c2maths',c3:'c3maths',c4:'c4maths',c5:'c5maths',c6:'c6maths',c7:'c7maths',c8:'c8maths',c9:'c9maths',c10:'c10maths'};
+  /* Nursery/LKG/UKG: first activity of their own list (ABC Letters etc.) */
+  var TIER = {};
+  function tierInfo(k){
+    try{
+      var m = (typeof TIERS!=='undefined' && TIERS[k] && TIERS[k].mods && TIERS[k].mods[0]) || null;
+      if(m) TIER[k] = { id: m.id, n: m.n, ico: m.ico, label: ({nursery:'Nursery', lkg:'LKG', ukg:'UKG'})[k] };
+    }catch(e){}
+  }
   function g(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function s(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
   function close(){ var o=document.getElementById('gpMission'); if(o) o.remove(); }
   function card(sec, cls){
     if(document.getElementById('gpMission')) return;
-    var n = String(cls).replace('c','');
-    var ch = ''; try{ ch = (typeof CHAPTERS!=='undefined' && CHAPTERS[sec] && CHAPTERS[sec][0]) || ''; }catch(e){}
+    var tier = TIER[cls], n = String(cls).replace('c','');
+    var ch = ''; try{ ch = tier ? (tier.ico + ' ' + tier.n) : ((typeof CHAPTERS!=='undefined' && CHAPTERS[sec] && CHAPTERS[sec][0]) || ''); }catch(e){}
+    var what = tier ? (tier.label + ' ka pehla khel: <b>10 aasaan sawaal</b> khelo aur <b>+50 bonus XP</b> pao.')
+                    : ('Class ' + n + ' Maths, Chapter 1 ke <b>10 sawaal</b> khelo aur <b>+50 bonus XP</b> pao.');
     var o = document.createElement('div');
     o.id = 'gpMission';
     o.style.cssText = 'position:fixed;inset:0;background:rgba(10,14,40,.55);display:flex;align-items:center;justify-content:center;z-index:100002;padding:16px;';
@@ -16890,7 +16900,7 @@ function gpHomeQuiz(){try{openDailyQuiz();}catch(e){}
       '<div style="background:#fff;border-radius:20px;max-width:360px;width:100%;padding:22px;text-align:center;font-family:Nunito,sans-serif;box-shadow:0 12px 40px rgba(0,0,0,.25);">'
       + '<div style="font-size:46px;line-height:1;">🎯</div>'
       + '<h3 style="margin:10px 0 6px;color:#1A237E;font-size:21px;">Pehla mission!</h3>'
-      + '<p style="margin:0 0 6px;color:#444;font-size:15px;line-height:1.5;">Class ' + n + ' Maths, Chapter 1 ke <b>10 sawaal</b> khelo aur <b>+50 bonus XP</b> pao.</p>'
+      + '<p style="margin:0 0 6px;color:#444;font-size:15px;line-height:1.5;">' + what + '</p>'
       + (ch ? '<p style="margin:0 0 16px;color:#888;font-size:12.5px;font-weight:700;">' + String(ch).replace(/[<>&]/g,'') + '</p>' : '<div style="height:10px"></div>')
       + '<button id="gpMissionGo" style="width:100%;border:0;border-radius:14px;padding:13px;background:linear-gradient(135deg,#FF6F00,#FFA000);color:#fff;font-weight:800;font-size:16px;cursor:pointer;">Shuru karo 🚀</button>'
       + '<button id="gpMissionLater" style="width:100%;border:0;background:none;color:#888;font-weight:700;font-size:14px;padding:12px 0 2px;cursor:pointer;">Pehle class dekhta hoon</button>'
@@ -16899,7 +16909,12 @@ function gpHomeQuiz(){try{openDailyQuiz();}catch(e){}
     document.getElementById('gpMissionLater').onclick = close;
     document.getElementById('gpMissionGo').onclick = function(){
       close(); s('gp_mission1','open');
-      try{ gpStartLevel(sec, 0); }catch(e){}
+      /* Leave the class page first; otherwise the questions open below the subject grid, out of sight */
+      try{
+        if(tier){ nStart(sec, 0); }
+        else { if(typeof gpHideAllScreens==='function') gpHideAllScreens(); gpStartLevel(sec, 0); }
+      }catch(e){}
+      try{ window.scrollTo(0,0); }catch(e){}
     };
   }
   try{
@@ -16913,7 +16928,8 @@ function gpHomeQuiz(){try{openDailyQuiz();}catch(e){}
             var p = (typeof gpProfile==='function' && gpProfile()) || {};
             try{ if(typeof gpstOpenMyClass==='function') gpstOpenMyClass(); }catch(e){}
             var sec = MAP[p.cls];
-            if(sec && typeof allData!=='undefined' && allData[sec]){ s('gp_mission1','offered'); setTimeout(function(){ card(sec, p.cls); }, 500); }
+            if(!sec){ tierInfo(p.cls); if(TIER[p.cls]) sec = TIER[p.cls].id; }
+            if(sec && (TIER[p.cls] || (typeof allData!=='undefined' && allData[sec]))){ s('gp_mission1','offered'); setTimeout(function(){ card(sec, p.cls); }, 500); }
           }
         }catch(e){}
         return r;
@@ -16937,6 +16953,23 @@ function gpHomeQuiz(){try{openDailyQuiz();}catch(e){}
         return r;
       };
       w2._gpMission = true; window.showLevelComplete = w2;
+    }
+  }catch(e){}
+  try{
+    var on = window.nDone;
+    if(typeof on==='function' && !on._gpMission){
+      var w3 = function(){
+        var r = on.apply(this, arguments);
+        try{
+          if(g('gp_mission1') === 'open'){
+            s('gp_mission1','done');
+            if(typeof addXP==='function') addXP(50);
+            setTimeout(function(){ try{ gpToast('🎉 Pehla mission poora! +50 bonus XP'); }catch(e){} }, 900);
+          }
+        }catch(e){}
+        return r;
+      };
+      w3._gpMission = true; window.nDone = w3;
     }
   }catch(e){}
 })();
@@ -17033,7 +17066,7 @@ function gpHomeQuiz(){try{openDailyQuiz();}catch(e){}
   }
 
   /* After a finished level / test / daily quiz */
-  ['showLevelComplete','testSubmit','dqAnswer','weeklySubmit'].forEach(function(n){
+  ['showLevelComplete','testSubmit','dqAnswer','weeklySubmit','nDone'].forEach(function(n){
     try{
       var o = window[n]; if(typeof o!=='function' || o._gpPush) return;
       var w = function(){ var r = o.apply(this, arguments); maybeAsk(); return r; };
@@ -17171,6 +17204,15 @@ function gpHomeQuiz(){try{openDailyQuiz();}catch(e){}
         return r;
       };
       w._gpRate = true; window.showLevelComplete = w;
+    }
+    var on = window.nDone;
+    if(typeof on === 'function' && !on._gpRate){
+      var wn = function(){
+        var r = on.apply(this, arguments);
+        try{ s('gp_rate_lv', String(n('gp_rate_lv') + 1)); if(eligible()) setTimeout(function(){ if(eligible() && !busy()) show(); }, 2600); }catch(e){}
+        return r;
+      };
+      wn._gpRate = true; window.nDone = wn;
     }
   }catch(e){}
   window.gpRateAsk = show;

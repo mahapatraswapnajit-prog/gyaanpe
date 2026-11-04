@@ -16425,6 +16425,7 @@ body.gp-web #premiumScreen .pass-badge{display:none !important;}
   function bump(field, n){
     try{ var d = load(); d[field] = (d[field]||0) + (n||1); save(d); dirty = true; }catch(e){}
   }
+  window.gpStatBump = bump;
 
   /* Wrap existing global functions without changing what they do */
   function hook(name, field, countArg){
@@ -16477,7 +16478,7 @@ body.gp-web #premiumScreen .pass-badge{display:none !important;}
       nw: first === day(), mins: mins,
       xp: d.xp||0, act: d.act||0, quiz: d.quiz||0, ai: d.ai||0,
       story: d.story||0, book: d.book||0, flow: d.flow||0, course: d.course||0,
-      pq: d.pq||0, pw: d.pw||0, share: d.share||0,
+      pq: d.pq||0, pw: d.pw||0, share: d.share||0, wa: d.wa||0,
       pu: pushState(), lv: parseInt(g('gp_rate_lv')||'0',10) || 0,
       t: Date.now()
     };
@@ -17462,6 +17463,60 @@ function gpHomeQuiz(){try{openDailyQuiz();}catch(e){}
         return r;
       };
       w._gpRefNudge = true; window.gpParent = w;
+    }
+  }catch(e){}
+})();
+</script>
+<script>
+/* ============ Parent WhatsApp card (Parent Dashboard) ============
+   The app never asks for a phone number. Instead the parent can choose to
+   message GyaanPe on WhatsApp for a free weekly study plan. The message is
+   pre-filled with the class only (no child name); the parent can edit it
+   and decides whether to send. Shown only in the Parent Dashboard. */
+(function(){
+  var WA = '917008112031';
+  var CLS = {nursery:'Nursery', lkg:'LKG', ukg:'UKG'};
+  function clsName(){
+    var p = {}; try{ p = (typeof gpProfile==='function' && gpProfile()) || {}; }catch(e){}
+    var c = String(p.cls||'');
+    return CLS[c] || (/^c\d+$/.test(c) ? 'Class ' + c.slice(1) : '');
+  }
+  function text(){
+    var c = clsName();
+    return 'Namaste! Mera bachha ' + (c ? c : '___') + ' me hai. Mujhe GyaanPe ka free weekly study plan chahiye.';
+  }
+  window.gpParentWA = function(){
+    try{ if(typeof window.gpStatBump === 'function') window.gpStatBump('wa'); }catch(e){}
+    var t = encodeURIComponent(text());
+    var web = 'https://wa.me/' + WA + '?text=' + t;
+    if(/Android/i.test(navigator.userAgent)){
+      try{
+        window.location.href = 'intent://send?phone=' + WA + '&text=' + t +
+          '#Intent;scheme=whatsapp;package=com.whatsapp;S.browser_fallback_url=' + encodeURIComponent(web) + ';end';
+        return;
+      }catch(e){}
+    }
+    try{ window.open(web, '_blank'); }catch(e){ window.location.href = web; }
+  };
+  function addCard(){
+    var body = document.getElementById('parentBody'); if(!body) return;
+    var c = document.getElementById('gpWaCard');
+    if(!c){
+      c = document.createElement('button'); c.type = 'button'; c.id = 'gpWaCard'; c.className = 'gpcl-card';
+      c.style.borderColor = '#A5D6A7'; c.style.background = '#F1F8E9';
+      c.onclick = function(){ window.gpParentWA(); };
+      c.innerHTML = '<span class="ic" aria-hidden="true">&#128242;</span><div><b>Free weekly study plan, WhatsApp par</b>'
+        + '<span>Bachhe ki class ke hisaab se har hafte plan aur tips. Sawaal bhi pooch sakte hain.</span></div>';
+    }
+    var school = document.getElementById('gpclCard');
+    if(school && school.parentNode === body) body.insertBefore(c, school.nextSibling);
+    else body.insertBefore(c, body.firstChild);
+  }
+  try{
+    var o = window.gpParent;
+    if(typeof o === 'function' && !o._gpWa){
+      var w = function(){ var r = o.apply(this, arguments); try{ addCard(); }catch(e){} return r; };
+      w._gpWa = true; window.gpParent = w;
     }
   }catch(e){}
 })();

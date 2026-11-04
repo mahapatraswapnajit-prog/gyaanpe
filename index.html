@@ -16463,7 +16463,7 @@ body.gp-web #premiumScreen .pass-badge{display:none !important;}
   hook('gplOpenBook','book');     /* library books opened */
   hook('gpStageAction','flow');   /* learning-flow steps */
   hook('gpcUnlock','course');     /* course purchased (Play) */
-  hook('gpShareWhatsApp','share'); hook('gpShareOther','share'); hook('sendChallenge','share'); /* app shared */
+  hook('gpShareToWhatsApp','share'); hook('gpShareOther','share'); hook('sendChallenge','share'); /* app shared (every WhatsApp share, incl. Refer & Earn and the weekly report, goes through gpShareToWhatsApp) */
 
   function record(){
     var d = load(), p = {};
@@ -17408,6 +17408,62 @@ function gpHomeQuiz(){try{openDailyQuiz();}catch(e){}
   /* a code from a link waits until onboarding is finished */
   var ac = setInterval(function(){ if(!g('gp_ref_in')){ clearInterval(ac); return; } autoClaim(); }, 20000);
   setTimeout(function(){ clearInterval(ac); }, 10*60000);
+})();
+</script>
+<script>
+/* ============ Refer nudge in the Parent Dashboard ============
+   Refer & Earn is parent-facing (Play Families policy), so the reminder sits
+   where parents look: a small card when the Parent Dashboard opens.
+   Shown only after the child has finished at least one level, at most once
+   in 5 days, at most 3 times, and never once the parent has opened Refer from it. */
+(function(){
+  var DAY = 86400000;
+  function g(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
+  function s(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
+  function n(k){ return parseInt(g(k)||'0',10) || 0; }
+  function busy(){ return ['gpMission','gpRefCard','gpRateCard','gpPushCard','gpRefNudge'].some(function(id){ return !!document.getElementById(id); }); }
+  function full(){ try{ var c = JSON.parse(g('gp_ref')||'null'); return !!(c && c.max && c.friends >= c.max); }catch(e){ return false; } }
+  function eligible(){
+    if(g('gp_refnudge_used') === '1' || full()) return false;
+    if(n('gp_rate_lv') < 1) return false;
+    if(n('gp_refnudge_n') >= 3) return false;
+    if(Date.now() - n('gp_refnudge_t') < 5*DAY) return false;
+    return typeof window.gpReferOpen === 'function';
+  }
+  function close(){ var o = document.getElementById('gpRefNudge'); if(o) o.remove(); }
+  function show(){
+    if(busy()) return;
+    s('gp_refnudge_t', String(Date.now())); s('gp_refnudge_n', String(n('gp_refnudge_n') + 1));
+    var o = document.createElement('div');
+    o.id = 'gpRefNudge';
+    o.style.cssText = 'position:fixed;inset:0;background:rgba(10,14,40,.45);display:flex;align-items:flex-end;justify-content:center;z-index:100002;padding:16px;';
+    o.innerHTML =
+      '<div style="background:#fff;border-radius:20px;max-width:380px;width:100%;padding:20px;text-align:center;font-family:Nunito,sans-serif;box-shadow:0 12px 40px rgba(0,0,0,.25);">'
+      + '<div style="font-size:42px;line-height:1;">🎁</div>'
+      + '<h3 style="margin:10px 0 6px;color:#4A148C;font-size:20px;">Doston ke bachhon ko bhi padhne dijiye</h3>'
+      + '<p style="margin:0 0 16px;color:#444;font-size:14.5px;line-height:1.55;">GyaanPe kisi parent ko bhejiye. Unhe <b>7 din Premium free</b> milega, aur jab wo agle din app kholenge to aapko bhi <b>7 din Premium free</b>.</p>'
+      + '<button id="gpRefNudgeGo" style="width:100%;border:0;border-radius:14px;padding:13px;background:#25D366;color:#fff;font-weight:800;font-size:15.5px;cursor:pointer;font-family:inherit;">📲 Code dekhein aur bhejein</button>'
+      + '<button id="gpRefNudgeLater" style="width:100%;border:0;background:none;color:#888;font-weight:700;font-size:14px;padding:12px 0 2px;cursor:pointer;font-family:inherit;">Baad me</button>'
+      + '</div>';
+    o.addEventListener('click', function(e){ if(e.target === o) close(); });
+    document.body.appendChild(o);
+    document.getElementById('gpRefNudgeLater').onclick = close;
+    document.getElementById('gpRefNudgeGo').onclick = function(){ s('gp_refnudge_used','1'); close(); try{ window.gpReferOpen(); }catch(e){} };
+  }
+  try{
+    var o = window.gpParent;
+    if(typeof o === 'function' && !o._gpRefNudge){
+      var w = function(){
+        var r = o.apply(this, arguments);
+        try{ if(eligible()) setTimeout(function(){
+          var ps = document.getElementById('parentScreen');
+          if(ps && ps.style.display !== 'none' && eligible()) show();
+        }, 1500); }catch(e){}
+        return r;
+      };
+      w._gpRefNudge = true; window.gpParent = w;
+    }
+  }catch(e){}
 })();
 </script>
 <script>

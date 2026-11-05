@@ -18,9 +18,56 @@ const PKG = 'com.gyaanpe.kidslearning';
 const QUESTIONS_ON_PAGE = 5;
 
 /* key = section id used inside the app */
+const S = (key, cls, subject, slug, book, lang) => ({ key, cls, subject, slug, book, lang: lang || 'en' });
 const SUBJECTS = [
-  { key: 'c6maths', cls: 6, subject: 'Maths', slug: 'maths', book: 'Ganita Prakash' },
-  { key: 'c6evs', cls: 6, subject: 'Science', slug: 'science', book: 'Curiosity' },
+  S('maths', 1, 'Maths', 'maths', 'Joyful Mathematics'),
+  S('english', 1, 'English', 'english', 'Mridang'),
+  S('hindi', 1, 'Hindi', 'hindi', 'Sarangi', 'hi'),
+  S('c2maths', 2, 'Maths', 'maths', 'Joyful Mathematics'),
+  S('c2eng', 2, 'English', 'english', 'Mridang'),
+  S('c2hin', 2, 'Hindi', 'hindi', 'Sarangi', 'hi'),
+  S('c3maths', 3, 'Maths', 'maths', 'Maths Mela'),
+  S('c3evs', 3, 'EVS', 'evs', 'Our Wondrous World'),
+  S('c3eng', 3, 'English', 'english', 'Santoor'),
+  S('c3hin', 3, 'Hindi', 'hindi', 'Veena', 'hi'),
+  S('c4maths', 4, 'Maths', 'maths', 'Maths Mela'),
+  S('c4evs', 4, 'EVS', 'evs', 'Our Wondrous World'),
+  S('c4eng', 4, 'English', 'english', 'Santoor'),
+  S('c4hin', 4, 'Hindi', 'hindi', 'Veena', 'hi'),
+  S('c5maths', 5, 'Maths', 'maths', 'Maths Mela'),
+  S('c5evs', 5, 'EVS', 'evs', 'Our Wondrous World'),
+  S('c5eng', 5, 'English', 'english', 'Santoor'),
+  S('c5hin', 5, 'Hindi', 'hindi', 'Veena', 'hi'),
+  S('c6maths', 6, 'Maths', 'maths', 'Ganita Prakash'),
+  S('c6evs', 6, 'Science', 'science', 'Curiosity'),
+  S('c6sst', 6, 'Social Science', 'social-science', 'Exploring Society: India and Beyond'),
+  S('c6eng', 6, 'English', 'english', 'Poorvi'),
+  S('c6hin', 6, 'Hindi', 'hindi', 'Malhar', 'hi'),
+  S('c6san', 6, 'Sanskrit', 'sanskrit', 'Deepakam', 'hi'),
+  S('c7maths', 7, 'Maths', 'maths', 'Ganita Prakash'),
+  S('c7evs', 7, 'Science', 'science', 'Curiosity'),
+  S('c7sst', 7, 'Social Science', 'social-science', 'Exploring Society: India and Beyond'),
+  S('c7eng', 7, 'English', 'english', 'Poorvi'),
+  S('c7hin', 7, 'Hindi', 'hindi', 'Malhar', 'hi'),
+  S('c7san', 7, 'Sanskrit', 'sanskrit', 'Deepakam', 'hi'),
+  S('c8maths', 8, 'Maths', 'maths', 'Ganita Prakash'),
+  S('c8evs', 8, 'Science', 'science', 'Curiosity'),
+  S('c8sst', 8, 'Social Science', 'social-science', 'Exploring Society: India and Beyond'),
+  S('c8eng', 8, 'English', 'english', 'Poorvi'),
+  S('c8hin', 8, 'Hindi', 'hindi', 'Malhar', 'hi'),
+  S('c8san', 8, 'Sanskrit', 'sanskrit', 'Deepakam', 'hi'),
+  S('c9maths', 9, 'Maths', 'maths', 'Ganita Manjari'),
+  S('c9evs', 9, 'Science', 'science', 'Exploration'),
+  S('c9sst', 9, 'Social Science', 'social-science', 'Understanding Society: India and Beyond'),
+  S('c9eng', 9, 'English', 'english', 'Kaveri'),
+  S('c9hin', 9, 'Hindi', 'hindi', 'Ganga', 'hi'),
+  S('c9san', 9, 'Sanskrit', 'sanskrit', 'Sharada', 'hi'),
+  S('c10maths', 10, 'Maths', 'maths', 'Mathematics'),
+  S('c10evs', 10, 'Science', 'science', 'Science'),
+  S('c10sst', 10, 'Social Science', 'social-science', 'Social Science'),
+  S('c10eng', 10, 'English', 'english', 'First Flight & Footprints Without Feet'),
+  S('c10hin', 10, 'Hindi', 'hindi', 'Kshitij & Kritika', 'hi'),
+  S('c10san', 10, 'Sanskrit', 'sanskrit', 'Shemushi', 'hi'),
 ];
 
 /* ---------- load app data (read only) ---------- */
@@ -51,7 +98,7 @@ const write = (rel, html) => {
 };
 const classPath = (c) => `/cbse/class-${c}/`;
 const subjectPath = (s) => `${classPath(s.cls)}${s.slug}/`;
-const chapterSlug = (i, title) => `chapter-${i + 1}-${slugify(title)}`;
+const chapterSlug = (i, title) => { const t = slugify(title); return t ? `chapter-${i + 1}-${t}` : `chapter-${i + 1}`; };
 const chapterPath = (s, i) => `${subjectPath(s)}${chapterSlug(i, CHAPTERS[s.key][i])}/`;
 
 const CSS = `
@@ -112,14 +159,14 @@ footer a{color:var(--muted)}
 @media (max-width:480px){h1{font-size:26px}.top-cta{font-size:13px;padding:7px 12px}}
 `;
 
-function page({ title, description, canonical, crumbs, body, ctaContent }) {
+function page({ title, description, canonical, crumbs, body, ctaContent, lang }) {
   const ld = {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
     itemListElement: crumbs.map((c, i) => ({ '@type': 'ListItem', position: i + 1, name: c.name, item: SITE + c.href })),
   };
   return `<!doctype html>
-<html lang="en">
+<html lang="${lang || 'en'}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -224,7 +271,7 @@ ${ctaBlock(content, `Practise all ${total || 10} questions + chapter test`, `Gya
 <div class="pn">${prev}${next}</div>
 <p><a href="${subjectPath(s)}">All Class ${s.cls} ${esc(s.subject)} chapters</a></p>`;
 
-    write(chapterPath(s, i), page({ title, description, canonical: chapterPath(s, i), crumbs, body, ctaContent: content }));
+    write(chapterPath(s, i), page({ title, description, canonical: chapterPath(s, i), crumbs, body, ctaContent: content, lang: s.lang }));
     written.push(chapterPath(s, i));
   });
 

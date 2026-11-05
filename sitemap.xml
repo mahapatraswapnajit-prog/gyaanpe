@@ -6,4 +6,33 @@
   <url><loc>https://gyaanpe.com/privacy.html</loc><changefreq>yearly</changefreq><priority>0.2</priority></url>
   <url><loc>https://gyaanpe.com/terms.html</loc><changefreq>yearly</changefreq><priority>0.2</priority></url>
   <url><loc>https://gyaanpe.com/refund.html</loc><changefreq>yearly</changefreq><priority>0.2</priority></url>
+
+  <!-- seo:start -->
+  <url><loc>https://gyaanpe.com/cbse/</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://gyaanpe.com/cbse/class-6/</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://gyaanpe.com/cbse/class-6/maths/</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://gyaanpe.com/cbse/class-6/maths/chapter-1-patterns-in-mathematics/</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://gyaanpe.com/cbse/class-6/maths/chapter-10-the-other-side-of-zero/</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://gyaanpe.com/cbse/class-6/maths/chapter-2-lines-and-angles/</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://gyaanpe.com/cbse/class-6/maths/chapter-3-number-play/</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://gyaanpe.com/cbse/class-6/maths/chapter-4-data-handling-and-presentation/</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://gyaanpe.com/cbse/class-6/maths/chapter-5-prime-time/</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://gyaanpe.com/cbse/class-6/maths/chapter-6-perimeter-and-area/</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://gyaanpe.com/cbse/class-6/maths/chapter-7-fractions/</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://gyaanpe.com/cbse/class-6/maths/chapter-8-playing-with-constructions/</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://gyaanpe.com/cbse/class-6/maths/chapter-9-symmetry/</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://gyaanpe.com/cbse/class-6/science/</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://gyaanpe.com/cbse/class-6/science/chapter-1-the-wonderful-world-of-science/</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://gyaanpe.com/cbse/class-6/science/chapter-10-living-creatures-exploring-their-characteristics/</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://gyaanpe.com/cbse/class-6/science/chapter-11-nature-s-treasures/</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://gyaanpe.com/cbse/class-6/science/chapter-12-beyond-earth/</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://gyaanpe.com/cbse/class-6/science/chapter-2-diversity-in-the-living-world/</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://gyaanpe.com/cbse/class-6/science/chapter-3-mindful-eating-a-path-to-a-healthy-body/</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://gyaanpe.com/cbse/class-6/science/chapter-4-exploring-magnets/</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://gyaanpe.com/cbse/class-6/science/chapter-5-measurement-of-length-and-motion/</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://gyaanpe.com/cbse/class-6/science/chapter-6-materials-around-us/</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://gyaanpe.com/cbse/class-6/science/chapter-7-temperature-and-its-measurement/</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://gyaanpe.com/cbse/class-6/science/chapter-8-a-journey-through-states-of-water/</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://gyaanpe.com/cbse/class-6/science/chapter-9-methods-of-separation-in-everyday-life/</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <!-- seo:end -->
 </urlset>

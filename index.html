@@ -17522,6 +17522,47 @@ function gpHomeQuiz(){try{openDailyQuiz();}catch(e){}
 })();
 </script>
 <script>
+/* ============ Rate-us card in the Parent Dashboard ============
+   Parents, not children, write Play reviews, so the reminder sits in the
+   Parent Dashboard. Only inside the Play app, only after the child has
+   finished 2 levels, and gone once the parent has chosen "Rating dein".
+   It opens the same neutral card as the in-app prompt (rate / suggestion),
+   with no reward attached, as Google Play requires. */
+(function(){
+  function g(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
+  function inPlayApp(){
+    try{ return g('gp_twa') === '1' || String(document.referrer||'').indexOf('android-app://') === 0; }catch(e){ return false; }
+  }
+  function eligible(){
+    return inPlayApp() && g('gp_rate_done') !== '1'
+      && (parseInt(g('gp_rate_lv')||'0',10) || 0) >= 2
+      && typeof window.gpRateAsk === 'function';
+  }
+  function addCard(){
+    var body = document.getElementById('parentBody'); if(!body) return;
+    var c = document.getElementById('gpRateDash');
+    if(!eligible()){ if(c) c.remove(); return; }
+    if(!c){
+      c = document.createElement('button'); c.type = 'button'; c.id = 'gpRateDash'; c.className = 'gpcl-card';
+      c.style.borderColor = '#FFE082'; c.style.background = '#FFFDE7';
+      c.onclick = function(){ try{ window.gpRateAsk(); }catch(e){} };
+      c.innerHTML = '<span class="ic" aria-hidden="true">&#11088;</span><div><b>GyaanPe ko Play Store par rating dein</b>'
+        + '<span>Aapki rating se doosre parents ko sahi app chunne me madad milti hai. Sirf 10 second.</span></div>';
+    }
+    var after = document.getElementById('gpWaCard') || document.getElementById('gpclCard');
+    if(after && after.parentNode === body) body.insertBefore(c, after.nextSibling);
+    else body.insertBefore(c, body.firstChild);
+  }
+  try{
+    var o = window.gpParent;
+    if(typeof o === 'function' && !o._gpRateDash){
+      var w = function(){ var r = o.apply(this, arguments); try{ addCard(); }catch(e){} return r; };
+      w._gpRateDash = true; window.gpParent = w;
+    }
+  }catch(e){}
+})();
+</script>
+<script>
 /* ============ Weekly report as a picture ============
    The Parent Dashboard report (gpwrBuild/gpwrText) already has the numbers.
    This draws the same numbers on a card image so it looks good on WhatsApp,

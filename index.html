@@ -7796,6 +7796,7 @@ function gpUpgradePopup(reason) {
   });
   html += "</div>";
   html += '<button class="gp-btn" onclick="gpCloseModal(\'gpUpgradeModal\');gpOpenPremium();">Start Free Trial</button>';
+  html += '<button class="gp-btn" style="background:#25D366;margin-top:8px;" onclick="gpParentAsk()">💬 Mummy-Papa ko bhejo</button>';
   html += '<button class="gp-btn" style="background:#EEE;color:#333;margin-top:8px;" onclick="gpCloseModal(\'gpUpgradeModal\');gpOpenPremium();">View Plans</button>';
   html += '<button class="gp-btn" style="background:transparent;color:#999;box-shadow:none;margin-top:2px;" onclick="gpCloseModal(\'gpUpgradeModal\')">Maybe Later</button>';
   html += "</div>";
@@ -7804,6 +7805,37 @@ function gpUpgradePopup(reason) {
     modal.innerHTML = html;
     modal.classList.add("show");
   }
+}
+
+/* Premium popup -> the child sends a WhatsApp note to a parent (the one who pays).
+   The link opens GyaanPe straight on the Premium screen (?go=premium). */
+function gpParentAsk() {
+  try { if (typeof window.gpStatBump === 'function') window.gpStatBump('prs'); } catch (e) {}
+  var p = {}; try { p = gpProfile() || {}; } catch (e) {}
+  var nm = (p.name && p.name !== 'Champ') ? String(p.name).slice(0, 30) : '';
+  var qz = 0;
+  try {
+    var t = new Date(), pd = function (n) { return (n < 10 ? '0' : '') + n; };
+    var d = JSON.parse(localStorage.getItem('gps_day_' + t.getFullYear() + '-' + pd(t.getMonth() + 1) + '-' + pd(t.getDate())) || '{}');
+    qz = parseInt(d.quiz, 10) || 0;
+  } catch (e) {}
+  var text = 'Namaste Mummy/Papa! 🙏' + (nm ? ' Main ' + nm + ' hoon.' : '') + '\n'
+    + (qz > 0 ? 'Aaj maine GyaanPe pe ' + qz + ' quiz poore kiye 🎉\n' : '')
+    + 'Mujhe aage ke chapter padhne hain, uske liye GyaanPe Premium chahiye.\n\n'
+    + '✅ Play Store app me pehle 7 din FREE, pasand na aaye to cancel\n'
+    + '✅ Saal bhar ka sirf ₹1,499, roz ₹4 se bhi kam\n'
+    + '✅ Saare chapter, unlimited AI Tutor, worksheets\n\n'
+    + 'Please app me Premium shuru kar do 👇\n'
+    + 'https://gyaanpe.com/?go=premium&src=parent';
+  var enc = encodeURIComponent(text);
+  if (/Android/i.test(navigator.userAgent)) {
+    var fb = encodeURIComponent('https://wa.me/?text=' + enc);
+    try {
+      window.location.href = 'intent://send?text=' + enc + '#Intent;scheme=whatsapp;package=com.whatsapp;S.browser_fallback_url=' + fb + ';end';
+      return;
+    } catch (e) {}
+  }
+  try { window.open('https://wa.me/?text=' + enc, '_blank'); } catch (e) {}
 }
 
 function gpRequirePremium(reason) {
@@ -13168,6 +13200,7 @@ if ('serviceWorker' in navigator) {
       var purchaseToken = response.details.purchaseToken;
       await response.complete('success');                // acknowledges the purchase
       await onPurchased(planKey, sku, purchaseToken, false);
+      try { if (typeof window.gpStatBump === 'function') { window.gpStatBump('bok'); if (window.gpStats) window.gpStats.flush(true); } } catch (e) {}
       return true;
     } catch (e) {
       var msg = String(e && e.message || e);
@@ -16463,6 +16496,14 @@ body.gp-web #premiumScreen .pass-badge{display:none !important;}
     w._gpsHooked=true; window.pracSelect=w; }catch(e){} })();
   hook('gpUpgradePopup','pw');    /* times the Premium popup was shown */
   hook('tutorSend','ai');         /* AI tutor questions */
+  /* Other AI calls to the tutor worker were not counted before 11 Nov 2026:
+     "Ye jawab kyun sahi hai?", written-answer check, AI worksheet, AI Olympiad */
+  ['gpExplainAsk','wrCheck','wsGenerate','olyGenerate'].forEach(function(n){ hook(n,'ai'); });
+  /* Premium funnel: popup (pw) -> plans screen (pso) -> buy/trial tapped (bt) -> bought (bok, in buy()) */
+  hook('gpOpenPremium','pso');
+  (function(){ try{ var o=window.gpBuy; if(typeof o!=='function'||o._gpsHooked) return;
+    var w=function(p){ try{ if(p!=='restore') bump('bt',1); }catch(e){} return o.apply(this,arguments); };
+    w._gpsHooked=true; window.gpBuy=w; }catch(e){} })();
   hook('stOpenStory','story');    /* stories opened */
   hook('gplOpenBook','book');     /* library books opened */
   hook('gpStageAction','flow');   /* learning-flow steps */
@@ -16482,6 +16523,7 @@ body.gp-web #premiumScreen .pass-badge{display:none !important;}
       xp: d.xp||0, act: d.act||0, quiz: d.quiz||0, ai: d.ai||0,
       story: d.story||0, book: d.book||0, flow: d.flow||0, course: d.course||0,
       pq: d.pq||0, pw: d.pw||0, share: d.share||0, wa: d.wa||0,
+      prs: d.prs||0, pdl: d.pdl||0, pso: d.pso||0, bt: d.bt||0, bok: d.bok||0,
       pu: pushState(), lv: parseInt(g('gp_rate_lv')||'0',10) || 0,
       t: Date.now()
     };
@@ -16507,6 +16549,19 @@ body.gp-web #premiumScreen .pass-badge{display:none !important;}
     if(document.visibilityState === 'hidden') flush(true); /* app closed / switched */
   });
   window.gpStats = { flush: flush, record: record, isMe: isMe };
+
+  /* Parent opened the link the child sent (gyaanpe.com/?go=premium): show the
+     Premium screen, but only on a device that already has a child profile, so
+     a first-time visitor still gets the normal onboarding. */
+  (function(){
+    try{
+      var q = new URLSearchParams(location.search);
+      if(q.get('go') !== 'premium') return;
+      bump('pdl',1);
+      if(!g('gp_profile')) return;
+      setTimeout(function(){ try{ if(typeof gpOpenPremium==='function') gpOpenPremium(); }catch(e){} }, 1200);
+    }catch(e){}
+  })();
 })();
 </script>
 <!-- ============ CLASS JOIN (links a child to a teacher's class dashboard; parent consent required) ============ -->

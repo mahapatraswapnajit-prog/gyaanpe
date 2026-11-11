@@ -2172,6 +2172,7 @@ function gpToast(msg){
 <div style="text-align:center;font-size:11px;color:#aaa;margin-top:14px;">Nayi NCERT books (2026-27) ke hisaab se &#127881;</div>
 </div>
 <div class="jscreen" id="class10Home">
+<div id="gpbpSlot"></div>
 <div class="we-exam-banner" onclick="openWeeklyExam('c10')"><div class="cwb-title">📝 Weekly Exam</div><div class="cwb-sub">Mixed questions from all chapters &bull; Certificate at 80%+</div></div>
 <div class="we-exam-banner mk-banner" onclick="openMockTest('c10')"><div class="cwb-title">🎯 Board Mock Test &amp; Likhit Abhyas &bull; NEW</div><div class="cwb-sub">Timer wala test, Test Series P1&ndash;P10 &bull; likhe jawab Arjun Sir check karenge</div></div>
 <div class="j-head"><button class="home-btn-back" onclick="goHome()">&#8592; HOME</button><span class="j-title">&#127891; Class 10 &bull; Board</span><span style="width:60px;"></span></div>
@@ -7739,6 +7740,8 @@ var PREMIUM_CONFIG = {
 try { localStorage.removeItem("gp_dev_premium"); } catch(e){}
 
 function isPremium() {
+  /* Board Exam Pass 2027 (one-time Play product, verified like a course, valid till 31 Mar 2027) */
+  try { if (window.gpBoardPass && gpBoardPass.ok()) return true; } catch(e){}
   /* Access-code Premium (web / school codes), checked by gyaanpe-pay */
   try { if (window.gpCodes && gpCodes.premiumOk()) return true; } catch(e){}
   /* Refer & Earn days (gyaanpe-refer Worker) */
@@ -7795,6 +7798,12 @@ function gpUpgradePopup(reason) {
     html += "\u2022 " + esc(f) + "<br>";
   });
   html += "</div>";
+  try {
+    var _bpCls = (gpProfile() || {}).cls, _bpSec = (typeof currentSection === 'string') ? currentSection : '';
+    if (window.gpBoardPass && gpBoardPass.open() && (_bpCls === 'c10' || _bpSec.indexOf('c10') === 0)) {
+      html += '<button class="gp-btn" style="background:linear-gradient(135deg,#B71C1C,#FF6F00);margin-bottom:8px;" onclick="gpCloseModal(\'gpUpgradeModal\');gpBoardPass.buy();">🎯 Board Exam Pass · ₹299<br><span style="font-size:11.5px;font-weight:600;">Ek baar payment · 31 March 2027 tak sab kuch</span></button>';
+    }
+  } catch (e) {}
   html += '<button class="gp-btn" onclick="gpCloseModal(\'gpUpgradeModal\');gpOpenPremium();">Start Free Trial</button>';
   html += '<button class="gp-btn" style="background:#25D366;margin-top:8px;" onclick="gpParentAsk()">💬 Mummy-Papa ko bhejo</button>';
   html += '<button class="gp-btn" style="background:#EEE;color:#333;margin-top:8px;" onclick="gpCloseModal(\'gpUpgradeModal\');gpOpenPremium();">View Plans</button>';
@@ -13255,7 +13264,7 @@ if ('serviceWorker' in navigator) {
     refreshUI();
   }
 
-  function gpCodePrem(){ try{ return !!((window.gpCodes && gpCodes.premiumOk()) || (window.gpRefer && gpRefer.premiumOk())); }catch(e){ return false; } }
+  function gpCodePrem(){ try{ return !!((window.gpCodes && gpCodes.premiumOk()) || (window.gpRefer && gpRefer.premiumOk()) || (window.gpBoardPass && gpBoardPass.ok())); }catch(e){ return false; } }
   function refreshUI() {
     var prem = state.premium || gpCodePrem();
     document.documentElement.classList.toggle('gp-premium', prem);
@@ -16382,6 +16391,117 @@ if ('serviceWorker' in navigator) {
 </script>
 <!-- ============ END ACCESS CODE UNLOCK ============ -->
 
+<!-- ============ BOARD EXAM PASS 2027 (Class 10 · one-time ₹299 Play product · Premium till 31 Mar 2027) ============
+     Stored like a course (gpc_boardpass27 with token + productId) so the existing
+     gyaanpe-verify check (refreshAllCourses -> ask('product', ...)) verifies it. -->
+<script>
+(function(){
+  'use strict';
+  var ID = 'boardpass27', SKU = 'board_pass_2027';
+  var UNTIL = Date.parse('2027-03-31T23:59:59+05:30');
+  var BILLING = 'https://play.google.com/billing';
+
+  function rec(){ try{ return JSON.parse(localStorage.getItem('gpc_' + ID) || 'null'); }catch(e){ return null; } }
+  function ok(){
+    if (Date.now() > UNTIL) return false;
+    var s = rec(); if (!s || !s.owned) return false;
+    try{ if (window.gpVerify && typeof gpVerify.courseOk === 'function') return gpVerify.courseOk(ID, s); }catch(e){}
+    return false;
+  }
+  /* Still on sale: before the end date, and the child is not already Premium some other way */
+  function open(){
+    if (Date.now() > UNTIL) return false;
+    try{ if (typeof isPremium === 'function' && isPremium()) return false; }catch(e){}
+    return true;
+  }
+  function bump(f){ try{ if (typeof window.gpStatBump === 'function') window.gpStatBump(f); }catch(e){} }
+  function toast(t){ try{ if (typeof gpToast === 'function') gpToast(t); }catch(e){} }
+
+  function save(token){
+    var s = rec() || {};
+    s.owned = true; s.token = token || s.token || null; s.productId = SKU;
+    s.purchaseDate = s.purchaseDate || new Date().toISOString(); s.ts = Date.now();
+    s.completedDays = s.completedDays || []; s.scores = s.scores || {};
+    try{ localStorage.setItem('gpc_' + ID, JSON.stringify(s)); }catch(e){}
+    try{ if (window.gpVerify) gpVerify.refreshCourse(ID, true); }catch(e){}
+    afterChange();
+  }
+  async function ack(token){
+    if (!token || !window.getDigitalGoodsService) return;
+    try{ var svc = await window.getDigitalGoodsService(BILLING); if (svc.acknowledge) await svc.acknowledge(token, 'onetime'); }catch(e){}
+  }
+  function afterChange(){
+    try{ if (typeof GyaanPePremium !== 'undefined' && GyaanPePremium.refreshUI) GyaanPePremium.refreshUI(); }catch(e){}
+    try{ if (typeof gpApplyClassLocks === 'function') gpApplyClassLocks(); }catch(e){}
+    mount();
+  }
+
+  async function buy(){
+    bump('bpt');
+    if (!window.PaymentRequest || !window.getDigitalGoodsService){
+      toast('Board Exam Pass GyaanPe ki Play Store app me milta hai.');
+      if (/Android/i.test(navigator.userAgent)) setTimeout(function(){ location.href = '/app'; }, 1200);
+      return false;
+    }
+    try{
+      var req = new PaymentRequest(
+        [{ supportedMethods: BILLING, data: { sku: SKU } }],
+        { total: { label: 'Board Exam Pass 2027', amount: { currency: 'INR', value: '0' } } }
+      );
+      var res = await req.show();
+      var token = res.details && res.details.purchaseToken;
+      await res.complete('success');
+      save(token); ack(token);
+      bump('bok'); try{ if (window.gpStats) gpStats.flush(true); }catch(e){}
+      toast('🎉 Board Exam Pass active! 31 March 2027 tak sab kuch khula.');
+      return true;
+    }catch(e){
+      if (!/cancel/i.test(String(e && e.message || e))) toast('Purchase nahi hua. Dobara try karo.');
+      return false;
+    }
+  }
+
+  /* Reinstall / new phone on the same Google account */
+  async function restore(silent){
+    if (!window.getDigitalGoodsService) return false;
+    try{
+      var svc = await window.getDigitalGoodsService(BILLING);
+      var list = await svc.listPurchases();
+      var f = (list || []).filter(function(p){ return p.itemId === SKU; })[0];
+      if (f){ var s = rec(); if (!s || !s.owned || s.token !== f.purchaseToken) save(f.purchaseToken); if (!silent) toast('Board Pass restore ho gaya ✅'); return true; }
+      if (!silent) toast('Is account par Board Pass nahi mila.');
+      return false;
+    }catch(e){ return false; }
+  }
+
+  /* Banner on the Class 10 screen, only while it can be bought */
+  function mount(){
+    var slot = document.getElementById('gpbpSlot'); if (!slot) return;
+    if (!open()){ slot.innerHTML = ''; return; }
+    slot.innerHTML = '<div class="we-exam-banner" style="background:linear-gradient(135deg,#B71C1C,#FF6F00);box-shadow:0 4px 12px rgba(183,28,28,.3);" onclick="gpBoardPass.buy()">'
+      + '<div class="cwb-title">🎯 Board Exam Pass 2027 · ₹299</div>'
+      + '<div class="cwb-sub">Board Mock Test, Test Series P1–P10, Likhit Abhyas, saare chapter • ek baar payment • 31 March 2027 tak</div></div>';
+  }
+
+  window.gpBoardPass = { ok: ok, open: open, buy: buy, restore: restore, until: UNTIL, sku: SKU };
+
+  function kick(){
+    mount();
+    /* refresh the banner each time the Class 10 screen opens */
+    try{
+      var o = window.gpOpenSenior;
+      if (typeof o === 'function' && !o._gpbp){
+        var w = function(n){ var r = o.apply(this, arguments); try{ if (String(n) === '10') mount(); }catch(e){} return r; };
+        w._gpbp = true; window.gpOpenSenior = w;
+      }
+    }catch(e){}
+    var s = rec();
+    if (!(s && s.owned)) setTimeout(function(){ restore(true); }, 2500);
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', kick); else kick();
+  document.addEventListener('visibilitychange', function(){ if (!document.hidden) mount(); });
+})();
+</script>
 <!-- ============ WEB BUY SWITCH (website -> Cashfree buy page, Play app -> Play Billing) ============ -->
 <style>
 body.gp-web #premiumScreen [onclick="gpBuy('trial')"],
@@ -16523,7 +16643,7 @@ body.gp-web #premiumScreen .pass-badge{display:none !important;}
       xp: d.xp||0, act: d.act||0, quiz: d.quiz||0, ai: d.ai||0,
       story: d.story||0, book: d.book||0, flow: d.flow||0, course: d.course||0,
       pq: d.pq||0, pw: d.pw||0, share: d.share||0, wa: d.wa||0,
-      prs: d.prs||0, pdl: d.pdl||0, pso: d.pso||0, bt: d.bt||0, bok: d.bok||0,
+      prs: d.prs||0, pdl: d.pdl||0, pso: d.pso||0, bt: d.bt||0, bok: d.bok||0, bpt: d.bpt||0,
       pu: pushState(), lv: parseInt(g('gp_rate_lv')||'0',10) || 0,
       t: Date.now()
     };

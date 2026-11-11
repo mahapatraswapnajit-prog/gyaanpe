@@ -51,7 +51,7 @@
     <thead><tr><th>Date</th><th>Active</th><th>New</th><th>Naye: agle din wapas</th><th>Naye: 1+ level</th><th>Wapas</th><th>Play</th><th>Web</th><th>Premium</th><th>Avg min</th><th>Quiz</th><th>Practice</th><th>AI</th><th>Stories</th><th>Books</th><th>Popup</th><th>Share</th><th>WA</th><th>XP</th><th>Reminder</th></tr></thead>
     <tbody id="rows"></tbody>
   </table></div>
-  <p class="muted">Active = us din app khola. Wapas = Active − New (pehle aa chuke log). Avg min = active users ka average padhai time (sirf jab app screen pe khula ho). Quiz = poora kiya level, Chapter Test, Mock, Weekly, Olympiad ya Aaj ka Quiz. Practice = practice me jawab diye sawaal. Popup = kitne logon ko Premium popup dikha. Share = WhatsApp/doosre tarike se app ya challenge bheja. Quiz/Practice/Popup ki nayi ginti 26 Oct 2026 ke update se shuru hai. WhatsApp dabaya = Parent Dashboard me "Free weekly study plan" WhatsApp button kitni baar dabaya (5 Nov 2026 se). Reminder ON = jinke phone par shaam 6 baje ka reminder chalu hai; blocked = notification band kiya; not possible = phone/browser support nahi karta. Naye: pehle din 1+ level = naye users me se kitno ne pehle hi din kam se kam ek level poora kiya. Ye dono ginti 2 Nov 2026 ke update se shuru hai. Premium funnel (12 Nov 2026 se): Popup dekha → Plans screen khola → Trial/Buy dabaya (Play sheet ya buy page khula) → Kharida (Play me payment poora). Parent ko bheja = popup me "Mummy-Papa ko bhejo" dabaya; Parent ne link khola = us WhatsApp link se app khula. AI use = AI Tutor sawaal + "Ye jawab kyun sahi hai?" + likhe jawab ka check + AI worksheet + AI Olympiad (12 Nov 2026 se sab gine jaate hain; pehle sirf AI Tutor). Kal ke naye → aaj wapas = kal jo naye aaye unme se kitne aaj phir aaye. Table me "Naye: agle din wapas" aur "Naye: 1+ level" har din ke naye users ke liye alag hai (aaj ki row me agle din abhi aaya nahi, isliye "-").</p>
+  <p class="muted">Active = us din app khola. Wapas = Active − New (pehle aa chuke log). Avg min = active users ka average padhai time (sirf jab app screen pe khula ho). Quiz = poora kiya level, Chapter Test, Mock, Weekly, Olympiad ya Aaj ka Quiz. Practice = practice me jawab diye sawaal. Popup = kitne logon ko Premium popup dikha. Share = WhatsApp/doosre tarike se app ya challenge bheja. Quiz/Practice/Popup ki nayi ginti 26 Oct 2026 ke update se shuru hai. WhatsApp dabaya = Parent Dashboard me "Free weekly study plan" WhatsApp button kitni baar dabaya (5 Nov 2026 se). Reminder ON = jinke phone par shaam 6 baje ka reminder chalu hai; blocked = notification band kiya; not possible = phone/browser support nahi karta. Naye: pehle din 1+ level = naye users me se kitno ne pehle hi din kam se kam ek level poora kiya. Ye dono ginti 2 Nov 2026 ke update se shuru hai. Premium funnel (12 Nov 2026 se): Popup dekha → Plans screen khola → Trial/Buy dabaya (Play sheet ya buy page khula) → Kharida (Play me payment poora). Board Pass dabaya = Class 10 ka ₹299 Board Exam Pass button dabaya (13 Nov 2026 se). Kharida = Premium ya Board Pass ka payment poora. Parent ko bheja = popup me "Mummy-Papa ko bhejo" dabaya; Parent ne link khola = us WhatsApp link se app khula. AI use = AI Tutor sawaal + "Ye jawab kyun sahi hai?" + likhe jawab ka check + AI worksheet + AI Olympiad (12 Nov 2026 se sab gine jaate hain; pehle sirf AI Tutor). Kal ke naye → aaj wapas = kal jo naye aaye unme se kitne aaj phir aaye. Table me "Naye: agle din wapas" aur "Naye: 1+ level" har din ke naye users ke liye alag hai (aaj ki row me agle din abhi aaya nahi, isliye "-").</p>
 </main>
 <script>
 (function(){
@@ -75,7 +75,7 @@
       avgMin: activeMin.length ? Math.round(sum('mins')/activeMin.length) : 0,
       quiz: sum('quiz'), ai: sum('ai'), story: sum('story'), book: sum('book'), xp: sum('xp'),
       pq: sum('pq'), pw: sum('pw'), share: sum('share'), wa: sum('wa'),
-      prs: sum('prs'), pdl: sum('pdl'), pso: sum('pso'), bt: sum('bt'), bok: sum('bok'), pwUsers: users.filter(function(u){ return (+u.pw||0)>0; }).length,
+      prs: sum('prs'), pdl: sum('pdl'), pso: sum('pso'), bt: sum('bt'), bok: sum('bok'), bpt: sum('bpt'), pwUsers: users.filter(function(u){ return (+u.pw||0)>0; }).length,
       pushOn: users.filter(function(u){ return u.pu==='on'; }).length
     };
   }
@@ -98,15 +98,15 @@
       var kal = cohort(1);
       el('today').innerHTML = card(t.active,'Active users') + card(t.nw,'New users') + card(t.play+' / '+t.web,'Play / Web')
         + card(t.prem,'Premium users') + card(t.active-t.nw,'Wapas aaye') + card(t.avgMin,'Avg minutes') + card(t.quiz,'Quizzes') + card(t.pq,'Practice sawaal') + card(t.ai,'AI use') + card(t.pwUsers,'Premium popup dekha') + card(t.share,'App share') + card(t.wa,'WhatsApp dabaya') + card(t.pushOn,'Reminder ON')
-        + card(t.pso,'Plans screen khola') + card(t.prs,'Parent ko bheja') + card(t.bt,'Trial/Buy dabaya') + card(t.bok,'Kharida')
+        + card(t.pso,'Plans screen khola') + card(t.prs,'Parent ko bheja') + card(t.bt,'Trial/Buy dabaya') + card(t.bpt,'Board Pass dabaya') + card(t.bok,'Kharida')
         + card(kal.n ? kal.b+' / '+kal.n+' <small style="font-size:.55em">('+kal.d1+')</small>' : '-', 'Kal ke naye → aaj wapas');
 
-      var uniq = {}, nw = 0, srcs = {}, quiz = 0, ai = 0, mins = 0, minUsers = 0, pq = 0, seenDays = {}, pwU = {}, shares = 0, was = 0, fun = {pso:0,prs:0,pdl:0,bt:0,bok:0};
+      var uniq = {}, nw = 0, srcs = {}, quiz = 0, ai = 0, mins = 0, minUsers = 0, pq = 0, seenDays = {}, pwU = {}, shares = 0, was = 0, fun = {pso:0,prs:0,pdl:0,bt:0,bpt:0,bok:0};
       list.slice(0,7).forEach(function(d){
         var rec = byDay[d]; Object.keys(rec).forEach(function(u){
           var r = rec[u]||{};
           if(!uniq[u]){ uniq[u] = r; var sname = r.src||'direct'; srcs[sname] = (srcs[sname]||0)+1; }
-          if(r.nw) nw++; ['pso','prs','pdl','bt','bok'].forEach(function(k){ fun[k] += +r[k]||0; }); quiz += +r.quiz||0; ai += +r.ai||0; pq += +r.pq||0; shares += +r.share||0; was += +r.wa||0;
+          if(r.nw) nw++; ['pso','prs','pdl','bt','bpt','bok'].forEach(function(k){ fun[k] += +r[k]||0; }); quiz += +r.quiz||0; ai += +r.ai||0; pq += +r.pq||0; shares += +r.share||0; was += +r.wa||0;
           seenDays[u] = (seenDays[u]||0) + 1; if((+r.pw||0)>0) pwU[u] = 1;
           if((r.mins||0)>0){ mins += +r.mins; minUsers++; }
         });
@@ -130,7 +130,7 @@
         + card(Object.keys(pwU).length,'Premium popup dekha') + card(shares,'App share') + card(was,'WhatsApp dabaya')
         + card(fdN ? Math.round(100*fdL/fdN)+'%' : '-', 'Naye: pehle din 1+ level') + card(pu.on,'Reminder ON')
         + card(pu.off,'Reminder blocked') + card(pu.na,'Reminder not possible')
-        + card(fun.pso,'Plans screen khola') + card(fun.prs,'Parent ko bheja') + card(fun.pdl,'Parent ne link khola') + card(fun.bt,'Trial/Buy dabaya') + card(fun.bok,'Kharida');
+        + card(fun.pso,'Plans screen khola') + card(fun.prs,'Parent ko bheja') + card(fun.pdl,'Parent ne link khola') + card(fun.bt,'Trial/Buy dabaya') + card(fun.bpt,'Board Pass dabaya') + card(fun.bok,'Kharida');
 
       var sk = Object.keys(srcs).sort(function(a,b){ return srcs[b]-srcs[a]; });
       el('sources').innerHTML = sk.length ? sk.map(function(k){ return '<span class="pill">'+k.replace(/[<>&]/g,'')+' <b>'+srcs[k]+'</b></span>'; }).join('') : '<span class="muted">Abhi data nahi hai.</span>';

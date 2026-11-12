@@ -12997,22 +12997,47 @@ function gpBackToClass(){
   if(typeof fn==='function'){ fn(); return; }
   goHome();
 }
+var GP_BACK_SEL='.home-btn-back,.st-back,.gpfq-back,.gpl-page-back,.gplr-back,.gppc-back,.gpqb-back,.gpv-page-back';
+function gpVisible(x){ return !!(x && x.offsetParent!==null); }
+/* returns true when it handled the back press; false when the child is already on Home */
 function gpPhoneBack(){
   try{
     /* 1. an open popup closes first */
     var md=[].slice.call(document.querySelectorAll('.gp-modal.show,[id$="Modal"].show'));
-    if(md.length){ md.forEach(function(x){ x.classList.remove('show'); }); return; }
-    /* 2. inside a quiz: back to the chapter list of that subject */
+    if(md.length){ md.forEach(function(x){ x.classList.remove('show'); }); return true; }
+    /* 2. full-screen overlays (courses, course store): their own Back */
+    var sc=document.getElementById('screenCourse');
+    if(sc && sc.classList.contains('gp-show') && typeof gpcBack==='function'){ gpcBack(); return true; }
+    var ss=document.getElementById('screenStore');
+    if(ss && ss.classList.contains('gp-show') && typeof gpsClose==='function'){ gpsClose(); return true; }
+    var setup=document.getElementById('gpSetup');
+    if(setup && setup.classList.contains('gp-show')) return true;   /* first-time setup: stay */
+    /* 3. inside a quiz: back to the chapter list of that subject */
     var qa=document.getElementById('quizArea');
     var inQuiz=qa&&qa.classList.contains('show') || ['levelComplete','resultScreen','gameoverScreen'].some(function(id){ var e=document.getElementById(id); return e&&e.classList.contains('show'); });
-    if(inQuiz && typeof currentSection==='string' && typeof allData!=='undefined' && allData[currentSection] && /^c\d/.test(currentSection)){ gpJourney(currentSection); return; }
-    /* 3. otherwise press the BACK button of the screen on view */
-    var b=[].slice.call(document.querySelectorAll('.home-btn-back')).filter(function(x){ return x.offsetParent!==null; })[0];
-    if(b){ b.click(); return; }
-  }catch(e){}
-  goHome();
+    if(inQuiz && typeof currentSection==='string' && typeof allData!=='undefined' && allData[currentSection] && /^c\d/.test(currentSection)){ gpJourney(currentSection); return true; }
+    if(inQuiz){ goHome(); return true; }
+    /* 4. otherwise press the Back button of the screen on view (the top-most one, e.g. the story reader) */
+    var bs=[].slice.call(document.querySelectorAll(GP_BACK_SEL)).filter(gpVisible);
+    if(bs.length){ bs[bs.length-1].click(); return true; }
+    /* 5. some other screen without a Back button: go Home */
+    var hs=document.getElementById('homeScreen');
+    if(!hs || hs.style.display==='none' || !gpVisible(hs)){ goHome(); return true; }
+  }catch(e){ goHome(); return true; }
+  return false;
 }
-window.addEventListener('popstate',function(){history.pushState(null,null,location.href);gpPhoneBack();});
+/* Phone back on Home: first press shows a note, a second press within 3 s closes the app. */
+var _gpExitArmed=false, _gpExitTimer=null;
+window.addEventListener('popstate',function(){
+  if(_gpExitArmed){ return; }                         /* second press already left the page */
+  if(gpPhoneBack()){ history.pushState(null,null,location.href); return; }
+  _gpExitArmed=true;
+  try{ if(typeof gpToast==='function') gpToast('App band karne ke liye ek baar aur Back dabao'); }catch(e){}
+  clearTimeout(_gpExitTimer);
+  _gpExitTimer=setTimeout(function(){ _gpExitArmed=false; history.pushState(null,null,location.href); },3000);
+});
+/* if the child carries on using the app instead, put the back-guard straight back */
+document.addEventListener('click',function(){ if(_gpExitArmed){ _gpExitArmed=false; clearTimeout(_gpExitTimer); history.pushState(null,null,location.href); } },true);
 
 /* ============ PHASE 1 GAMIFICATION ENGINE ============ */
 var AVATARS=['\uD83D\uDC66','\uD83D\uDC67','\uD83E\uDDD2','\uD83D\uDC69','\uD83E\uDD8A','\uD83D\uDC31','\uD83D\uDC36','\uD83E\uDD81','\uD83D\uDC38','\uD83D\uDC22','\uD83E\uDD84','\uD83D\uDC27'];

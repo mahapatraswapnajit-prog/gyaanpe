@@ -1,4 +1,4 @@
-const CACHE = 'gyaanpe-v85';
+const CACHE = 'gyaanpe-v86';
 
 /* Works on both https://mahapatraswapnajit-prog.github.io/gyaanpe/ and https://gyaanpe.com/ :
    every path is resolved against the folder this sw.js lives in. */
@@ -56,10 +56,10 @@ self.addEventListener('fetch', e => {
      Workers, Firebase and Play Billing calls completely out of the SW. */
   if (req.method !== 'GET') return;
   if (new URL(req.url).origin !== self.location.origin) return;
-  /* Short links (/app, /yt, /wa) are Cloudflare redirects to the Play Store.
+  /* Short links (/app, /yt, /wa, /get) are Cloudflare redirects to the Play Store.
      A cross-site redirect cannot be followed from inside the SW, so let the
      browser open them itself. */
-  if (/^\/(app|yt|wa)\/?$/.test(new URL(req.url).pathname)) return;
+  if (/^\/(app|yt|wa|get)\/?$/.test(new URL(req.url).pathname)) return;
 
   if (isHtmlRequest(req)) {
     /* Network-first, and cache: 'reload' so the browser's own HTTP cache

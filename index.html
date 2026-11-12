@@ -2222,7 +2222,7 @@ function gpToast(msg){
 <div id="c7wcompContainer" style="padding-bottom:20px;"></div>
 </div>
 <div class="jscreen" id="chapterHubScreen">
-<div class="j-head"><button class="home-btn-back" onclick="goHome()">&#8592; HOME</button><span class="j-title" style="font-size:14px;" id="hubTitle">Chapter Guide</span><span style="width:60px;"></span></div>
+<div class="j-head"><button class="home-btn-back" onclick="gpBackToChapters()">&#8592; BACK</button><span class="j-title" style="font-size:14px;" id="hubTitle">Chapter Guide</span><span style="width:60px;"></span></div>
 <div class="hub-progress-track"><div class="hub-progress-fill" id="hubProgFill" style="width:0%;"></div></div>
 <div id="hubStageList"></div>
 </div>
@@ -2370,27 +2370,27 @@ function gpToast(msg){
 <div class="stk-celeb" id="stkCelebModal"><div class="stk-celeb-box" id="stkCelebBox"></div></div>
 
  <div class="jscreen" id="stageLearnScreen">
-<div class="j-head"><button class="home-btn-back" onclick="openChapterHub('c6sst',0)">&#8592; BACK</button><span class="j-title" style="font-size:14px;">&#128218; Learn</span><span style="width:60px;"></span></div>
+<div class="j-head"><button class="home-btn-back" onclick="gpBackToHub()">&#8592; BACK</button><span class="j-title" style="font-size:14px;">&#128218; Learn</span><span style="width:60px;"></span></div>
 <div id="stageLearnContainer" style="padding-bottom:20px;"></div>
 </div>
 <div class="jscreen" id="stagePracticeScreen">
-<div class="j-head"><button class="home-btn-back" onclick="openChapterHub('c6sst',0)">&#8592; BACK</button><span class="j-title" style="font-size:14px;">&#9997; Practice</span><span style="width:60px;"></span></div>
+<div class="j-head"><button class="home-btn-back" onclick="gpBackToHub()">&#8592; BACK</button><span class="j-title" style="font-size:14px;">&#9997; Practice</span><span style="width:60px;"></span></div>
 <div id="stagePracticeContainer" style="padding-bottom:20px;"></div>
 </div>
 <div class="jscreen" id="stageRevisionScreen">
-<div class="j-head"><button class="home-btn-back" onclick="openChapterHub('c6sst',0)">&#8592; BACK</button><span class="j-title" style="font-size:14px;">&#128161; Revision</span><span style="width:60px;"></span></div>
+<div class="j-head"><button class="home-btn-back" onclick="gpBackToHub()">&#8592; BACK</button><span class="j-title" style="font-size:14px;">&#128161; Revision</span><span style="width:60px;"></span></div>
 <div id="stageRevisionContainer" style="padding-bottom:20px;"></div>
 </div>
 <div class="jscreen" id="stageSummaryScreen">
-<div class="j-head"><button class="home-btn-back" onclick="openChapterHub('c6sst',0)">&#8592; BACK</button><span class="j-title" style="font-size:14px;">&#128203; Summary</span><span style="width:60px;"></span></div>
+<div class="j-head"><button class="home-btn-back" onclick="gpBackToHub()">&#8592; BACK</button><span class="j-title" style="font-size:14px;">&#128203; Summary</span><span style="width:60px;"></span></div>
 <div id="stageSummaryContainer" style="padding-bottom:20px;"></div>
 </div>
 <div class="jscreen" id="stageTestScreen">
-<div class="j-head"><button class="home-btn-back" onclick="openChapterHub('c6sst',0)">&#8592; BACK</button><span class="j-title" style="font-size:14px;">&#128221; Chapter Test</span><span style="width:60px;"></span></div>
+<div class="j-head"><button class="home-btn-back" onclick="gpBackToHub()">&#8592; BACK</button><span class="j-title" style="font-size:14px;">&#128221; Chapter Test</span><span style="width:60px;"></span></div>
 <div id="stageTestContainer" style="padding-bottom:20px;"></div>
 </div>
 <div class="jscreen" id="journeyScreen">
-<div class="j-head"><button class="home-btn-back" onclick="goHome()">&#8592; HOME</button><span class="j-title" id="jTitle">Journey</span><span style="width:60px;"></span></div>
+<div class="j-head"><button class="home-btn-back" onclick="gpBackToClass()">&#8592; BACK</button><span class="j-title" id="jTitle">Journey</span><span style="width:60px;"></span></div>
 <div class="j-map" id="jMap"></div>
 </div>
 <div class="jscreen" id="parentScreen">
@@ -12974,7 +12974,45 @@ else{medal='\ud83d\udcaa';medalName='KEEP PRACTICING!';}
 passMsg=(pct>=PASS_MARK)?('\u2705 PASSED (Pass mark: '+PASS_MARK+'%)'):('\u274c NOT PASSED YET (Pass mark: '+PASS_MARK+'%)');
 document.getElementById('stageTestContainer').innerHTML='<div class="test-result-box"><div style="font-size:13px;font-weight:800;">CHAPTER TEST COMPLETE!</div><div class="medal-box">'+medal+'</div><div style="font-family:Anton;font-size:15px;">'+medalName+'</div><div class="test-score-num">'+correct+'/'+total+'</div><div style="font-size:13px;">Accuracy: '+pct+'%</div><div class="pass-badge">'+passMsg+'</div><div style="margin-top:10px;font-size:12px;">+'+xp+' XP &bull; +'+coins+' Coins &#127942;</div></div><button class="pbc-btn" style="background:#6A1B9A;color:#fff;margin-top:14px;" onclick="openStageTest(\''+_testState.sec+'\','+_testState.idx+')">\ud83d\udd04 RETAKE TEST</button><button class="pbc-btn" style="background:#EEE;color:#6A1B9A;margin-top:8px;" onclick="openChapterHub(\''+_testState.sec+'\','+_testState.idx+')">BACK TO CHAPTER GUIDE</button>';}
 
-window.addEventListener('popstate',function(){history.pushState(null,null,location.href);goHome();});
+/* ---- Back navigation: one step at a time ----
+   Chapter screens (Learn/Practice/Revision/Summary/Test) -> that chapter's guide -> the subject's
+   chapter list -> the class page -> Home. The phone's back button follows the same path. */
+var _gpNav={sec:null,idx:0};
+(function(){
+  var o=window.openChapterHub;
+  if(typeof o==='function'){ window.openChapterHub=function(sec,idx){ _gpNav.sec=sec; _gpNav.idx=idx||0; return o.apply(this,arguments); }; }
+  var j=window.gpJourney;
+  if(typeof j==='function'){ window.gpJourney=function(sec){ if(sec) _gpNav.sec=sec; return j.apply(this,arguments); }; }
+})();
+function gpBackToHub(){
+  if(_gpNav.sec && typeof allData!=='undefined' && allData[_gpNav.sec]){ openChapterHub(_gpNav.sec,_gpNav.idx); return; }
+  goHome();
+}
+function gpBackToChapters(){
+  if(_gpNav.sec && typeof allData!=='undefined' && allData[_gpNav.sec]){ gpJourney(_gpNav.sec); return; }
+  goHome();
+}
+function gpBackToClass(){
+  var m=/^c(\d+)/.exec(_gpNav.sec||''), fn=m?window['openClass'+m[1]]:null;
+  if(typeof fn==='function'){ fn(); return; }
+  goHome();
+}
+function gpPhoneBack(){
+  try{
+    /* 1. an open popup closes first */
+    var md=[].slice.call(document.querySelectorAll('.gp-modal.show,[id$="Modal"].show'));
+    if(md.length){ md.forEach(function(x){ x.classList.remove('show'); }); return; }
+    /* 2. inside a quiz: back to the chapter list of that subject */
+    var qa=document.getElementById('quizArea');
+    var inQuiz=qa&&qa.classList.contains('show') || ['levelComplete','resultScreen','gameoverScreen'].some(function(id){ var e=document.getElementById(id); return e&&e.classList.contains('show'); });
+    if(inQuiz && typeof currentSection==='string' && typeof allData!=='undefined' && allData[currentSection] && /^c\d/.test(currentSection)){ gpJourney(currentSection); return; }
+    /* 3. otherwise press the BACK button of the screen on view */
+    var b=[].slice.call(document.querySelectorAll('.home-btn-back')).filter(function(x){ return x.offsetParent!==null; })[0];
+    if(b){ b.click(); return; }
+  }catch(e){}
+  goHome();
+}
+window.addEventListener('popstate',function(){history.pushState(null,null,location.href);gpPhoneBack();});
 
 /* ============ PHASE 1 GAMIFICATION ENGINE ============ */
 var AVATARS=['\uD83D\uDC66','\uD83D\uDC67','\uD83E\uDDD2','\uD83D\uDC69','\uD83E\uDD8A','\uD83D\uDC31','\uD83D\uDC36','\uD83E\uDD81','\uD83D\uDC38','\uD83D\uDC22','\uD83E\uDD84','\uD83D\uDC27'];

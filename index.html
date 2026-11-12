@@ -13019,7 +13019,9 @@ function gpPhoneBack(){
     if(inQuiz){ goHome(); return true; }
     /* 4. otherwise press the Back button of the screen on view (the top-most one, e.g. the story reader) */
     var bs=[].slice.call(document.querySelectorAll(GP_BACK_SEL)).filter(gpVisible);
-    if(bs.length){ bs[bs.length-1].click(); return true; }
+    /* only real Back/Home buttons (with the arrow), not look-alike ones such as "History" */
+    var arrows=bs.filter(function(x){ return /\u2190|back|home/i.test(x.textContent||''); });
+    if(arrows.length){ arrows[arrows.length-1].click(); return true; }
     /* 5. some other screen without a Back button: go Home */
     var hs=document.getElementById('homeScreen');
     if(!hs || hs.style.display==='none' || !gpVisible(hs)){ goHome(); return true; }

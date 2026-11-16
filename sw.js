@@ -1,4 +1,4 @@
-const CACHE = 'gyaanpe-v88';
+const CACHE = 'gyaanpe-v89';
 
 /* Works on both https://mahapatraswapnajit-prog.github.io/gyaanpe/ and https://gyaanpe.com/ :
    every path is resolved against the folder this sw.js lives in. */
@@ -128,6 +128,10 @@ self.addEventListener('push', e => {
     } else if (m.last === gpDayStr(y) && streak >= 2) {
       title = '🔥 ' + streak + ' din ki streak khatre me!';
       body = (name ? name + ', ' : '') + 'aaj 5 minute padho aur streak bachao.';
+    } else if (m.last === gpDayStr(y)) {
+      /* Came only yesterday (new child or a 1-day streak): the day that decides if they come back */
+      title = '🔥 Kal ka streak bachao' + (name ? ', ' + name : '') + '!';
+      body = 'Aaj ka quiz aur practice ready hai. Sirf 5 minute do, streak 2 din ki ho jayegi!';
     } else {
       const i = Math.floor(now.getTime() / 864e5) % GP_MSGS.length;
       title = GP_MSGS[i][0];

@@ -7748,6 +7748,8 @@ var PREMIUM_CONFIG = {
 try { localStorage.removeItem("gp_dev_premium"); } catch(e){}
 
 function isPremium() {
+  /* 3-day free Premium trial (no payment, once per device, Class 5-10) */
+  try { if (window.gpTrial && gpTrial.ok()) return true; } catch(e){}
   /* Board Exam Pass 2027 (one-time Play product, verified like a course, valid till 31 Mar 2027) */
   try { if (window.gpBoardPass && gpBoardPass.ok()) return true; } catch(e){}
   /* Access-code Premium (web / school codes), checked by gyaanpe-pay */
@@ -16765,7 +16767,7 @@ body.gp-web #premiumScreen .pass-badge{display:none !important;}
       story: d.story||0, book: d.book||0, flow: d.flow||0, course: d.course||0,
       pq: d.pq||0, pw: d.pw||0, share: d.share||0, wa: d.wa||0,
       prs: d.prs||0, pdl: d.pdl||0, pso: d.pso||0, bt: d.bt||0, bok: d.bok||0, bpt: d.bpt||0, wib: d.wib||0,
-      pd1: d.pd1||0, gft: d.gft||0, gfc: d.gfc||0,
+      pd1: d.pd1||0, gft: d.gft||0, gfc: d.gfc||0, rto: d.rto||0, rts: d.rts||0, rte: d.rte||0,
       pu: pushState(), lv: parseInt(g('gp_rate_lv')||'0',10) || 0,
       t: Date.now()
     };
@@ -18117,6 +18119,82 @@ function gpHomeQuiz(){try{openDailyQuiz();}catch(e){}
   }
   setTimeout(claimCard, 3500);
   document.addEventListener('visibilitychange', function(){ if(document.visibilityState === 'visible'){ tries = 0; setTimeout(claimCard, 1500); } });
+})();
+</script>
+<script>
+/* 3-day free Premium (reverse trial): the first time a Class 5-10 child hits a
+   Premium lock, offer 3 days of full Premium with no payment. Once per device.
+   When it ends, show one card that sends the parent the Premium link.
+   gp_rtrial = start time (ms). Stats: rto = offered, rts = started, rte = end card shown. */
+(function(){
+  var DUR = 3*86400000;
+  function g(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
+  function s(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
+  function start(){ return parseInt(g('gp_rtrial')||'0',10) || 0; }
+  function ok(){ var t = start(); return t > 0 && Date.now() - t < DUR && Date.now() >= t; }
+  function used(){ return start() > 0; }
+  function left(){ var t = start(); if(!t) return 0; return Math.max(0, Math.ceil((t + DUR - Date.now())/86400000)); }
+  window.gpTrial = { ok: ok, used: used, left: left };
+  function bump(f){ try{ if(typeof window.gpStatBump==='function') window.gpStatBump(f); }catch(e){} }
+  function toast(m){ try{ if(typeof gpToast==='function') gpToast(m); }catch(e){} }
+  function cls(){ try{ var p = (typeof gpProfile==='function' && gpProfile()) || {}; return String(p.cls||''); }catch(e){ return ''; } }
+  function bigClass(){ return /^c(5|6|7|8|9|10)$/.test(cls()); }
+  function paid(){ try{ var t = g('gp_rtrial'); localStorage.removeItem('gp_rtrial'); var r = (typeof isPremium==='function') && isPremium(); if(t) s('gp_rtrial', t); return r; }catch(e){ return false; } }
+  function eligible(){ return !used() && bigClass() && !paid(); }
+  function close(){ var o = document.getElementById('gpTrialCard'); if(o) o.remove(); }
+  function card(emoji, title, text, yes, no){
+    close();
+    var o = document.createElement('div');
+    o.id = 'gpTrialCard';
+    o.style.cssText = 'position:fixed;inset:0;background:rgba(10,14,40,.55);display:flex;align-items:center;justify-content:center;z-index:100003;padding:16px;';
+    o.innerHTML = '<div style="background:#fff;border-radius:20px;max-width:360px;width:100%;padding:22px;text-align:center;font-family:Nunito,sans-serif;box-shadow:0 12px 40px rgba(0,0,0,.25);">'
+      + '<div style="font-size:48px;line-height:1;">' + emoji + '</div>'
+      + '<h3 style="margin:10px 0 6px;color:#1A237E;font-size:20px;">' + title + '</h3>'
+      + '<p style="margin:0 0 16px;color:#555;font-size:14px;line-height:1.55;">' + text + '</p>'
+      + '<button id="gpTrialYes" style="width:100%;border:0;border-radius:14px;padding:13px;background:linear-gradient(135deg,#FF6F00,#FFA000);color:#fff;font-weight:800;font-size:16px;cursor:pointer;">' + yes + '</button>'
+      + (no ? '<button id="gpTrialNo" style="width:100%;border:0;background:none;color:#888;font-weight:700;font-size:14px;padding:12px 0 2px;cursor:pointer;">' + no + '</button>' : '')
+      + '</div>';
+    document.body.appendChild(o);
+  }
+
+  /* Offer at the first Premium lock */
+  var orig = window.gpUpgradePopup;
+  if(typeof orig === 'function' && !orig._gpTrial){
+    var w = function(reason){
+      var self = this, args = arguments;
+      if(!eligible()) return orig.apply(self, args);
+      bump('rto');
+      card('🎁', '3 din ka Premium FREE!', 'Koi payment nahi, koi card nahi.<br>Saare chapter, unlimited AI Tutor, worksheets aur test, <b>pure 3 din</b>. 😊', 'Abhi shuru karo 🎉', 'Nahi, baad me');
+      document.getElementById('gpTrialYes').onclick = function(){
+        s('gp_rtrial', String(Date.now())); bump('rts'); close();
+        toast('🎉 Premium khul gaya! 3 din tak sab free. Ab chapter phir se kholo');
+      };
+      document.getElementById('gpTrialNo').onclick = function(){ close(); orig.apply(self, args); };
+    };
+    w._gpTrial = true; window.gpUpgradePopup = w;
+  }
+
+  /* During the trial: a short reminder once a day. After it: one parent card. */
+  function onOpen(){
+    try{
+      if(ok()){
+        var d = new Date().toDateString();
+        if(g('gp_rtrial_tday') !== d){ s('gp_rtrial_tday', d); setTimeout(function(){ toast('🎁 Free Premium: ' + left() + ' din baaki. Jitna chaho padho!'); }, 2500); }
+        return;
+      }
+      if(used() && g('gp_rtrial_end') !== '1' && !paid()){
+        setTimeout(function(){
+          if(document.getElementById('gpTrialCard')) return;
+          s('gp_rtrial_end','1'); bump('rte');
+          card('⏰', 'Free Premium khatam ho gaya', 'Ye 3 din kaise lage? 😊 Aage bhi saare chapter padhne ke liye <b>Mummy-Papa ko bhejo</b>. Unhe Premium ka link WhatsApp pe chala jayega.', '💬 Mummy-Papa ko bhejo', 'Baad me');
+          document.getElementById('gpTrialYes').onclick = function(){ close(); try{ if(typeof gpParentAsk==='function') gpParentAsk(); }catch(e){} };
+          document.getElementById('gpTrialNo').onclick = close;
+        }, 3000);
+      }
+    }catch(e){}
+  }
+  onOpen();
+  document.addEventListener('visibilitychange', function(){ if(document.visibilityState === 'visible') onOpen(); });
 })();
 </script>
 </body>

@@ -16765,6 +16765,7 @@ body.gp-web #premiumScreen .pass-badge{display:none !important;}
       story: d.story||0, book: d.book||0, flow: d.flow||0, course: d.course||0,
       pq: d.pq||0, pw: d.pw||0, share: d.share||0, wa: d.wa||0,
       prs: d.prs||0, pdl: d.pdl||0, pso: d.pso||0, bt: d.bt||0, bok: d.bok||0, bpt: d.bpt||0, wib: d.wib||0,
+      pd1: d.pd1||0, gft: d.gft||0, gfc: d.gfc||0,
       pu: pushState(), lv: parseInt(g('gp_rate_lv')||'0',10) || 0,
       t: Date.now()
     };
@@ -17302,7 +17303,7 @@ function gpHomeQuiz(){try{openDailyQuiz();}catch(e){}
     try{
       if(!('caches' in window)) return;
       var p = {}; try{ p = (typeof gpProfile==='function' && gpProfile()) || {}; }catch(e){}
-      var m = { name: p.name || '', streak: parseInt(g('gp_streak')||'0',10) || 0, last: today() };
+      var m = { name: p.name || '', streak: parseInt(g('gp_streak')||'0',10) || 0, last: today(), gift: g('gp_gift') === 'pending' ? 1 : 0 };
       caches.open('gp-meta').then(function(c){
         return c.put('/__gp_meta', new Response(JSON.stringify(m), { headers: { 'Content-Type': 'application/json' } }));
       }).catch(function(){});
@@ -18036,6 +18037,86 @@ function gpHomeQuiz(){try{openDailyQuiz();}catch(e){}
       w._gpD1 = true; window[n] = w;
     }catch(e){}
   });
+})();
+</script>
+<script>
+/* Day-2 gift: on the install day, after the 1st finished quiz, tell the child a
+   gift (Mystery Quiz + 50 coins) unlocks tomorrow. From day 2 to day 7 the first
+   app open hands it over. gp_gift: '' -> 'pending' (teaser shown) -> 'claimed'.
+   The 6 pm reminder reads gift:1 from gp-meta (see saveMeta / sw.js). */
+(function(){
+  var DAY = 86400000;
+  function g(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
+  function s(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
+  function pad(n){ return (n<10?'0':'')+n; }
+  function key(t){ return t.getFullYear()+'-'+pad(t.getMonth()+1)+'-'+pad(t.getDate()); }
+  function day(){ return key(new Date()); }
+  function quizToday(){ try{ return parseInt((JSON.parse(g('gps_day_'+day())||'{}')).quiz,10)||0; }catch(e){ return 0; } }
+  function age(){ var f = g('gps_first'); if(!f) return -1; var p = f.split('-'); var d0 = new Date(+p[0], +p[1]-1, +p[2]); var t = new Date(); var d1 = new Date(t.getFullYear(), t.getMonth(), t.getDate()); return Math.round((d1 - d0)/DAY); }
+  function busy(){ return ['gpMission','gpRefCard','gpRateCard','gpPushCard','gpRefNudge','gpD1Parent','gpGiftCard'].some(function(id){ return !!document.getElementById(id); })
+    || !!document.querySelector('#gpUpgradeModal.show'); }
+  function bump(f){ try{ if(typeof window.gpStatBump==='function') window.gpStatBump(f); }catch(e){} }
+  function close(){ var o = document.getElementById('gpGiftCard'); if(o) o.remove(); }
+  function card(emoji, title, text, yes, no){
+    var o = document.createElement('div');
+    o.id = 'gpGiftCard';
+    o.style.cssText = 'position:fixed;inset:0;background:rgba(10,14,40,.55);display:flex;align-items:center;justify-content:center;z-index:100002;padding:16px;';
+    o.innerHTML =
+      '<div style="background:#fff;border-radius:20px;max-width:360px;width:100%;padding:22px;text-align:center;font-family:Nunito,sans-serif;box-shadow:0 12px 40px rgba(0,0,0,.25);">'
+      + '<div style="font-size:48px;line-height:1;">' + emoji + '</div>'
+      + '<h3 style="margin:10px 0 6px;color:#1A237E;font-size:20px;">' + title + '</h3>'
+      + '<p style="margin:0 0 16px;color:#555;font-size:14px;line-height:1.5;">' + text + '</p>'
+      + '<button id="gpGiftYes" style="width:100%;border:0;border-radius:14px;padding:13px;background:linear-gradient(135deg,#FF6F00,#FFA000);color:#fff;font-weight:800;font-size:16px;cursor:pointer;">' + yes + '</button>'
+      + (no ? '<button id="gpGiftNo" style="width:100%;border:0;background:none;color:#888;font-weight:700;font-size:14px;padding:12px 0 2px;cursor:pointer;">' + no + '</button>' : '')
+      + '</div>';
+    document.body.appendChild(o);
+    return o;
+  }
+
+  /* Day 1: teaser */
+  var tt = 0;
+  function teaser(){
+    if(g('gp_gift') || age() !== 0 || quizToday() < 1) return;
+    if(busy()){ if(++tt < 20) setTimeout(teaser, 3000); return; }
+    s('gp_gift','pending'); bump('gft');
+    card('🎁', 'Kal ke liye ek gift ready hai!', 'Kal app kholo aur pao <b>Mystery Quiz + 50 bonus coins</b>. Sirf kal ke liye! 😊', 'Wah! Kal pakka aaunga', '');
+    document.getElementById('gpGiftYes').onclick = close;
+  }
+  ['showLevelComplete','testSubmit','mockFinalSubmit','weeklySubmit','olySubmit','dqAnswer','nDone'].forEach(function(n){
+    try{
+      var o = window[n]; if(typeof o!=='function' || o._gpGift) return;
+      var w = function(){ var r = o.apply(this, arguments); if(!g('gp_gift') && age() === 0){ tt = 0; setTimeout(teaser, 4500); } return r; };
+      w._gpGift = true; window[n] = w;
+    }catch(e){}
+  });
+
+  /* Day 2-7: hand it over on the first open */
+  var tries = 0;
+  function claimCard(){
+    if(g('gp_gift') === 'claimed') return;
+    var a = age(); if(a < 1 || a > 7) return;
+    if(busy()){ if(++tries < 6) setTimeout(claimCard, 5000); return; }
+    var nm = ''; try{ var p = (typeof gpProfile==='function' && gpProfile()) || {}; if(p.name && p.name !== 'Champ') nm = ', ' + String(p.name).slice(0,16); }catch(e){}
+    card('🎁', 'Tumhara gift aa gaya' + nm + '!', 'Wapas aane ka inaam: <b>+50 coins</b> aur ek <b>Mystery Quiz</b>. Kholo aur khelo!', 'Gift kholo 🎉', 'Baad me');
+    document.getElementById('gpGiftNo').onclick = close;
+    document.getElementById('gpGiftYes').onclick = function(){
+      s('gp_gift','claimed'); bump('gfc'); close();
+      try{ if(typeof window.gpAwardReward==='function') window.gpAwardReward(20, 50, null); }catch(e){}
+      try{ if(typeof goHome==='function') goHome(); }catch(e){}
+      setTimeout(function(){
+        var done = false;
+        try{ done = !window.dqData || localStorage.getItem('gp_dq_done') === dqData.date; }catch(e){ done = true; }
+        if(!done && typeof openDailyQuiz==='function'){
+          try{ openDailyQuiz(); var b = document.getElementById('dailyQuizBox'); if(b) b.scrollIntoView({behavior:'smooth', block:'center'}); }catch(e){}
+          try{ if(typeof gpToast==='function') gpToast('🎉 +50 coins mil gaye! Ye raha tumhara Mystery Quiz'); }catch(e){}
+        } else {
+          try{ if(typeof gpToast==='function') gpToast('🎉 +50 coins mil gaye! Ab ek level khelo'); }catch(e){}
+        }
+      }, 400);
+    };
+  }
+  setTimeout(claimCard, 3500);
+  document.addEventListener('visibilitychange', function(){ if(document.visibilityState === 'visible'){ tries = 0; setTimeout(claimCard, 1500); } });
 })();
 </script>
 </body>

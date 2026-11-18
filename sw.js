@@ -1,4 +1,4 @@
-const CACHE = 'gyaanpe-v90';
+const CACHE = 'gyaanpe-v91';
 
 /* Works on both https://mahapatraswapnajit-prog.github.io/gyaanpe/ and https://gyaanpe.com/ :
    every path is resolved against the folder this sw.js lives in. */
@@ -125,6 +125,10 @@ self.addEventListener('push', e => {
     if (m.last === gpDayStr(now)) {
       title = 'Shabaash' + (name ? ', ' + name : '') + '! 🌟';
       body = 'Aaj ki padhai ho gayi. Ek quiz aur khel kar XP badhao?';
+    } else if (m.last === gpDayStr(y) && m.gift) {
+      /* Day-1 child was promised a gift for coming back today */
+      title = '🎁 Tumhara gift ready hai' + (name ? ', ' + name : '') + '!';
+      body = 'Mystery Quiz + 50 bonus coins tumhara intezaar kar rahe hain. Abhi app kholo!';
     } else if (m.last === gpDayStr(y) && streak >= 2) {
       title = '🔥 ' + streak + ' din ki streak khatre me!';
       body = (name ? name + ', ' : '') + 'aaj 5 minute padho aur streak bachao.';

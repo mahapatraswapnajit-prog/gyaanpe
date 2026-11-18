@@ -17968,5 +17968,75 @@ function gpHomeQuiz(){try{openDailyQuiz();}catch(e){}
   };
 })();
 </script>
+<script>
+/* Day-1 parent card: on the install day, after the child's 2nd finished quiz,
+   offer a one-tap WhatsApp note to Mummy/Papa showing what was learnt today.
+   Progress only (no price), so it is parent-facing and Families-safe.
+   Shown once per device; skipped while another card is open (retried on the next quiz). */
+(function(){
+  function g(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
+  function s(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
+  function pad(n){ return (n<10?'0':'')+n; }
+  function day(){ var t=new Date(); return t.getFullYear()+'-'+pad(t.getMonth()+1)+'-'+pad(t.getDate()); }
+  function today(){ try{ return JSON.parse(g('gps_day_'+day())||'{}'); }catch(e){ return {}; } }
+  function busy(){ return ['gpMission','gpRefCard','gpRateCard','gpPushCard','gpRefNudge','gpD1Parent'].some(function(id){ return !!document.getElementById(id); })
+    || !!document.querySelector('#gpUpgradeModal.show'); }
+  function bump(f){ try{ if(typeof window.gpStatBump==='function') window.gpStatBump(f); }catch(e){} }
+  function eligible(){
+    if(g('gp_d1p') === '1') return false;
+    if(g('gps_first') !== day()) return false;
+    return (parseInt(today().quiz,10) || 0) >= 2;
+  }
+  function close(){ var o = document.getElementById('gpD1Parent'); if(o) o.remove(); }
+  function send(){
+    bump('prs');
+    var p = {}; try{ p = (typeof gpProfile==='function' && gpProfile()) || {}; }catch(e){}
+    var nm = (p.name && p.name !== 'Champ') ? String(p.name).slice(0,30) : '';
+    var d = today(), qz = parseInt(d.quiz,10)||0, xp = parseInt(d.xp,10)||0;
+    var text = 'Namaste Mummy/Papa! 🙏' + (nm ? ' Main ' + nm + ' hoon.' : '') + '\n'
+      + 'Aaj maine GyaanPe pe ' + qz + ' quiz poore kiye' + (xp > 0 ? ' aur ' + xp + ' XP kamaye' : '') + ' 🎉\n'
+      + 'Kal bhi padhna hai, aap mujhe roz shaam yaad dilana! 😊\n\n'
+      + '📲 GyaanPe app (Nursery se Class 10):\n'
+      + 'https://play.google.com/store/apps/details?id=com.gyaanpe.kidslearning&referrer=utm_source%3Dparent%26utm_campaign%3Dday1_progress';
+    var enc = encodeURIComponent(text);
+    close();
+    if(/Android/i.test(navigator.userAgent)){
+      try{
+        var fb = encodeURIComponent('https://wa.me/?text=' + enc);
+        window.location.href = 'intent://send?text=' + enc + '#Intent;scheme=whatsapp;package=com.whatsapp;S.browser_fallback_url=' + fb + ';end';
+        return;
+      }catch(e){}
+    }
+    try{ window.open('https://wa.me/?text=' + enc, '_blank'); }catch(e){}
+  }
+  function show(){
+    if(!eligible() || busy()) return;
+    s('gp_d1p','1'); bump('pd1');
+    var qz = parseInt(today().quiz,10)||0;
+    var o = document.createElement('div');
+    o.id = 'gpD1Parent';
+    o.style.cssText = 'position:fixed;inset:0;background:rgba(10,14,40,.55);display:flex;align-items:center;justify-content:center;z-index:100002;padding:16px;';
+    o.innerHTML =
+      '<div style="background:#fff;border-radius:20px;max-width:360px;width:100%;padding:22px;text-align:center;font-family:Nunito,sans-serif;box-shadow:0 12px 40px rgba(0,0,0,.25);">'
+      + '<div style="font-size:44px;line-height:1;">🎉</div>'
+      + '<h3 style="margin:10px 0 6px;color:#1A237E;font-size:20px;">Shabaash! Aaj ' + qz + ' quiz ho gaye!</h3>'
+      + '<p style="margin:0 0 16px;color:#555;font-size:14px;line-height:1.5;">Mummy-Papa ko dikhao aaj tumne kya seekha. Wo khush honge! 😊</p>'
+      + '<button id="gpD1Yes" style="width:100%;border:0;border-radius:14px;padding:13px;background:#25D366;color:#fff;font-weight:800;font-size:16px;cursor:pointer;">💬 Mummy-Papa ko bhejo</button>'
+      + '<button id="gpD1No" style="width:100%;border:0;background:none;color:#888;font-weight:700;font-size:14px;padding:12px 0 2px;cursor:pointer;">Baad me</button>'
+      + '</div>';
+    document.body.appendChild(o);
+    document.getElementById('gpD1No').onclick = close;
+    document.getElementById('gpD1Yes').onclick = send;
+  }
+  function later(){ if(eligible()) setTimeout(show, 2600); }
+  ['showLevelComplete','testSubmit','mockFinalSubmit','weeklySubmit','olySubmit','dqAnswer','nDone'].forEach(function(n){
+    try{
+      var o = window[n]; if(typeof o!=='function' || o._gpD1) return;
+      var w = function(){ var r = o.apply(this, arguments); later(); return r; };
+      w._gpD1 = true; window[n] = w;
+    }catch(e){}
+  });
+})();
+</script>
 </body>
 </html>

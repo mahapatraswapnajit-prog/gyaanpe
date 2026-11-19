@@ -46,6 +46,10 @@
   <h2>Kahan se aaye (7 din, unique users)</h2>
   <div id="sources"></div>
 
+  <h2>Parents page (gyaanpe.com/parents, Meta ad)</h2>
+  <div class="cards" id="landing"><span class="muted">Loading…</span></div>
+  <p class="muted">Page khola = alag-alag log jo page pe aaye. Download dabaya = unme se jinhone Play Store button dabaya. Install ka pakka number Play Console me (source: meta) dikhta hai.</p>
+
   <h2>Roz ka hisaab (14 din)</h2>
   <div class="wrap"><table>
     <thead><tr><th>Date</th><th>Active</th><th>New</th><th>Naye: agle din wapas</th><th>Naye: 1+ level</th><th>Wapas</th><th>Play</th><th>Web</th><th>Premium</th><th>Avg min</th><th>Quiz</th><th>Practice</th><th>AI</th><th>Stories</th><th>Books</th><th>Popup</th><th>Share</th><th>WA</th><th>XP</th><th>Reminder</th></tr></thead>
@@ -80,11 +84,29 @@
     };
   }
 
+  function loadLanding(){
+    var LDB = DB;  /* parents-page visits sit in daily/ with pl:'lp' */
+    var list = days(7);
+    Promise.all(list.map(function(d){
+      return fetch(LDB+d+'.json').then(function(r){ return r.json(); }).then(function(j){ var o = {}; j = j||{}; Object.keys(j).forEach(function(k){ if((j[k]||{}).pl==='lp') o[k] = j[k]; }); return o; }).catch(function(){ return {}; });
+    })).then(function(res){
+      var tv = Object.keys(res[0]).length, tc = Object.keys(res[0]).filter(function(k){ return (+(res[0][k]||{}).c||0)>0; }).length;
+      var wv = {}, wc = {}, src = {};
+      res.forEach(function(rec){ Object.keys(rec).forEach(function(k){ var r = rec[k]||{}; wv[k] = 1; if((+r.c||0)>0) wc[k] = 1; var sn = r.src||'direct'; src[sn] = src[sn]||{}; src[sn][k] = 1; }); });
+      var nv = Object.keys(wv).length, nc = Object.keys(wc).length;
+      var srcTxt = Object.keys(src).map(function(k){ return k.replace(/[<>&]/g,'')+' '+Object.keys(src[k]).length; }).join(', ') || '-';
+      el('landing').innerHTML = card(tv,'Aaj: page khola') + card(tc,'Aaj: download dabaya')
+        + card(nv,'7 din: page khola') + card(nc,'7 din: download dabaya')
+        + card(nv ? Math.round(100*nc/nv)+'%' : '-','7 din: page → download')
+        + card('<small style="font-size:.5em">'+srcTxt+'</small>','Kahan se aaye (7 din)');
+    }).catch(function(){ el('landing').innerHTML = '<span class="muted">Data nahi aaya.</span>'; });
+  }
+
   function load(){
     el('status').textContent = 'Loading…'; el('status').className = 'muted';
     var list = days(14);
     Promise.all(list.map(function(d){
-      return fetch(DB+d+'.json').then(function(r){ return r.json(); }).then(function(j){ return [d, j||{}]; });
+      return fetch(DB+d+'.json').then(function(r){ return r.json(); }).then(function(j){ j = j||{}; Object.keys(j).forEach(function(k){ if((j[k]||{}).pl==='lp') delete j[k]; }); return [d, j]; });
     })).then(function(res){
       var byDay = {}; res.forEach(function(x){ byDay[x[0]] = x[1]; });
       var t = summarize(byDay[list[0]]);
@@ -145,8 +167,8 @@
       el('status').textContent = 'Data load nahi hua. Internet ya Firebase rules check karein.'; el('status').className = 'err';
     });
   }
-  el('reload').addEventListener('click', load);
-  load();
+  el('reload').addEventListener('click', function(){ load(); loadLanding(); });
+  load(); loadLanding();
 })();
 </script>
 </body>

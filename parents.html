@@ -91,7 +91,20 @@
       try{ fetch(DB+day+'/'+id+'.json',{method:'PUT',body:JSON.stringify(rec),keepalive:true,headers:{'Content-Type':'application/json'}}).catch(function(){}); }catch(e){}
     }
     put();
-    [].forEach.call(document.querySelectorAll('a.cta'),function(a){ a.addEventListener('click',function(){ rec.c=(rec.c||0)+1; put(); }); });
+    /* In Instagram/Facebook's in-app browser the page is torn down the moment Play Store opens,
+       which drops the counter request. So count first, then open Play Store (max 600 ms wait). */
+    [].forEach.call(document.querySelectorAll('a.cta'),function(a){
+      a.addEventListener('click',function(ev){
+        rec.c=(rec.c||0)+1; rec.t=Date.now(); s(key,JSON.stringify(rec));
+        var href=a.href, gone=false;
+        function go(){ if(gone) return; gone=true; location.href=href; }
+        try{
+          ev.preventDefault();
+          fetch(DB+day+'/'+id+'.json',{method:'PUT',body:JSON.stringify(rec),keepalive:true,headers:{'Content-Type':'application/json'}}).then(go,go);
+          setTimeout(go,600);
+        }catch(e){ go(); }
+      });
+    });
   }catch(e){}
 })();
 </script>

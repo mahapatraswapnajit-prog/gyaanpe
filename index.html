@@ -13046,18 +13046,45 @@ function gpPhoneBack(){
   }catch(e){ goHome(); return true; }
   return false;
 }
-/* Phone back on Home: first press shows a note, a second press within 3 s closes the app. */
-var _gpExitArmed=false, _gpExitTimer=null;
+/* Phone back on Home: first press shows the exit card, a second press within 4 s closes the app.
+   Chrome skips back-guard entries that were added before the child touched the page, so the guard
+   is added again on the first touch after each use (_gpGuardOk). */
+var _gpExitArmed=false, _gpExitTimer=null, _gpGuardOk=false;
+function gpExitCardHide(){ var c=document.getElementById('gpExitCard'); if(c) c.classList.remove('on'); }
+function gpExitCardShow(){
+  var c=document.getElementById('gpExitCard');
+  if(!c){
+    c=document.createElement('div'); c.id='gpExitCard';
+    c.setAttribute('style','position:fixed;left:50%;bottom:24px;transform:translateX(-50%);width:min(92vw,380px);background:#fff;border-radius:18px;box-shadow:0 10px 30px rgba(0,0,0,.25);padding:16px 16px 14px;z-index:100000;text-align:center;font-family:Nunito,sans-serif;display:none;');
+    document.body.appendChild(c);
+    var st=document.createElement('style'); st.textContent='#gpExitCard.on{display:block!important}'; document.head.appendChild(st);
+  }
+  var p={}; try{ p=gpProfile()||{}; }catch(e){}
+  var nm=(p.name&&p.name!=='Champ')?(' '+String(p.name).split(' ')[0]):'';
+  var sk=0; try{ sk=parseInt(localStorage.getItem('gp_streak')||'0',10)||0; }catch(e){}
+  var line=sk>=2?('🔥 '+sk+' din ki streak! Kal phir aana, toot na jaye.'):'📚 Kal phir aana, roz thoda padhna hai!';
+  c.innerHTML='<div style="font-size:30px;line-height:1">👋</div>'
+    +'<div style="font-size:17px;font-weight:900;color:#1A237E;margin:6px 0 4px">Ja rahe ho'+nm.replace(/[<>&"]/g,'')+'?</div>'
+    +'<div style="font-size:13.5px;color:#444;margin-bottom:10px">'+line+'</div>'
+    +'<button type="button" id="gpExitStay" style="width:100%;border:0;border-radius:12px;padding:11px;background:#1A237E;color:#fff;font-weight:800;font-size:14.5px">📖 Nahi, padhai karte hain</button>'
+    +'<div style="font-size:12px;color:#888;margin-top:8px">App band karne ke liye ek baar aur Back dabao</div>';
+  c.classList.add('on');
+  var b=document.getElementById('gpExitStay'); if(b) b.onclick=function(){ gpExitCardHide(); };
+}
 window.addEventListener('popstate',function(){
-  if(_gpExitArmed){ return; }                         /* second press already left the page */
+  _gpGuardOk=false;
+  if(_gpExitArmed){ try{ history.back(); }catch(e){} return; }   /* second press: keep going back until the app closes */
+  gpExitCardHide();
   if(gpPhoneBack()){ history.pushState(null,null,location.href); return; }
   _gpExitArmed=true;
-  try{ if(typeof gpToast==='function') gpToast('App band karne ke liye ek baar aur Back dabao'); }catch(e){}
+  try{ gpExitCardShow(); }catch(e){ try{ if(typeof gpToast==='function') gpToast('App band karne ke liye ek baar aur Back dabao'); }catch(e2){} }
   clearTimeout(_gpExitTimer);
-  _gpExitTimer=setTimeout(function(){ _gpExitArmed=false; history.pushState(null,null,location.href); },3000);
+  _gpExitTimer=setTimeout(function(){ _gpExitArmed=false; gpExitCardHide(); history.pushState(null,null,location.href); },4000);
 });
 /* if the child carries on using the app instead, put the back-guard straight back */
-document.addEventListener('click',function(){ if(_gpExitArmed){ _gpExitArmed=false; clearTimeout(_gpExitTimer); history.pushState(null,null,location.href); } },true);
+document.addEventListener('click',function(){ if(_gpExitArmed){ _gpExitArmed=false; clearTimeout(_gpExitTimer); gpExitCardHide(); history.pushState(null,null,location.href); _gpGuardOk=true; } },true);
+/* a guard added after a touch is one that Chrome will not skip */
+['pointerdown','keydown'].forEach(function(ev){ document.addEventListener(ev,function(){ if(!_gpGuardOk && !_gpExitArmed){ _gpGuardOk=true; history.pushState(null,null,location.href); } },true); });
 
 /* ============ PHASE 1 GAMIFICATION ENGINE ============ */
 var AVATARS=['\uD83D\uDC66','\uD83D\uDC67','\uD83E\uDDD2','\uD83D\uDC69','\uD83E\uDD8A','\uD83D\uDC31','\uD83D\uDC36','\uD83E\uDD81','\uD83D\uDC38','\uD83D\uDC22','\uD83E\uDD84','\uD83D\uDC27'];

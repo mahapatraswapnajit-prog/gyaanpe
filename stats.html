@@ -50,6 +50,10 @@
   <div class="cards" id="landing"><span class="muted">Loading…</span></div>
   <p class="muted">Page khola = alag-alag log jo page pe aaye. Download dabaya = unme se jinhone Play Store button dabaya. Install ka pakka number Play Console me (source: meta) dikhta hai.</p>
 
+  <h2>Naye user ka pehla din (7 din)</h2>
+  <div class="cards" id="firstday"><span class="muted">Loading…</span></div>
+  <p class="muted">Har card = pichhle 7 din ke naye users me se kitne us step tak pahunche (pehle din). Start / Demo / Setup poora ki ginti 21 Nov 2026 ke update se shuru hai (naam ab zaroori nahi, sirf class). 0 minute = app khola par padhai screen pe 1 minute bhi nahi ruke.</p>
+
   <h2>Kamai aur wapsi (30 din)</h2>
   <div class="cards" id="money"><span class="muted">Loading…</span></div>
   <p class="muted">Paying = Play subscription ya Board Pass wale (school/refer code aur 3-din free trial paying me nahi gine). Premium ka type 20 Nov 2026 ke update se record hota hai; usse pehle ke "Kharida" (Play payment poora) bhi paying me gine hain. 3-din trial → paid = jinhone 3-din free trial shuru kiya, unme se kitne baad me paying bane. Naye → paid = 30 din ke naye users me se kitne paying bane. Day-7 wapsi = naye users me se kitne theek 7ve din app khole. Week-2 me active = naye users me se kitne 8ve se 14ve din ke beech kabhi aaye (sirf woh naye users gine jinke 14 din poore ho gaye).</p>
@@ -151,6 +155,16 @@
       var d1n = 0, d1b = 0;
       for(var i=1;i<=7;i++){ var dd = byDay[list[i]]||{}, nx = byDay[list[i-1]]||{};
         Object.keys(dd).forEach(function(u){ if((dd[u]||{}).nw){ d1n++; if(nx[u]) d1b++; } }); }
+      /* First-day funnel of new users (last 7 days) */
+      var F = { n:0, m0:0, fs:0, fd:0, fo:0, cls:0, act:0, flow:0, quiz:0, m5:0, pu:0 };
+      list.slice(0,7).forEach(function(d){ var rec = byDay[d]; Object.keys(rec).forEach(function(u){ var r = rec[u]||{}; if(!r.nw) return; F.n++;
+        if(!(+r.mins)) F.m0++; if((+r.fs||0)>0) F.fs++; if((+r.fd||0)>0) F.fd++; if((+r.fo||0)>0) F.fo++; if(r.cls) F.cls++;
+        if((+r.act||0)>0) F.act++; if((+r.flow||0)>0) F.flow++; if((+r.quiz||0)>0) F.quiz++; if((+r.mins||0)>=5) F.m5++; if(r.pu==='on') F.pu++; }); });
+      function fp(x){ return F.n ? x+' <small style="font-size:.55em">('+Math.round(100*x/F.n)+'%)</small>' : '-'; }
+      el('firstday').innerHTML = card(F.n,'Naye users') + card(fp(F.m0),'0 minute (turant chale gaye)') + card(fp(F.fs),'Start dabaya') + card(fp(F.fd),'Demo dabaya')
+        + card(fp(F.fo),'Setup poora') + card(fp(F.cls),'Class chuni') + card(fp(F.act),'Kuch padha/khela') + card(fp(F.flow),'Lesson step')
+        + card(fp(F.quiz),'Pehla quiz poora') + card(fp(F.m5),'5+ minute') + card(fp(F.pu),'Reminder ON') + card(d1n ? Math.round(100*d1b/d1n)+'%' : '-','Agle din wapas');
+
       el('week').innerHTML = card(ids.length,'Unique users') + card(nw,'New users') + card(back2,'2+ din aaye')
         + card(d1n ? Math.round(100*d1b/d1n)+'%' : '-', 'Agle din wapas (Day-1)') + card(premNow,'Premium users')
         + card(minUsers?Math.round(mins/minUsers):0,'Avg min / din') + card(quiz,'Quizzes') + card(pq,'Practice sawaal') + card(ai,'AI use')

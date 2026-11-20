@@ -1504,7 +1504,8 @@ function gpstPickCls(k){ gpstCls = k; gpstRender(); }
 
 function gpstCheck(){
   var nm = (document.getElementById('gpstName').value || '').trim();
-  document.getElementById('gpstGo').disabled = !(nm.length >= 2 && gpstCls);
+  /* Name is optional (many new users left at this step): class alone is enough */
+  document.getElementById('gpstGo').disabled = !gpstCls;
 }
 
 function gpstOpen(){
@@ -1520,10 +1521,11 @@ function gpstOpen(){
 
 function gpstFinish(){
   var nm = (document.getElementById('gpstName').value || '').trim();
-  if(nm.length < 2 || !gpstCls) return;
+  if(!gpstCls) return;
   var p = {};
   try{ p = gpProfile() || {}; }catch(e){}
-  p.name = nm;
+  var wasOnboarded = false; try{ wasOnboarded = localStorage.getItem('gp_onboarded') === '1'; }catch(e){}
+  p.name = nm.length >= 2 ? nm : (p.name || 'Champ');
   p.avatar = GPST_AV[gpstAv];
   p.cls = gpstCls;
   try{ localStorage.setItem('gp_profile', JSON.stringify(p)); }catch(e){}
@@ -1534,6 +1536,10 @@ function gpstFinish(){
   try{ if(typeof gpRenderHome === 'function') gpRenderHome(); }catch(e){}
   try{ if(typeof gpApplyClassLocks === 'function') gpApplyClassLocks(); }catch(e){}
   try{ if(typeof gpPills === 'function') gpPills(); }catch(e){}
+  /* First-time setup finished: count it (the mission wrapper below opens the class) */
+  if(!wasOnboarded){
+    try{ if(typeof window.gpStatBump === 'function') window.gpStatBump('fo'); }catch(e){}
+  }
 }
 function gpstOpenMyClass(){
   var p = {};
@@ -1684,8 +1690,8 @@ function gpToast(msg){
 </script>
   <div class="gp-fte-logo">Gyaan<span>Pe</span></div>
   <div class="gp-fte-tagline">Loved by Kids &middot; Trusted by Parents</div>
-  <button class="gp-fte-btn gp-fte-btn-secondary" onclick="gpOpenDemo()">&#128064; Explore Demo (Optional)</button>
-  <button class="gp-fte-btn gp-fte-btn-primary" onclick="gpGoToRealSetup()">&#128640; Start My Learning Journey</button>
+  <button class="gp-fte-btn gp-fte-btn-secondary" onclick="try{gpStatBump('fd')}catch(e){};gpOpenDemo()">&#128064; Explore Demo (Optional)</button>
+  <button class="gp-fte-btn gp-fte-btn-primary" onclick="try{gpStatBump('fs')}catch(e){};gpGoToRealSetup()">&#128640; Start My Learning Journey</button>
 </div>
 </div>
 
@@ -16807,6 +16813,7 @@ body.gp-web #premiumScreen .pass-badge{display:none !important;}
       pq: d.pq||0, pw: d.pw||0, share: d.share||0, wa: d.wa||0,
       prs: d.prs||0, pdl: d.pdl||0, pso: d.pso||0, bt: d.bt||0, bok: d.bok||0, bpt: d.bpt||0, wib: d.wib||0,
       pd1: d.pd1||0, gft: d.gft||0, gfc: d.gfc||0, rto: d.rto||0, rts: d.rts||0, rte: d.rte||0,
+      fs: d.fs||0, fd: d.fd||0, fo: d.fo||0,
       pu: pushState(), lv: parseInt(g('gp_rate_lv')||'0',10) || 0,
       t: Date.now()
     };

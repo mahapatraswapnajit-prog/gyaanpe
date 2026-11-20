@@ -50,6 +50,10 @@
   <div class="cards" id="landing"><span class="muted">Loading…</span></div>
   <p class="muted">Page khola = alag-alag log jo page pe aaye. Download dabaya = unme se jinhone Play Store button dabaya. Install ka pakka number Play Console me (source: meta) dikhta hai.</p>
 
+  <h2>Kamai aur wapsi (30 din)</h2>
+  <div class="cards" id="money"><span class="muted">Loading…</span></div>
+  <p class="muted">Paying = Play subscription ya Board Pass wale (school/refer code aur 3-din free trial paying me nahi gine). Premium ka type 20 Nov 2026 ke update se record hota hai; usse pehle ke "Kharida" (Play payment poora) bhi paying me gine hain. 3-din trial → paid = jinhone 3-din free trial shuru kiya, unme se kitne baad me paying bane. Naye → paid = 30 din ke naye users me se kitne paying bane. Day-7 wapsi = naye users me se kitne theek 7ve din app khole. Week-2 me active = naye users me se kitne 8ve se 14ve din ke beech kabhi aaye (sirf woh naye users gine jinke 14 din poore ho gaye).</p>
+
   <h2>Roz ka hisaab (14 din)</h2>
   <div class="wrap"><table>
     <thead><tr><th>Date</th><th>Active</th><th>New</th><th>Naye: agle din wapas</th><th>Naye: 1+ level</th><th>Wapas</th><th>Play</th><th>Web</th><th>Premium</th><th>Avg min</th><th>Quiz</th><th>Practice</th><th>AI</th><th>Stories</th><th>Books</th><th>Popup</th><th>Share</th><th>WA</th><th>XP</th><th>Reminder</th></tr></thead>
@@ -167,8 +171,38 @@
       el('status').textContent = 'Data load nahi hua. Internet ya Firebase rules check karein.'; el('status').className = 'err';
     });
   }
-  el('reload').addEventListener('click', function(){ load(); loadLanding(); });
-  load(); loadLanding();
+  /* Money + retention over 30 days: trial -> paid, new -> paid, Day-7 and week-2 retention */
+  function loadMoney(){
+    var list = days(30);  /* list[0] = today */
+    Promise.all(list.map(function(d){
+      return fetch(DB+d+'.json').then(function(r){ return r.json(); }).then(function(j){ j = j||{}; Object.keys(j).forEach(function(k){ if((j[k]||{}).pl==='lp') delete j[k]; }); return j; }).catch(function(){ return {}; });
+    })).then(function(res){
+      var paid = {}, trial = {}, newDay = {}, seen = {};
+      res.forEach(function(rec, i){ Object.keys(rec).forEach(function(u){ var r = rec[u]||{};
+        (seen[u] = seen[u]||{})[i] = 1;
+        if(r.pt==='play' || r.pt==='bp' || (+r.bok||0)>0) paid[u] = 1;
+        if(r.pt==='trial' || (+r.rts||0)>0) trial[u] = 1;
+        if(r.nw && newDay[u]===undefined) newDay[u] = i;
+      }); });
+      var paidNow = {}; res.slice(0,7).forEach(function(rec){ Object.keys(rec).forEach(function(u){ var r = rec[u]||{}; if(r.pt==='play'||r.pt==='bp') paidNow[u] = 1; }); });
+      var tr = Object.keys(trial), trPaid = tr.filter(function(u){ return paid[u]; }).length;
+      var nws = Object.keys(newDay), nwPaid = nws.filter(function(u){ return paid[u]; }).length;
+      /* Day-7: new on day index i (i>=7), seen again on index i-7. Week-2: new on i (i>=14), seen on any index i-8 .. i-14 */
+      var d7n = 0, d7b = 0, w2n = 0, w2b = 0;
+      nws.forEach(function(u){ var i = newDay[u], s = seen[u];
+        if(i >= 7){ d7n++; if(s[i-7]) d7b++; }
+        if(i >= 14){ w2n++; for(var k=8;k<=14;k++){ if(s[i-k]){ w2b++; break; } } }
+      });
+      function pct(a,b){ return b ? Math.round(100*a/b)+'%' : '-'; }
+      el('money').innerHTML = card(Object.keys(paid).length,'Paying users (30 din)') + card(Object.keys(paidNow).length,'Paying, pichhle 7 din me active')
+        + card(tr.length,'3-din trial shuru (30 din)') + card(trPaid+' <small style="font-size:.55em">('+pct(trPaid,tr.length)+')</small>','3-din trial → paid')
+        + card(nws.length,'Naye users (30 din)') + card(nwPaid+' <small style="font-size:.55em">('+pct(nwPaid,nws.length)+')</small>','Naye → paid')
+        + card(pct(d7b,d7n)+' <small style="font-size:.55em">('+d7b+'/'+d7n+')</small>','Day-7 wapsi') + card(pct(w2b,w2n)+' <small style="font-size:.55em">('+w2b+'/'+w2n+')</small>','Week-2 me active');
+    }).catch(function(){ el('money').innerHTML = '<span class="muted">Data nahi aaya.</span>'; });
+  }
+
+  el('reload').addEventListener('click', function(){ load(); loadLanding(); loadMoney(); });
+  load(); loadLanding(); loadMoney();
 })();
 </script>
 </body>

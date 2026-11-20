@@ -16784,11 +16784,23 @@ body.gp-web #premiumScreen .pass-badge{display:none !important;}
     var d = load(), p = {};
     try{ p = (typeof gpProfile==='function' && gpProfile()) || {}; }catch(e){}
     var prem = false; try{ prem = typeof isPremium==='function' && !!isPremium(); }catch(e){}
+    /* Which kind of Premium: 'play' (Play subscription, server-verified), 'bp' (Board Pass),
+       'code', 'ref' (Refer & Earn days), 'trial' (3-day free), '' (free). Paid kinds first. */
+    var pt = '';
+    if(prem){
+      try{ var _st = window.GyaanPePremium && GyaanPePremium._state;
+        if(_st && _st.premium && (_st.plan==='yearly'||_st.plan==='monthly') && window.gpVerify && gpVerify.premiumOk()) pt = 'play'; }catch(e){}
+      if(!pt) try{ if(window.gpBoardPass && gpBoardPass.ok()) pt = 'bp'; }catch(e){}
+      if(!pt) try{ if(window.gpCodes && gpCodes.premiumOk()) pt = 'code'; }catch(e){}
+      if(!pt) try{ if(window.gpRefer && gpRefer.premiumOk()) pt = 'ref'; }catch(e){}
+      if(!pt) try{ if(window.gpTrial && gpTrial.ok()) pt = 'trial'; }catch(e){}
+      if(!pt) pt = 'other';
+    }
     var mins = 0; try{ mins = Math.round((parseInt(g('gpsm_secs_'+(typeof gpTodayKey==='function'?gpTodayKey():day())),10)||0)/60); }catch(e){}
     var first = g('gps_first');
     if(!first){ first = day(); s('gps_first', first); }
     return {
-      pl: platform(), src: source(), cls: String(p.cls||''), prem: prem,
+      pl: platform(), src: source(), cls: String(p.cls||''), prem: prem, pt: pt,
       nw: first === day(), mins: mins,
       xp: d.xp||0, act: d.act||0, quiz: d.quiz||0, ai: d.ai||0,
       story: d.story||0, book: d.book||0, flow: d.flow||0, course: d.course||0,

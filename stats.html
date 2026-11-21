@@ -100,9 +100,10 @@
     })).then(function(res){
       var tv = Object.keys(res[0]).length, tc = Object.keys(res[0]).filter(function(k){ return (+(res[0][k]||{}).c||0)>0; }).length;
       var wv = {}, wc = {}, src = {};
-      res.forEach(function(rec){ Object.keys(rec).forEach(function(k){ var r = rec[k]||{}; wv[k] = 1; if((+r.c||0)>0) wc[k] = 1; var sn = r.src||'direct'; src[sn] = src[sn]||{}; src[sn][k] = 1; }); });
+      var tap = {};  /* per page+source: download taps, to compare /parents vs /board */
+      res.forEach(function(rec){ Object.keys(rec).forEach(function(k){ var r = rec[k]||{}; wv[k] = 1; if((+r.c||0)>0) wc[k] = 1; var sn = (r.pg && r.pg!=='parents' ? r.pg+':' : '') + (r.src||'direct'); src[sn] = src[sn]||{}; src[sn][k] = 1; if((+r.c||0)>0){ tap[sn] = tap[sn]||{}; tap[sn][k] = 1; } }); });
       var nv = Object.keys(wv).length, nc = Object.keys(wc).length;
-      var srcTxt = Object.keys(src).map(function(k){ return k.replace(/[<>&]/g,'')+' '+Object.keys(src[k]).length; }).join(', ') || '-';
+      var srcTxt = Object.keys(src).map(function(k){ return k.replace(/[<>&]/g,'')+' '+Object.keys(src[k]).length+' ('+Object.keys(tap[k]||{}).length+' dl)'; }).join(', ') || '-';
       el('landing').innerHTML = card(tv,'Aaj: page khola') + card(tc,'Aaj: download dabaya')
         + card(nv,'7 din: page khola') + card(nc,'7 din: download dabaya')
         + card(nv ? Math.round(100*nc/nv)+'%' : '-','7 din: page → download')

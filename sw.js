@@ -1,4 +1,4 @@
-const CACHE = 'gyaanpe-v98';
+const CACHE = 'gyaanpe-v99';
 
 /* Works on both https://mahapatraswapnajit-prog.github.io/gyaanpe/ and https://gyaanpe.com/ :
    every path is resolved against the folder this sw.js lives in. */
@@ -59,7 +59,7 @@ self.addEventListener('fetch', e => {
   /* Short links (/app, /yt, /wa, /get) are Cloudflare redirects to the Play Store.
      A cross-site redirect cannot be followed from inside the SW, so let the
      browser open them itself. */
-  if (/^\/(app|yt|wa|get)\/?$/.test(new URL(req.url).pathname)) return;
+  if (/^\/(app|yt|wa|get|whatsapp|board-plan)\/?$/.test(new URL(req.url).pathname)) return;
 
   if (isHtmlRequest(req)) {
     /* Network-first, and cache: 'reload' so the browser's own HTTP cache

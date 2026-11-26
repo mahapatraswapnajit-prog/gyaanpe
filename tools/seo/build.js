@@ -142,6 +142,8 @@ summary{cursor:pointer;font-weight:800;color:var(--green)}
 .cta p{margin:0 0 16px;opacity:.92}
 .btn{display:inline-block;background:var(--orange);color:#fff;text-decoration:none;font-weight:800;padding:13px 22px;border-radius:999px;font-size:17px;margin:4px}
 .btn.ghost{background:transparent;border:2px solid rgba(255,255,255,.7)}
+.btn.wa{background:#25D366}
+.wa-note{margin:12px 0 0;font-size:14px;opacity:.85}
 .pn{display:flex;gap:10px;justify-content:space-between;margin:18px 0}
 .pn a{flex:1;background:#fff;border-radius:14px;padding:12px 14px;text-decoration:none;font-weight:700;box-shadow:0 2px 10px rgba(0,0,0,.05);font-size:15px}
 .pn a.next{text-align:right}
@@ -204,12 +206,16 @@ ${body}
 `;
 }
 
+const WA_LINK = 'https://wa.me/917008112031?text=' + encodeURIComponent('Hi GyaanPe');
+
 function ctaBlock(content, heading, text) {
   return `<section class="cta">
   <h2>${esc(heading)}</h2>
   <p>${esc(text)}</p>
   <a class="btn" href="${playLink(content)}" rel="nofollow">Practise free on GyaanPe</a>
   <a class="btn ghost" href="/">Use in browser</a>
+  <p class="wa-note">Parents: roz ka free task aur sawaalon ke jawab WhatsApp par</p>
+  <a class="btn wa" href="${WA_LINK}" rel="nofollow">&#128172; WhatsApp par judiye</a>
 </section>`;
 }
 

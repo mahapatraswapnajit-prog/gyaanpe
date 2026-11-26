@@ -17537,8 +17537,9 @@ function gpHomeQuiz(){try{openDailyQuiz();}catch(e){}
     if(g('gp_rate_done') === '1') return false;
     if(n('gp_rate_shown') >= 3) return false;
     if(Date.now() - n('gp_rate_t') < 21*DAY) return false;
-    if(n('gp_rate_days') < 2) return false;
-    if(n('gp_rate_lv') < 3) return false;
+    /* Was: 2 separate days + 3 levels. Most new users never came back on a 2nd day,
+       so almost nobody was ever asked. Now: after the 2nd finished level, same day is fine. */
+    if(n('gp_rate_lv') < 2) return false;
     return true;
   }
   function busy(){

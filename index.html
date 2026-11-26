@@ -885,6 +885,14 @@ transform:scale(0.96);filter:brightness(0.97);
   .gp-fte-btn:active{transform:scale(0.97);}
   .gp-fte-btn-primary{background:linear-gradient(135deg,#FF6F00,#FF8F00);color:#fff;}
   .gp-fte-btn-secondary{background:#fff;color:#1A237E;border:2px solid #1A237E;}
+  .gp-fte-q{font-size:20px;font-weight:900;color:#1A237E;margin:-14px 0 14px;text-align:center;}
+  .gp-fte-cls{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;width:100%;max-width:340px;}
+  .gp-fte-cls button{padding:13px 6px;border:2px solid #FFD8A8;background:#fff;border-radius:14px;font-family:'Nunito',sans-serif;font-weight:900;font-size:17px;color:#1A237E;cursor:pointer;box-shadow:0 3px 10px rgba(0,0,0,.05);}
+  .gp-fte-cls button:active{transform:scale(.96);background:#FFF3E0;}
+  .gp-fte-cls .gp-fte-c10{grid-column:1/-1;background:linear-gradient(135deg,#FF6F00,#FF8F00);color:#fff;border:none;}
+  .gp-fte-sub{font-size:13px;color:#777;margin:12px 0 18px;font-weight:700;}
+  .gp-fte-links{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;}
+  .gp-fte-links button{background:none;border:none;color:#1A237E;font-family:'Nunito',sans-serif;font-weight:800;font-size:13.5px;text-decoration:underline;cursor:pointer;padding:6px;}
   #gpDemoBar{position:fixed;top:0;left:0;right:0;background:#5E35B1;color:#fff;text-align:center;font-size:12.5px;font-weight:800;padding:8px 10px;z-index:100000;display:none;}
   #gpDemoBar.gp-show{display:block;}
   #gpDemoExitBtn{background:#fff;color:#5E35B1;border:none;border-radius:10px;padding:4px 10px;font-weight:800;font-size:12px;margin-left:10px;cursor:pointer;}
@@ -1690,8 +1698,41 @@ function gpToast(msg){
 </script>
   <div class="gp-fte-logo">Gyaan<span>Pe</span></div>
   <div class="gp-fte-tagline">Loved by Kids &middot; Trusted by Parents</div>
-  <button class="gp-fte-btn gp-fte-btn-secondary" onclick="try{gpStatBump('fd')}catch(e){};gpOpenDemo()">&#128064; Explore Demo (Optional)</button>
-  <button class="gp-fte-btn gp-fte-btn-primary" onclick="try{gpStatBump('fs')}catch(e){};gpGoToRealSetup()">&#128640; Start My Learning Journey</button>
+  <!-- One-tap start: many new users left on this screen without pressing anything.
+       Picking the class here finishes setup (name defaults to Champ) and opens the class. -->
+  <div class="gp-fte-q">Bachcha kis class me hai?</div>
+  <div class="gp-fte-cls" id="gpFteCls">
+    <button onclick="gpFteClass('nursery')">Nursery</button><button onclick="gpFteClass('lkg')">LKG</button><button onclick="gpFteClass('ukg')">UKG</button>
+    <button onclick="gpFteClass('c1')">1</button><button onclick="gpFteClass('c2')">2</button><button onclick="gpFteClass('c3')">3</button>
+    <button onclick="gpFteClass('c4')">4</button><button onclick="gpFteClass('c5')">5</button><button onclick="gpFteClass('c6')">6</button>
+    <button onclick="gpFteClass('c7')">7</button><button onclick="gpFteClass('c8')">8</button><button onclick="gpFteClass('c9')">9</button>
+    <button class="gp-fte-c10" onclick="gpFteClass('c10')">Class 10 &middot; Board</button>
+  </div>
+  <div class="gp-fte-sub">Ek tap me shuru &middot; FREE</div>
+  <div class="gp-fte-links">
+    <button onclick="try{gpStatBump('fd')}catch(e){};gpOpenDemo()">&#128064; Pehle demo dekhein</button>
+    <button onclick="try{gpStatBump('fs')}catch(e){};gpGoToRealSetup()">&#9999;&#65039; Naam aur avatar ke saath</button>
+  </div>
+<script>
+/* Class tap on the first screen. The setup code and the mission card (which opens the class
+   and offers the first lesson) are defined further down this large file, so wait for them. */
+function gpFteClass(k){
+  try{ gpStatBump('fs'); }catch(e){}
+  var box=document.getElementById('gpFteCls'); if(box) box.style.opacity='.5';
+  var tries=0;
+  (function go(){
+    var f=window.gpstFinish;
+    if(typeof f==='function' && (f._gpMission || tries>80) && document.getElementById('gpstName')){
+      try{ gpstCls=k; f(); }catch(e){}
+      try{ if(!f._gpMission && typeof gpstOpenMyClass==='function') gpstOpenMyClass(); }catch(e){}
+      if(box) box.style.opacity='';
+      return;
+    }
+    if(++tries>150){ if(box) box.style.opacity=''; return; }
+    setTimeout(go,100);
+  })();
+}
+</script>
 </div>
 </div>
 

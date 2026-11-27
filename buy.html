@@ -114,6 +114,13 @@
       <legend>Kya kharidna hai?</legend>
 
       <label class="plan">
+        <input type="radio" name="plan" value="board_pass_2027">
+        <span class="name">Class 10 Board Exam Pass</span>
+        <span class="price">₹299</span>
+        <span class="sub">Ek baar payment · <b>31 March 2027 tak</b> poora Premium: saare chapter, Mock Test, Test Series</span>
+      </label>
+
+      <label class="plan">
         <input type="radio" name="plan" value="premium_30" checked>
         <span class="name">Premium, 30 din</span>
         <span class="price">₹199</span>
@@ -198,7 +205,7 @@
     ['freedom30','Freedom Struggle'],['chess30','Chess'],['art30','Art'],['creative30','Creative Writing'],
     ['music30','Music'],['health30','Health'],['manners30','Manners'],['study30','Study Skills']
   ];
-  var PRICES = { premium_30:199, premium_365:1499, course:99 };
+  var PRICES = { premium_30:199, premium_365:1499, board_pass_2027:299, course:99 };
 
   var $ = function(id){ return document.getElementById(id); };
   var sel = $('course'), payBtn = $('payBtn'), msg = $('msg');
@@ -213,6 +220,7 @@
   function label(p){
     if (p === 'premium_30') return 'GyaanPe Premium, 30 din';
     if (p === 'premium_365') return 'GyaanPe Premium, 1 saal';
+    if (p === 'board_pass_2027') return 'Class 10 Board Exam Pass';
     if (p && p.indexOf('course_') === 0) return 'Course: ' + courseName(p.slice(7));
     return p;
   }
@@ -227,7 +235,7 @@
   (function(){
     var want = '';
     try { want = new URLSearchParams(location.search).get('p') || ''; } catch(e){}
-    if (want === 'premium_30' || want === 'premium_365') {
+    if (want === 'premium_30' || want === 'premium_365' || want === 'board_pass_2027') {
       document.querySelector('input[name=plan][value=' + want + ']').checked = true;
     } else if (want.indexOf('course_') === 0) {
       var id = want.slice(7);
@@ -324,7 +332,8 @@
 
   function showCode(res){
     var what = label(res.product);
-    what += res.kind === 'premium' ? ' (din pehli baar use karne se ginenge)' : ' (hamesha ke liye)';
+    what += res.product === 'board_pass_2027' ? ' (31 March 2027 tak)'
+          : res.kind === 'premium' ? ' (din pehli baar use karne se ginenge)' : ' (hamesha ke liye)';
     $('codeText').textContent = res.code;
     $('codeWhat').textContent = what;
     var text = 'Mera GyaanPe unlock code: ' + res.code + '\n' + label(res.product) + '\nGyaanPe app mein "Code se unlock karein" mein daalein.';

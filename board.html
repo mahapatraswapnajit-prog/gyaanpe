@@ -87,6 +87,28 @@
     if (d > 0) document.getElementById('count').textContent = '⏰ Board exam (16 Feb) me sirf ' + d + ' din bache!';
   }catch(e){}
 })();
+/* Google Search ad visitors (?utm_source=google) came for the free WhatsApp plan: put the WhatsApp
+   button first and in the sticky bar, and tag the Play links as google instead of meta. */
+(function(){
+  try{
+    var q=new URLSearchParams(location.search);
+    if((q.get('utm_source')||'').toLowerCase()!=='google') return;
+    var cmp=(q.get('utm_campaign')||'board_search').toLowerCase().replace(/[^a-z0-9_-]/g,'').slice(0,30)||'board_search';
+    [].forEach.call(document.querySelectorAll('a[href*="play.google.com"]'),function(a){
+      a.href=a.href.replace('utm_source%3Dmeta','utm_source%3Dgoogle').replace('utm_campaign%3Dboard_lp','utm_campaign%3D'+cmp);
+    });
+    var wa=document.querySelector('a.cta.wa'), lead=document.querySelector('.lead');
+    if(wa&&lead){
+      var sub=document.createElement('p'); sub.className='sub';
+      sub.textContent='Free PDF turant WhatsApp par · koi payment nahi';
+      lead.parentNode.insertBefore(sub,lead.nextSibling);
+      lead.parentNode.insertBefore(wa,sub);
+      wa.style.marginTop='0';
+      var st=document.querySelector('.sticky .cta');
+      if(st){ st.href=wa.href; st.textContent='💬 Free Board plan WhatsApp par'; st.classList.add('wa'); st.setAttribute('rel','nofollow'); }
+    }
+  }catch(e){}
+})();
 /* Visit + download-tap counter (anonymous, no names): gyaanpeStats/daily/<date>/<visitor> with pl:'lp', pg:'board'
    (stats.html keeps these out of the app user counts). Owner's devices (?me=1) are not counted. */
 (function(){
